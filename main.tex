@@ -1,0 +1,108 @@
+\documentclass[preprint]{aastex}
+\usepackage{graphicx}
+
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\Fig}[1]{Fig.~\ref{#1}}
+\newcommand{\Sec}[1]{Sec.~\ref{#1}}
+\newcommand{\Table}[1]{Table~\ref{#1}}
+\newcommand{\ticket}[1]{ticket \code{\##1}}
+\newcommand{\by}{$\times$}
+
+\shorttitle{LSST Data Challenge 2}
+\shortauthors{Axelrod, Plante et al.}
+
+\DeclareGraphicsExtensions{.pdf,.jpg,.png}
+
+\begin{document}
+
+\title{LSST Data Challenge 3a}
+
+
+% -- Author/Affiliation information
+\author{Tim Axelrod, Robyn Allsman, Jeff Kantor, 
+        Francesco Pierfederici}
+\affil{LSST Corporation}
+
+\and\author{Serge Monkewicz}
+\affil{NASA Infrared Processing and Analysis Center}
+
+\and\author{Greg Daues, David Gehrig, Steve Pietrowicz, Raymond Plante}
+\affil{National Center for Supercomputing Applications}
+
+\and\author{Jacek Becla, Kian-Tat Lim}
+\affil{Stanford Linear Accelerator Center}
+
+\and\author{Andrew Becker, Andrew Connolly, Russell Owen, Nicole Silvestri}
+\affil{University of Washington}
+
+\and\author{Robert H. Lupton}
+\affil{Princeton University}
+
+\pagebreak
+\begin{abstract}
+This report describes the third in a series of formal prototypes of
+the LSST Data Management System referred to as Data Challenge 3a (DC3a).
+. . .
+\end{abstract}
+
+\pagebreak
+\tableofcontents
+
+% -- section 0
+\input{execsummary.tex}
+
+% -- Section 1
+\input{introduction.tex}
+
+% -- Section 2
+\input{components.tex}
+
+% -- Section 3
+\input{development.tex}
+
+% -- Section 4
+\input{inputdata.tex}
+
+% -- Section 5
+\section{Software Framework}
+
+\subsection{Framework Modifications Since DC2}
+
+\input{dataaccess.tex}
+
+\input{execution.tex}
+
+\input{orchestration.tex}
+
+\input{schema.tex}
+
+% -- Section 6
+\section{Application Layer}
+
+\input{isr.tex}
+
+\input{background.tex}
+
+\input{detection.tex}
+
+\input{psf.tex}
+
+\input{wcs.tex}
+
+\input{imagesub.tex}
+
+\input{mops.tex}
+
+\input{association.tex}
+
+
+% -- Section 7
+\input{results.tex}
+
+% -- Section 8
+\input{conclusions.tex}
+
+
+\end {document}
+
+

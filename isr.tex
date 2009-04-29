@@ -1,0 +1,216 @@
+% Section 6.1: ISR
+
+\clearpage
+\subsection{Instrument Signature Removal (ISR) Pipeline}
+
+Because the vast majority of ISR tasks require trivial pixel
+operations (e.g. subtraction of or division by a master calibration
+image) the sub--stages were written in {\tt Python}, implemented in
+the file {\tt \$IP\_ISR\_DIR/python/lsst/ip/isr/IsrStages.py}, with
+access to these sub--stages available to a pipeline Stage by {\tt
+import lsst.ip.isr.IsrStages as isrStages}.
+
+Each sub--stage is given a representative string 
+%{\tt
+%    std::string const\& ISR\_LIN   = "ISR\_LIN";    ///< Linearization           \\
+%    std::string const\& ISR\_OSCAN = "ISR\_OSCAN";  ///< Overscan                \\ 
+%    std::string const\& ISR\_TRIM  = "ISR\_TRIM";   ///< Trim                    \\
+%    std::string const\& ISR\_BIAS  = "ISR\_BIAS";   ///< Bias                    \\
+%    std::string const\& ISR\_DFLAT = "ISR\_DFLAT";  ///< Dome flat               \\
+%    std::string const\& ISR\_ILLUM = "ISR\_ILLUM";  ///< Illumination correction \\
+%    std::string const\& ISR\_BADP  = "ISR\_BADP";   ///< Bad pixel mask          \\
+%    std::string const\& ISR\_SAT   = "ISR\_SAT";    ///< Saturated pixels        \\
+%    std::string const\& ISR\_FRING = "ISR\_FRING";  ///< Fringe correction       \\
+%    std::string const\& ISR\_DARK  = "ISR\_DARK";   ///< Dark correction         \\
+%    std::string const\& ISR\_PUPIL = "ISR\_PUPIL";  ///< Pupil correction        \\
+%    std::string const\& ISR\_CRREJ = "ISR\_CRREJ";  ///< Cosmic ray rejection    \\
+%}
+%
+that is used when logging the results of the ISR processing (
+e.g. {\tt lsst.ip.isr.trim DEBUG: ISR\_TRIM using trimsec
+[1:512,1:2048] } )
+%
+as well as to provide provenance in the Exposure's Metadata 
+%
+(e.g. {\tt ISR\_TRIM= 'using trimsec [1:512,1:2048]; Fri Mar 27
+03:33:56 2009' } ).
+%
+Each sub--stage also assigned a bitplane to record the type of
+processing done to each image.  This information would typically be
+checked for before undertaking a given sub--stage, so as to not repeat
+processing steps.
+
+%{\tt 
+%    enum StageId {                                        \\
+%        ISR\_LINid   = 0x1,   ///< Linearization           \\
+%        ISR\_OSCANid = 0x2,   ///< Overscan                \\
+%        ISR\_TRIMid  = 0x4,   ///< Trim                    \\
+%        ISR\_BIASid  = 0x8,   ///< Bias                    \\
+%        ISR\_DFLATid = 0x10,  ///< Dome flat               \\
+%        ISR\_ILLUMid = 0x20,  ///< Illumination correction \\
+%        ISR\_BADPid  = 0x40,  ///< Bad pixel mask          \\
+%        ISR\_SATid   = 0x80,  ///< Saturated pixels        \\
+%        ISR\_FRINid  = 0x100, ///< Fringe correction       \\ 
+%        ISR\_DARKid  = 0x200, ///< Dark correction         \\
+%        ISR\_PUPILid = 0x400, ///< Pupil correction        \\
+%        ISR\_CRREJid = 0x800, ///< Cosmic ray rejection    \\
+%    };                                                    \\
+%}
+
+
+\subsubsection{ISR Tasks Implemented for DC3a}
+
+The sub--stages that were implemented for DC3a, using their subroutine
+names and listed in the order they are called by the {\tt process()}
+method of the main ISR stage, are :
+
+\begin{itemize}
+
+\item ExposureFromInputData : This assembles an Exposure from the
+input science Image, Metadata, and Bounding Box of the Amplifier
+within the CCD.  A zero--valued Mask is created, and the variance
+Image is synthesized from the science pixels and the {\tt Gain} from
+the Metadata.  These are combined into a MaskedImage.  A WCS is
+synthesized from the input Metadata, and finally an Exposure assembled
+
+\item LookupTableFromPolicy : Creates a linearization lookup table
+({\tt LookupTableMultiplicative} or {\tt LookupTableReplace}) from an
+input Policy.  For DC3a, we create a replacement lookup table that
+merely replaces a pixel value by itself, since we don't know the true
+non--linearity of the CFHT data, and the Simulated data are linear.
+
+\item Linearization : Apply the lookup table generated above to the
+science image.  The location of this sub--stage within the overall ISR
+processing depends on the details of how the linearity curve was
+determined.  For example, it might go after bias and dark subtraction,
+if the linearity calibration frames were themselves bias and dark
+subtracted before analysis.
+
+\item SaturationCorrection : The saturation keyword is retrieved from
+the Exposure's Metadata, and the Detection algorithm is called to find
+all pixel values equal or greater than this value, returning a list of
+Footprints.  If the Policy contains an option to grow these
+Footprints, they are isotropically grown.  The associated pixels in
+the Mask have their saturated bit set.  The Policy also determines
+whether or not to interpolate over these pixels - if interpolation is
+requested, this functionality is called and additional bits are set in
+the Mask indicating the pixels were interpolated.  A default Psf with
+full--width--half--maximum (FWHM) of 5 pixels is used in the
+interpolation.
+
+\item OverscanCorrection : The overscan region is retrieved from the
+Exposure's Metadata, and a subExposure created using this bounding
+box.  Currently, the user can chose to subtract the mean or median of
+all pixels in this overscan region from the image.  
+
+\item TrimNew : The trim section is retrieved from the Exposure's
+Metadata, and a new subExposure is created containing the trimmed
+science Exposure.  The pixel origin is shifted accordingly, and the
+trim section removed from the Exposure's Metadata.  The new Exposure
+is returned.
+
+\item BiasCorrection : The master bias Exposure is read from the
+Clipboard, and subtracted from the science Exposure.
+
+\item DarkCorrection : The master dark Exposure is read from the
+Clipboard.  The dark Exposure is scaled to the science Exposure's
+integration time, and then subtracted from the science Exposure.
+
+\item FlatCorrection : The master flat Exposure is read from the
+Clipboard.  The flat Exposure is scaled by its mean or median, and
+divided out of the science Exposure.
+
+\item IlluminationCorrection : This is the same functionality as {\tt
+FlatCorrection}.  
+
+\item MaskBadPixelsDef : A list of instrumental pixel Defects is read 
+from the input Clipboard.  The corresponding bits are set in the
+Exposure Mask.  The Policy also determines whether or not to
+interpolate over these pixels - if interpolation is requested, this
+functionality is called and additional bits are set in the Mask
+indicating the pixels were interpolated.  A default Psf with a FWHM of
+5 pixels is used in the interpolation.
+
+\item CrRejection : A background model is generated for the Exposure, 
+and subtracted off of the science Image.  A default Psf with a FWHM of
+5 pixels is used to compare detected Sources; Sources sharper than the
+Psf are masked as cosmic rays, and interpolated over.
+
+\item CalculateSdqaRatings : Two SdqaRatings are genereated by the ISR : 
+{\tt ip.isr.numSaturatedPixels} and {\tt ip.isr.numCosmicRayPixels}.
+Both of these are synthesized from the final Mask by counting the
+number of pixels with the {\tt SAT} and {\tt CR} bits set,
+respectively.
+
+
+\end{itemize}
+
+
+\subsubsection{Results}
+
+\subsubsection{Issues}
+
+Several issues both minor and outstanding were raised during
+development of the ISR for DC3a.  These include :
+
+\begin{itemize}
+
+\item The CFHT data sections (e.g. {\tt TRIMSEC, BIASSEC}) are stored
+in FITS 1--indexed convention, with the final index inclusive.  For
+eaxmple, {\tt BSECA = '[1:32,1:4644]'} indicates that a bias section
+runs from the first to thirty-second pixel on the x-axis.  As LSST is
+using 0--indexed pixel addressing convention with the final index
+inclusive, this should read {\tt BSECA = '[0:31,0:4643]'}.  This
+adjustment is currently made when turning the input data section into
+a {\tt lsst::afw::image::BBox} in {\tt isr::BBoxFromDatasec}; however
+in the future we need to be careful to standardize the subExposure
+formatting.
+
+\end{itemize}
+
+When does background subtraction happen?  I do it for CR rejection.
+
+Defects and Footprints and BBoxes are used inconsistently in the data.
+
+Normalization of the Metadata keywords, and mapping them to input data.
+
+The input datasecs are in Fits convention, but our bboxes are
+0-indexed.  Currently this is taken care of in {\tt
+isr::BBoxFromDatasec}.
+
+\subsubsection{ISR Tasks Yet To Be Implemented Or Need to be Improved}
+
+
+
+The sub--stages (or features of the sub--stages) that remain to be
+implemented are :
+
+\begin{itemize}
+
+\item The details of how saturated pixel Footprints are grown.
+
+\item Allow functional fitting of the overscan region.  Currently a
+single number is calculated for the overscan value (the median of all
+overscan pixels) and subtracted from the entire image.  However, the
+overscan may vary, and typically a functional form (spline, Legendre
+polynomial) of a given order is fit to the data.  The type of fitting
+({\tt mean, median, Legendre}) will be controlled by the input Policy.
+
+\item Fringe frame correction.  The amplitude of the fringes in a
+given science image needs to be fit for, and a scaled version of the
+master Fringe frame subtracted from the science image.
+
+\item Cross--talk correction.  This will happen at the camera in
+Nightly Processing, but will have to be redone by the ISR for Data
+Release Processing.  This is an inherently non--parallel task,
+requiring at the least all Amplifier images from a given CCD, and at
+the reasonable most all CCD images from a given Raft.
+
+\item Creation of the master calibration products, including bias,
+darks, flats, illumination correction images, pupil correction (is
+this the right place for this?), linearization tables, bad pixel
+masks, and cross--talk correction matrices.  Each of these requires a
+specialized set of input calibration data that was out of scope for
+DC3a.
+
+\end{itemize}

@@ -1,0 +1,95 @@
+% section 4: Input Data
+
+\section{Input Data}
+
+
+\subsection{CFHT-LS Deep Survey Data}
+
+32 CCDs.
+
+\subsubsection{Science Data Products}
+
+The ``raw'' archival science data from CFHT have actually gone through
+a modicum of processing by the CFHT {\tt ELIXIR}
+pipeline\footnote{\url{http://cfht.hawaii.edu/Instruments/Imaging/MegaPrime/rawdata.html}}.
+In particular, the two amplifier readouts were spliced back together
+into 2112 by 4644 pixel images corresponding to a single CCD.  We need
+to undo this operation to some degree, while still maintaining
+consistency between the valid data sections, overscan regions, and
+approximate Wcs information in the image headers.
+
+For DC3a processing, we turned each of the 32 CCD images into 8 images
+that are approximately the anticipated size of LSST amplifier images.
+Synthesized amplifier images 0-3 come from image subsection {\tt
+[0:1056,0:4612]} of the input images, and amplifier images 4-7 from
+{\tt [1056:2112,0:4612]} (there is an additional overscan region from
+$4612 \leq y \leq 4644$ that is ignored).  Each resulting amplifier
+image is 1056 x 1153 pixels, with 32 pixels of overscan implemented as
+``prescan'' (amplifiers 0-3) or ``postscan'' (amplifiers 4-7).  When
+segmenting the images, we adjust the following Metadata keywords :
+
+% NOTE - I coped these sections straight out of 
+% prepdc3a/python/stageCfhtForDc3a.py.  Unfortunately
+% these data sections end up being a mix of python slicing 
+% (0-indexed) and IRAF/FITS convention (1-indexed).  How did I 
+% deal with the fact that the sections are originally defined 
+% in this convention?  This is dealt with in Isr.cc, BBoxFromDatasec.
+
+\begin{itemize}
+
+\item {\tt RDNOISE} : Each amplifier has a different amount of
+readnoise.  In the spliced CFHT CCD image, these are recorded as {\tt
+RDNOISEA} and {\tt RDNOISEB}.  For our segmented amplifier images we
+assign {\tt RDNOISE} as either {\tt RDNOISEA} (amplifiers 0-3) or {\tt
+RDNOISEB} (amplifiers 4-7).
+
+\item {\tt GAIN} : Derived from {\tt GAINA} and {\tt GAINB} in a
+manner similar to the {\tt RDNOISE} field.
+
+\item {\tt BIASSEC} : This is set to either columns {\tt [1:32,]} (amps
+0-3) or {\tt [1025:1056,]} (amps 4-7).
+
+\item {\tt DATASEC} and {\tt TRIMSEC} : This is set to either columns
+{\tt [33:1056,]} (amps 0-3) or {\tt [1:1024,]} (amps 4-7).
+
+\item {\tt CRPIX1} : This is left as--is for amps 0-3, and corrected
+by -1023 pixels for amps 4--7.  Additionally, for CCDs 1--16, amps
+0--3 are adjusted by another -33 pixels, and for CCDs 17--32 amps 4--7
+are adjusted by another -33 pixels.  This reflects the exclusion of a
+secondary overscan region at the ``top'' or ``bottom'' of the CCD,
+depending on the orientation of the CCD on the focal plane.
+
+\item {\tt CRPIX2} : This is adjusted by the y--axis offset of each
+amplifier image from the original CCD image.
+
+\end{itemize}
+
+The visitId associated with each Image comes from the Metadata keyword
+{\tt OBSID}, while we assume that this image represents the first
+exposure (exposureId = 0) of the cosmic ray split.  The segmented
+files are saved on disk as Images using the following formatting :
+{\tt 'raw-\%06d-e\%03d-c\%03d-a\%03d.fits' \% (visitId, exposureId,
+ccdId, ampId)}
+
+The second exposure of the visit is synthesized by taking the actual
+CFHT image and adding a set of cosmic rays.  This is saved to disk
+using the above formatting, with exposureId = 1.
+
+\subsubsection{Calibration Data Products}
+
+RHL can talk about making the calibration products database.
+
+\subsection{LSST Simulated Images and Catalogs}
+
+AJC.
+
+\subsubsection{Science Data Products}
+
+AJC and JP.
+
+\subsubsection{Calibration Data Products}
+
+AJC and JP.
+
+
+
