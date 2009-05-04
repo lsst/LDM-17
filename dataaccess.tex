@@ -2,5 +2,33 @@
 
 \subsubsection{Data Access}
 
+The data access framework was upgraded for DC3a.
 
+A new {\tt PropertySet} class replaced the old {\tt DataProperty} class.
+By simplifying the interface and unifying concepts, it helped to reduce
+complexity for developers, remove dependency issues, and bring
+{\tt Policy} and {\tt PropertySet} into closer alignment.
+
+The persistence framework saw a few additions.  New formatters for PSFs
+and their underlying kernels and spatial functions were written,
+allowing those classes to be persisted to Boost archive files and XML
+files.  A central, consistent facility for {\tt LogicalLocation} strings
+was provided, allowing information from an event, other {\tt Clipboard}
+items, or a {\tt Policy} to be substituted into them with optional
+formatting.
+
+Database access was improved by implementing the {\tt DbStorage}
+portability layer directly in terms of the MySQL API instead of using
+CORAL/SEAL as a second level of indirection, by better specification of
+database authentication credentials, by the added ability to execute raw
+SQL statements (allowing some computations to be done entirely in the
+database server), and by the added ability to use expressions and
+multi-part field names in queries.
+
+The {\tt DateTime} class that is used as a utility to deal with dates and
+times throughout the LSST software stack had its interface significantly
+revamped to improve the clarity of the timebase (UTC or TAI) used for
+its arguments and results.  (The internal representation of times always
+uses TAI.)  Conversions from {\tt DateTime} to and from ISO8601-format
+strings were implemented.
 
