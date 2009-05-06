@@ -3,4 +3,34 @@
 \subsubsection{Pipeline Execution}
 
 
+Exception throwing and handling was improved in DC3a. First, the
+interface was simplified by removing the virtually-unused inheritance
+from {\tt DataProperty}.  Instead, five features were added:
 
+\begin{itemize}
+
+\item A simple string message is used as the primary payload of the
+exception, for compatibility with standard C++ and Python exceptions.
+This also makes throwing an exception simpler for the programmer.
+
+\item A combination of macros and classes was used to automatically
+include the file, line, and function where the exception was thrown.
+This feature improves the debuggability of the code.
+
+\item Other macros allow arbitrary additional parameters to be added to
+subclasses of the generic {\tt lsst::pex::exceptions::Exception} class.
+
+\item Further macros were defined that allow additional traceback
+information, including additional messages, to be added to a caught and
+rethrown exception.
+
+\item LSST C++ exceptions are transformed via SWIG code into instances
+of the {\tt LsstCppException} class in Python, which inherits from the
+standard Python {\tt Exception} class.  The underlying SWIG-wrapped C++
+exception is available as an argument of the {\tt LsstCppException}, and
+the C++ exception's message is automatically included as part of the
+Python exception's message.  Previously, LSST C++ exceptions were
+transformed into Python exception classes that did not inherit from the
+standard Python {\tt Exception} class.
+
+\end{itemize}

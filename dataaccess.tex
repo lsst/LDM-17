@@ -7,23 +7,43 @@ The data access framework was upgraded for DC3a.
 A new {\tt PropertySet} class replaced the old {\tt DataProperty} class.
 By simplifying the interface and unifying concepts, it helped to reduce
 complexity for developers, remove dependency issues, and bring
-{\tt Policy} and {\tt PropertySet} into closer alignment.
+{\tt Policy} and {\tt PropertySet} into closer alignment.  In
+particular, there is no distinction between a {\tt PropertySet}
+containing a single key/value pair and one containing multiple key/value
+pairs.  While a {\tt DataProperty} attempted to maintain the order of
+the properties within it, a {\tt PropertySet} has no defined order
+except within the vector of values for a given key.  The new interface
+allows hierarchical {\tt PropertySet} values to be created more easily,
+using ``parent.child'' notation in the key name instead of requiring the
+creation of a separate {\tt DataProperty} instance for the child.
 
 The persistence framework saw a few additions.  New formatters for PSFs
 and their underlying kernels and spatial functions were written,
 allowing those classes to be persisted to Boost archive files and XML
-files.  A central, consistent facility for {\tt LogicalLocation} strings
-was provided, allowing information from an event, other {\tt Clipboard}
-items, or a {\tt Policy} to be substituted into them with optional
-formatting.
+files.  This was a non-trivial task due to the large number and
+diversity of subclasses involved.  The ability to persist and restore
+PSFs enhanced the debuggability of the pipeline.
+
+A central, consistent facility for processing {\tt LogicalLocation}
+strings was provided, allowing information from an event, other {\tt
+Clipboard} items, or a {\tt Policy} to be substituted into them with
+optional formatting.  This feature was used extensively to generate
+pathnames and database URLs.  It allowed stage policies to be
+platform agnostic while the pipeline orchestration layer combined
+with the pipeline harness to specify translations from
+platform-independent form to platform-dependent form.
 
 Database access was improved by implementing the {\tt DbStorage}
-portability layer directly in terms of the MySQL API instead of using
-CORAL/SEAL as a second level of indirection, by better specification of
-database authentication credentials, by the added ability to execute raw
-SQL statements (allowing some computations to be done entirely in the
-database server), and by the added ability to use expressions and
-multi-part field names in queries.
+portability layer directly in terms of the MySQL C API instead of using
+CORAL/SEAL as a second level of indirection.  This reduced the size and
+complexity of the software stack without sacrificing portability.
+Security was enhanced by improving the specification of database
+authentication credentials and the deprecation of shared database
+accounts.  The database interface now allows the limited ability to
+execute raw SQL statements (without return values), allowing some
+computations to be done very efficiently entirely on the database
+server, and it also allows the use of expressions and multi-part field
+names in queries.
 
 The {\tt DateTime} class that is used as a utility to deal with dates and
 times throughout the LSST software stack had its interface significantly
