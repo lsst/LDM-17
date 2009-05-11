@@ -3,9 +3,9 @@
 \subsubsection{Pipeline Execution}
 
 
-Exception throwing and handling was improved in DC3a. First, the
-interface was simplified by removing the virtually-unused inheritance
-from {\tt DataProperty}.  Instead, five features were added:
+Exception throwing and handling was improved in DC3a. The interface was
+simplified by removing the virtually-unused inheritance from {\tt
+DataProperty}.  Instead, five features were added:
 
 \begin{itemize}
 
@@ -34,3 +34,11 @@ transformed into Python exception classes that did not inherit from the
 standard Python {\tt Exception} class.
 
 \end{itemize}
+
+The result was an exception design that was simpler to throw and that
+targeted the location of the exception much more precisely.  Programmers
+are still not using the more advanced features of the exception facility
+such as re-throwing or additional parameters; if they are found to be
+unneeded, the class can be further simplified in the future by removing
+them.
+

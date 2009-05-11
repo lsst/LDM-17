@@ -24,6 +24,14 @@ files.  This was a non-trivial task due to the large number and
 diversity of subclasses involved.  The ability to persist and restore
 PSFs enhanced the debuggability of the pipeline.
 
+The formatters for {\tt Source}s and {\tt DiaSource}s (actually {\tt
+PersistableSourceVector}s and {\tt PersistableDiaSourceVector}s) were
+also updated to match the new contents of those classes.  These
+formatters were at the heart of inter-slice communication in DC3a as
+{\tt Source}s used for WCS and PSF determination were communicated via
+the database so that an entire CCD's information could be used for the
+calculations.
+
 A central, consistent facility for processing {\tt LogicalLocation}
 strings was provided, allowing information from an event, other {\tt
 Clipboard} items, or a {\tt Policy} to be substituted into them with
@@ -41,9 +49,9 @@ Security was enhanced by improving the specification of database
 authentication credentials and the deprecation of shared database
 accounts.  The database interface now allows the limited ability to
 execute raw SQL statements (without return values), allowing some
-computations to be done very efficiently entirely on the database
-server, and it also allows the use of expressions and multi-part field
-names in queries.
+computations to be done efficiently entirely on the database server, and
+it also allows the use of expressions and multi-part field names in
+queries.
 
 The {\tt DateTime} class that is used as a utility to deal with dates and
 times throughout the LSST software stack had its interface significantly
