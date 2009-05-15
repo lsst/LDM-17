@@ -1,4 +1,72 @@
 % Section 6.3: Source Detection
 
-\subsection{Source Detection}
+\subsection{Source Detection and Measurement}
+
+\subsection{Classes}
+
+The namespace lsst::afw::detection contains the framework classes related to 
+processing astronomical images. The namespace lsst::meas::algorithms contains
+the algorithmic implementations for processing detections.
+The fundamental objects are:\begin{itemize}
+\item Source detection (\code{lsst::afw::detection})
+\begin{description}
+    \item[Threshold] A threshold level.
+    \item[Footprint] A set of pixels (internally stored as Spans).
+    \item[DetectionSet] An STL collection of \code{Footprint}s associated 
+        with a \code{MaskedImage}.
+    \item[FootprintFunctor] Utility for applying a function over the pixels of
+        a \code{Footprint}.
+\end{description}
+\item Source measurement (\code{lsst::meas::algorithms})
+\begin{description}
+    \item[MeasureSources] Collection of centroid, shape, and photometry 
+        measurement algorithms to apply to a \code{Footprint}.
+\end{description}
+\item Miscellaneous
+\begin{description}
+    \item[lsst::meas::algorithms::PSF] PSF representation, a base API for
+        PSF should be moved to afw in DC3b/DC4
+    \end{description}
+\end{itemize}
+
+All of these classes are written to make use of image, utility and middleware
+framework classes such as \code{lsst::pex::logging::Trace}. They are 
+documented using doxygen, although the level of documentation is patchy.
+
+\subsection{Source detection}
+
+The fundamental class in source detection is a \code{Footprint}, a set of 
+connected pixels above (or below) some threshold. Two pixels are said to be 
+connected if they touch along a side or by a corner. The internal 
+representation of a \code{Footprint} is an STL container of \code{Spans} - 
+a triple of a row number in the image and a starting and ending column. The 
+user does need to be aware of this and can use a \code{FootprintFunctor} to
+iterate over the pixels in the \code{Footprint}
+
+A \code{Footprint} or set of \code{Footprint}s only makes sense in the 
+context of an image; a \code{DetectionSet} associates an STL container of 
+\code{Footprint}s with a \code{MaskedImage}, and may be constructed from 
+the \code{MaskedImage} and a \code{Threshold}; it is templated over the 
+\code{Image} and \code{Mask} pixel types.
+
+A \code{Threshold} may be constructed to be positive or negative value in 
+units of flux, variance or standard deviation. The question of what value to 
+adopt for the threshold (although interesting) has thus been abstracted from 
+the algorithms and is answered separately by \code{Policy}. 
+
+In DC3a we detect on both difference images and on stacked images, which are 
+first smoothed using \code{afw::math::Kernel}. In either use case, the output
+is a \code{DetectionSet}.
+
+\subsection{Source Measurement}
+
+Source measurement occurs only in the context of an exposure, thus 
+\code{MeasureSources} - a set of centroid, shape, and photometry measurement 
+algorithms that can be applied to a \code{Footprint} - is constructed from an 
+\code{Exposure}; it is templated over \code{Exposure}'s pixel type. 
+\code{MeasureSources}  acts as the driver behind the generalized 
+\code{Footprint} iterator \code{FootprintFunctor} in applying its set of 
+algorithms to a \code{Footprint} over the \code{Exposure}. The algorithms 
+used can be specified by name in a \code{Policy} file.
+
 
