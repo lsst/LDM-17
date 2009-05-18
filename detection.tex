@@ -2,7 +2,7 @@
 
 \subsection{Source Detection and Measurement}
 
-\subsection{Classes}
+\subsubsection{Classes}
 
 The namespace lsst::afw::detection contains the framework classes related to 
 processing astronomical images. The namespace lsst::meas::algorithms contains
@@ -33,7 +33,7 @@ All of these classes are written to make use of image, utility and middleware
 framework classes such as \code{lsst::pex::logging::Trace}. They are 
 documented using doxygen, although the level of documentation is patchy.
 
-\subsection{Source detection}
+\subsubsection{Source detection}
 
 The fundamental class in source detection is a \code{Footprint}, a set of 
 connected pixels above (or below) some threshold. Two pixels are said to be 
@@ -58,7 +58,7 @@ In DC3a we detect on both difference images and on stacked images, which are
 first smoothed using \code{afw::math::Kernel}. In either use case, the output
 is a \code{DetectionSet}.
 
-\subsection{Source Measurement}
+\subsubsection{Source Measurement}
 
 Source measurement occurs only in the context of an image, thus 
 \code{MeasureSources} - a set of centroid, shape, and photometry measurement 
