@@ -1,0 +1,30 @@
+% section 5.3: Operational Issues
+
+\subsection{Operational Issues}
+
+
+Database authorization was reworked. It was non-existent in DC2:
+everybody was allowed to do anything. In DC3a we tighten
+authorization: introduced scheme where each user had her/his
+own ``namespace'': each user is granted full access to
+her/his databases, and read-only access to other databases.
+An administrative tool for granting lsst-specific
+privileges for new users was written.
+
+
+We also introduced metadata about runs. This allows us
+to easily related databases with runs, and cleanup old
+or obsolete runs based on different criteria such as
+creation time or run owner.
+
+
+Database setup scripts were reworked. A thin layer between
+the database and the admin scripts was introduced to contain
+the code directly interacting with the database. This will
+simplify migration to other database technology, should
+this become necessary in the future. The database setup
+scripts were also integrated with policies.
+
+
+
+

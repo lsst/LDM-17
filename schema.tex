@@ -3,4 +3,50 @@
 \subsection{Database Schema Modifications since DC2}
 
 
+MOPS schema was integrated into the master copy of the
+LSST baseline schema (in Enterprise Architect). The 
+integration include realigning names, units, and 
+merging tables where appropriete.
+
+
+Amplifier-level exposure metadata was introduced
+in addition to the ccd- and fpa-level metadata which 
+was already present in DC2.
+
+
+SDQA related schema has been introduced, this is 
+covered in details in the SDQA section.
+
+
+Schema for capturing provenance related to policies
+has been introduced.
+
+
+The whole schema has been refactored to cleanup types
+and to realign it with the LSST naming convensions.
+
+
+Schema for the Object, Source and DIASource tables 
+has been modified to reflect the new needs of the 
+transient application classes.
+
+
+\subsubsection {Schema browser}
+
+Schema browser was built and deployed, the url is
+http://dev.lsstcorp.org/schema/. This graphical, web-based
+browser allows quick, easy and convenient way to look
+at the database schema structure, including browsing tables, 
+column names, their types, units, UCDs and descriptions.
+Decriptions and units for most columns has been added,
+the UCD fields are empty.
+
+This work include expanding the master copy of the schema 
+in EA to capture information about units, UCDs and description
+per-column. A script has been writen to translete this 
+information into format readable by schema browser. 
+This allows us to manage all the information about the schema 
+in one central place (EA) in database-agnostic form.
+
+
 
