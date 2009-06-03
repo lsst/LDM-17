@@ -3,6 +3,8 @@
 \subsubsection{Pipeline Execution}
 
 
+\subsubsubsection{Exceptions}
+
 Exception throwing and handling was improved in DC3a. The interface was
 simplified by removing the virtually-unused inheritance from {\tt
 DataProperty}.  Instead, five features were added:
@@ -42,3 +44,51 @@ such as re-throwing or additional parameters; if they are found to be
 unneeded, the class can be further simplified in the future by removing
 them.
 
+
+\subsubsubsection{Provenance}
+
+The Orca orchestration layer (see Section
+\ref{sec:PipelineOrchestration}) in DC3a produces enhanced provenance
+information.  In particular, the software environment and the contents
+of the policy files used to run the pipeline are written both to log
+files and to the database.
+
+The software environment is characterized by the versions of packages
+maintained by {\tt eups} that are ``setup'' at the time of pipeline
+execution.  In addition, the actual directories declared as the
+installation locations of the packages are also persisted, allowing
+locally-setup packages and packages installed under {\tt LSST\_DEVEL} to
+be identified.  The recorded policy file information includes the MD5
+hash of the file contents for eventual use to remove duplicates and the
+file's last-modified-time, in addition to the policy file's contents on
+a per-key basis.
+
+The provenance written to the database goes into two sets of tables: one
+set in the per-run database and one in a global database ({\tt
+DC3a\_DB}) that spans all DC3a runs.  The global database permits
+queries to find runs that used a given configuration.  For example, this
+query finds all runs that had the {\tt pixelScaleRangeFactor} set to a
+number other than 1.1:
+
+\begin{verbatim}
+SELECT prv_Run.runId, prv_PolicyKey.keyName, prv_cnf_PolicyKey.value
+FROM prv_Run, prv_PolicyKey, prv_cnf_PolicyKey
+WHERE prv_PolicyKey.policyKeyId = prv_cnf_PolicyKey.policyKeyId
+  AND keyName = 'pixelScaleRangeFactor'
+  AND value != '1.1'
+  AND FLOOR(prv_PolicyKey.policyFileId / 65536) = prv_Run.offset;
+\end{verbatim}
+
+Similarly, this query finds all runs that used version 3.0.9 of the {\it
+meas\_algorithms} package:
+
+\begin{verbatim}
+SELECT runId
+FROM prv_SoftwarePackage NATURAL JOIN prv_cnf_SoftwarePackage
+     JOIN prv_Run ON (FLOOR(prv_SoftwarePackage.packageId / 65536) = offset)
+WHERE packageName = 'meas_algorithms' AND version = '3.0.9';
+\end{verbatim}
+
+In addition, having the full contents of the policy files in the
+database allows a run to be reconstituted exactly as it was initially
+specified.
