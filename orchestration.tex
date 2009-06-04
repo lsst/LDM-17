@@ -1,52 +1,52 @@
 % section 5.1.3: Pipeline Orchestration
 
-\subsubsection{Pipeline Orchestration}
-\label{sec:PipelineOrchestration}
+\subsubsection{Pipeline Orchestration} \label{sec:PipelineOrchestration}
 
 The orchestration layer is a collection of Python objects used to set up and
-launch pipelines. This collection of objects is invoked via a command line 
-utility named "Orca".
+launch pipelines. This collection of objects is invoked via a command line
+utility named \texttt{Orca}.
 
-Orca takes as arguments a run id and a policy file. The run id is used to
-identify the pipeline run. The policy file lists configuration information
-about the platforms where pipelines are to be launched, the type of database
-to use, and the event broker to use.
+\texttt{Orca} takes as arguments a run ID and a policy file. The run ID is used
+to identify the pipeline run. The policy file lists configuration information
+about the platforms where pipelines are to be launched, the type of database to
+use, and the event broker to use.
 
-Orca's object hierarchy is architected so that platform specific work is 
-handled by subclasses and more generalized work is handled by super-classes. 
-The objects that Orca instantiates and uses are specified policy files.   As
-we add support for new platforms and database configurations, we can expand
-this object hierarchy, customizing platform specific tasks to the methods that
-will be executed without having to rework the main code for Orca.
+\texttt{Orca}'s object hierarchy is architected so that platform specific work
+is handled by subclasses and more generalized work is handled by super-classes.
+The objects that \texttt{Orca} instantiates and uses are specified by policy
+files. As we add support for new platforms and database configurations, we can
+expand this object hierarchy, customizing platform specific tasks to the methods
+that will be executed without having to rework the main code for \texttt{Orca}.
 
-The three main objects that Orca uses are the ProductionRunManager, the 
-DatabaseConfigurator and the PipelineManager.  The DatabaseConfigurator and
-the PipelineManager objects are subclassed to provide database and platform
+The three main objects that \texttt{Orca} uses are the
+\texttt{ProductionRunManager}, the \texttt{DatabaseConfig\-urator} and the
+\texttt{PipelineManager}.  The \texttt{DatabaseConfigurator} and the
+\texttt{PipelineManager} objects are subclassed to provide database and platform
 specific functions.
 
-The ProductionRunManager uses the policy to look up type of 
-DatabaseConfigurator to use and instantiates the appropriate object. The
-DatabaseConfigurator is responsible for looking up the appropriate database 
-authentication information for the user, connecting to the database and
-creating the necessary database tables that will be used to record
+The \texttt{ProductionRunManager} looks up in the policy the type of
+\texttt{DatabaseConfigurator} to use and instantiates the appropriate object.
+The \texttt{DatabaseConfigurator} is responsible for looking up the appropriate
+database authentication information for the user, connecting to the database,
+and creating the necessary database tables that will be used to record
 information about the run.
 
-The ProductionRunManager then creates a Provenance object that is used to
-record information to the database about the provenance about the run. This
-includes all information in the command line policy file.  
+The \texttt{ProductionRunManager} then creates a \texttt{Provenance} object used
+to record information to the database about the provenance about the run. This
+provenance information includes all information in the command line policy file.
 
-The ProductionRunManager uses the policy to lookup and create platform
-specific PipelineManager objects to configure and run pipelines. The pipeline
-policy and software environment provenance is recorded for each pipeline to
-the database.   
+The \texttt{ProductionRunManager} uses the policy to lookup and create platform
+specific \texttt{Pipeline\-Manager} objects to configure and run pipelines. The
+pipeline policy and software environment provenance is recorded for each
+pipeline to the database.
 
-PipelineManager that is invoked is specified in the platform section of the
-policy for that pipeline.   This section describes the root of the pipeline
-directories, the names of directories to create, and the pattern to use to 
-create those directories.  It also describes the hardware configuration to
-use, and the nodes available for use by a pipeline. The PipelineManager 
-places all the files required for the runs in locations where the pipelines
-can get to them.
+The \texttt{PipelineManager} that is invoked is specified in the platform
+section of the policy for that pipeline.  This section describes the root of the
+pipeline directories, the names of directories to create, and the pattern to use
+to create those directories.  It also describes the hardware configuration to
+use, and the nodes available for use by a pipeline. The \texttt{PipelineManager}
+places all the files required for the runs in locations where the pipelines can
+get to them.
 
-Once all the policy and data files are put into place, the Production run 
-manager has each PipelineManager launch its pipeline.
+Once all the policy and data files are put into place, the Production run
+manager has each \texttt{PipelineManager} launch its pipeline.
