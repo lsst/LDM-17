@@ -48,20 +48,36 @@ them.
 \subsubsubsection{Provenance}
 
 The Orca orchestration layer (see Section
-\ref{sec:PipelineOrchestration}) in DC3a produces enhanced provenance
+\ref{sec:PipelineOrchestration}) in DC3a generates enhanced provenance
 information.  In particular, the software environment and the contents
-of the policy files used to run the pipeline are written both to log
-files and to the database.
+of the policy files used to run the production are written both to log
+files and to the database.  Recording the software environment allows
+the exact software configuration used for the run to be reproduced
+later, while recording the policy files captures both platform
+configuration information such as the compute nodes and database used as
+well as all configurable science algorithm settings.
+
+This provenance information, in combination with an event sent to the
+production, is sufficient to enable accurate reconstruction of a given
+data product resulting from that event, although a demonstration of
+automated reconstruction was deferred.  When combined with the full
+sequence of events sent to the production, the provenance allows exact
+duplication of a given run.  The recorded provenance proved highly
+useful while debugging algorithmic issues since it simplified the
+construction of small reproducible test cases demonstrating problems.
 
 The software environment is characterized by the versions of packages
-maintained by {\tt eups} that are ``setup'' at the time of pipeline
+maintained by {\tt eups} that are ``setup'' at the time of production
 execution.  In addition, the actual directories declared as the
 installation locations of the packages are also persisted, allowing
 locally-setup packages and packages installed under {\tt LSST\_DEVEL} to
-be identified.  The recorded policy file information includes the MD5
-hash of the file contents for eventual use to remove duplicates and the
-file's last-modified-time, in addition to the policy file's contents on
-a per-key basis.
+be identified.
+
+The recorded policy file information includes the contents on a per-key
+basis as well as an MD5 hash of the file contents and the file's
+last-modified-time.  These latter two items are intended for eventual
+use to remove duplicate entries when policy files are reused across
+multiple runs.
 
 The provenance written to the database goes into two sets of tables: one
 set in the per-run database and one in a global database ({\tt
@@ -89,6 +105,3 @@ FROM prv_SoftwarePackage NATURAL JOIN prv_cnf_SoftwarePackage
 WHERE packageName = 'meas_algorithms' AND version = '3.0.9';
 \end{verbatim}
 
-In addition, having the full contents of the policy files in the
-database allows a run to be reconstituted exactly as it was initially
-specified.
