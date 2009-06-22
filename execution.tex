@@ -2,6 +2,60 @@
 
 \subsubsection{Pipeline Execution}
 
+LSST pipelines are executed within the context of a middleware layer, denoted the
+pipeline harness, that encapsulates aspects of distributed parallel
+processing, coordinates the synchronization of and communication
+between parallel worker {\tt Slice}'s,
+and provides the constructs for assembling pipelines from
+reusable scientific processing modules.
+A {\tt Pipeline} class encapsulates the main executing pipeline;
+it spawns a number of parallel workers (each denoted a {\tt Slice})
+that can be distributed across multiple processing nodes. Both {\tt Pipeline}
+and {\tt Slice} workers execute a loop of application stages
+as configured by pipeline policy.
+A primary driver for the construction of long lived parallel {\tt Slice}
+worker threads is the ability to hold image and other data in memory
+as the processing advances from one module to the next. The in-memory
+data structure tha holds the collection of the data on which
+applications operate is defined as a {\tt Clipboard}.
+
+The software container that the harness provides for hosting an algorithm written
+by an application developer is the {\tt Stage} class.
+The {\tt Stage} class provides a standard API
+for integrating code into the LSST pipeline harness framework.
+The pipeline harness links the modular application stages to standard interfaces for
+I/O functionality and access to the persistence layer, abstracting this functionality
+away from the application code.
+
+\subsubsubsection{Pipeline Harness Modifications Since DC2}
+
+Important improvements made to the pipeline harness for DC2 included:
+\begin{itemize}
+
+\item The harness middleware package was refactored to operate with the upgraded
+software framework classes, i.e., modified to use {\tt PropertySet},
+new persistence formatters and logical location setting, new {\tt Exception} classes, etc.
+
+\item Infrastructure required for interSlice communication using underlying {\tt boost::mpi}
+libraries (with boost serialization) was developed within pipeline middleware.
+The interSlice communication allows complex types in the form of a {\tt PropertySet} to be
+communicated via MPI, effectively transferred from the {\tt Clipboard} of
+one {\tt Slice} to that of another.
+This functionality was not leveraged within astronomical algorithms within DC3a, but
+the groundwork laid within DC3a will allow for more rapid inclusion into suitable
+algorithms for DC3b and the future.
+
+\item The harness logging was upgraded with the ability to write log messages to
+local log files, with a separate file for each {\tt Pipeline}
+and each {\tt Slice} worker.
+This functionality greatly facilitates debugging as middleware code and application
+stages are developed and tested.  In addition, logging in the harness
+was instrumented in coordination with the rules and constructs of the Event Monitor.
+This modification is vital for obtaining timing information on stage and visit processing,
+and for the potential detection of more complex error conditions by the Event Monitor.
+
+\end{itemize}
+
 
 \subsubsubsection{Exceptions}
 
