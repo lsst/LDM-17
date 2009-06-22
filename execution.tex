@@ -16,7 +16,7 @@ as configured by pipeline policy.
 A primary driver for the construction of long lived parallel {\tt Slice}
 worker threads is the ability to hold image and other data in memory
 as the processing advances from one module to the next. The in-memory
-data structure tha holds the collection of the data on which
+data structure that holds the collection of data on which
 applications operate is defined as a {\tt Clipboard}.
 
 The software container that the harness provides for hosting an algorithm written
@@ -31,11 +31,9 @@ away from the application code.
 
 Important improvements made to the pipeline harness for DC2 included:
 \begin{itemize}
-
 \item The harness middleware package was refactored to operate with the upgraded
 software framework classes, i.e., modified to use {\tt PropertySet},
 new persistence formatters and logical location setting, new {\tt Exception} classes, etc.
-
 \item Infrastructure required for interSlice communication using underlying {\tt boost::mpi}
 libraries (with boost serialization) was developed within pipeline middleware.
 The interSlice communication allows complex types in the form of a {\tt PropertySet} to be
@@ -44,7 +42,6 @@ one {\tt Slice} to that of another.
 This functionality was not leveraged within astronomical algorithms within DC3a, but
 the groundwork laid within DC3a will allow for more rapid inclusion into suitable
 algorithms for DC3b and the future.
-
 \item The harness logging was upgraded with the ability to write log messages to
 local log files, with a separate file for each {\tt Pipeline}
 and each {\tt Slice} worker.
@@ -53,7 +50,11 @@ stages are developed and tested.  In addition, logging in the harness
 was instrumented in coordination with the rules and constructs of the Event Monitor.
 This modification is vital for obtaining timing information on stage and visit processing,
 and for the potential detection of more complex error conditions by the Event Monitor.
-
+\item Pipeline policy handling was updated to use file types for the inclusion of 
+individual stage policies. This allows the stage policies to be subsumed into 
+the main pipeline policy for use 1)~by the orchestration layer for 
+simplified provenance recording, and 2)~by the pipeline harness when configuring stages 
+at runtime.  
 \end{itemize}
 
 
