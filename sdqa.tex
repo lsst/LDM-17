@@ -1,12 +1,12 @@
 % Section 6.9: Science Data Quality Analysis (SDQA) Subsystem
-
+s
 \subsection{\label{sdqasubsection}Science Data Quality Analysis (SDQA) Subsystem}
 
 Prior to DC3a, work on the high-level requirements and operations concept was performed 
 by Deborah Levine and Vince Mannings.  For DC3a, the SDQA development team welcomed new
 members Peregrine McGehee, Russ Laher, Jeoghee Rho, and Dick Shaw.  An oral paper which
 gives a succinct description of the basic design that emerged from our early efforts in 
-DC3a was presented at the 2008 ADASS conference held at Quebec City \citep{laher08}\footnote{http://spider.ipac.caltech.edu/staff/laher/lsst/O7A.2.pdf}.
+DC3a was presented at the 2008 ADASS conference held at Quebec City \citep{laher08}\footnote{http://spider.ipac.caltech.edu/staff/laher/lsst/O7A2.pdf}.
 
 DC3a marks the beginning of creating and testing prototype software for the SDQA subsystem, and checking it into the LSST source-code base.
 
@@ -72,8 +72,8 @@ includes tables for associating SDQA Ratings with image data at the CCD and FPA 
 The schema's tables closely parallel the SDQA classes that we have identified in our UML (universal modeling language) design.
 
 \begin{figure}
-\epsscale{0.835}
-\plotone{images/O7A.2_1.eps}
+\epsscale{0.5}
+\plotone{images/O7A2_1}
 \caption{SDQA database-schema design (``F.K.'' stands for foreign key, and ``1~{\jot 24pt}~1*..'' stands for one record to many records).} 
  \label{DB}
 \end{figure}
@@ -208,8 +208,8 @@ http://spider.ipac.caltech.edu/staff/laher/lsst/borne\_696\_Jan09-ver2.pdf
 }.
 
 \begin{figure}
-\epsscale{0.4}
-\plotone{images/O7A.2_2.eps}
+\epsscale{0.2}
+\plotone{images/O7A2_2}
 \caption{Artificial neural network with single-hidden-layer architecture.} 
  \label{ANN}
 \end{figure}
@@ -250,14 +250,14 @@ query and visualize LSST databases and image archives.
 
 \begin{figure}
 \epsscale{1.0}
-\plotone{images/PTFSDQSGUI1.eps}
+\plotone{images/PTFSDQSGUI1}
 \caption{PTF SDQA GUI screen shot showing image display from query of PTF database.} 
  \label{PTFSDQAGUI1}
 \end{figure}
 
 \begin{figure}
 \epsscale{1.0}
-\plotone{images/PTFSDQSGUI2.eps}
+\plotone{images/PTFSDQSGUI2}
 \caption{PTF SDQA GUI screen shot showing SDQA time-series plots from query of PTF database.} 
  \label{PTFSDQAGUI2}
 \end{figure}
