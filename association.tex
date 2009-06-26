@@ -2,3 +2,159 @@
 
 \subsection{Association}
 
+The association pipeline compares the difference sources from a pair of
+exposures (as produced by the image processing and detection pipeline), to
+a catalog of known objects (as produced by LSST data release processing) as
+well as to predicted positions of moving objects. The comparison is spatial;
+all difference-source/object pairs where the source and object are within a
+configurable angular separation of each-other are found and stored, as are
+all difference-source/moving-object pairs where the source falls inside the
+N-sigma error ellipse of the objects predicted position. These associations
+provide the context from which the (yet to be implemented) alert generation
+pipeline will decide whether or not a difference source should be alerted on.
+Difference sources that are not matched to an existing object are (under
+certain conditions) used to create new objects: this avoids repeated alerts
+for longer lived occurrences upon subsequent visits to the same region
+of the sky.
+
+\subsubsection{Architecture}
+
+For DC3a, the association pipeline was updated to keep pace with developments
+in the underlying middleware and applications framework classes. However, its
+architecture remains fundamentally the same as in DC2. We refer the interested
+reader to the DC2 report for a more detailed discussion thereof, but provide a
+brief outline below.
+
+The association pipeline is organized into three main phases: a load phase, a
+compute phase, and a store phase. The first of these loads objects within the
+field-of-view being observed from the file-system into memory. On disk,
+objects are organized into read-only chunk files, obtained by dividing objects
+into equal height declination stripes, and then physically partitioning these
+into chunks of equal width in right ascension. Each chunk file has an
+associated chunk-delta file which records new objects that have been created
+as a result of nightly processing, as well as any objects that may have been
+deleted (which might occur when a difference source originally used as the
+basis for a new object is re-classified as an observation of a moving object).
+Chunk files are read in their entirety, as are delta files; delta files are
+written in their entirety (in the store phase). The spatial sizing of chunks
+is determined by two competing factors: using large chunks results in a
+smaller number of relatively large and efficient IOs during the load phase,
+small chunks better approximate the field of view and so require less total
+IO, but result in smaller, less efficient requests. The load phase finds
+all chunks overlapping the field of view, reads objects from the corresponding
+files, and finishes by spatially indexing these objects into a data structure
+that allows for fast spatial matches.
+
+The compute phase waits for a trigger event from the image processing and
+detection pipeline; once received, all difference sources for the current
+visit are read into memory. For each difference source, all objects within a
+fixed distance $R$ are found and stored in the nightly processing database as
+difference source/object id pairs. A trigger event from the NightMOPS
+pipeline is then awaited; predicted positions for moving objects are read from
+the database once it arrives. Next, difference sources within moving object
+error ellipses are found and stored in the database, again as difference
+source/moving object id pairs. Finally, the difference sources to generate new
+objects from are identified using criteria discussed in more detail below; ids
+for these sources are also stored in the database.
+
+The store phase of the association pipeline is in charge of updating
+historical knowledge of the sky. This entails writing out delta files for
+chunks overlapping the FOV. A series of SQL statements operating on the
+outputs of all the pipelines are then executed. These scripts:
+
+\begin{itemsize}
+\item update the observation count and last observation time for matched
+      objects in the \code{Object} catalog.
+
+\item insert new objects into the variable \code{Object} catalog
+
+\item set the \code{objectId} field of difference sources to the id of the
+      object generated from the source, or to the id of the closest matching
+      object.
+
+\item append difference sources from the IPSD output tables to the global
+      \code{DIASource} table
+
+\item \emph{(optionally)} append per-visit moving object predictions and
+      association results to global tables
+
+\item \emph{(optionally)} drop per-visit pipeline output tables (from IPSD,
+      NightMOPS, and AP)
+\end{itemsize}
+
+\subsubsection{Performance}
+
+Due to the similarity in AP architecture between DC2 and DC3a, the AP
+performance profile remains broadly similar between the two data challenges.
+We note that the computational and IO burden during the load phase increased
+for DC3a due to proper motion correction of object positions (see below);
+however, unlike in DC2, the AP was compiled with optimization (\code{-O3}) and
+was configured to read chunk files from a parallel filesystem (lustre)
+rather than NFS. As a result, the load phase was observed to complete in under
+1 second for the runs analyzed (artificially low timings for visits after the
+first were ignored: DC3a runs repeatedly visited the same field, and chunk
+files were therefore cached almost immediately at the OS/filesystem level).
+These timings are roughly equivalent to DC2.
+
+One AP performance concern raised as a result of DC2 performance analysis was
+the speed with which difference sources were read from the database in the
+compute phase - we had observed timings of \ensuremath{\sim}0.12 seconds for
+every thousand difference sources read in. For DC3a, database IO speed was
+very significantly improved: it is now performed via a thin LSST wrapper for
+the native MySQL API, rather than through a debug build of the CORAL database
+access library. As a result, difference sources are read more than an order of
+magnitude faster, at \ensuremath{\sim}0.01 seconds per thousand difference
+sources. Timings for the rest of the compute phase are comparable to DC2
+results.
+
+During the store phase, we observed somewhat more consistent delta file write
+timing within a run (0.1 - 0.23 sec, 1 - 1.5 sec); however, wide swings in
+timing (for very similar delta file sizes) across runs remain. We hypothesize
+this is due to filesystem contention. On the other hand, SQL script execution
+times for the runs we examined were much more consistent. Their execution
+consumed slightly less than 1 second on average with no significant spikes; in
+DC2 timing swings of several seconds within a run were observed.
+
+\subsubsection{Changes for DC3a}
+
+TODO: describe proper motion correction, operation on difference source pairs,
+source characterization
+
+\subsubsection{Future Work}
+
+Features to be implemented and/or investigated in the DC3b timeframe include:
+\begin{itemize}
+\item \emph{Use of inter-slice communications primitives}:
+    During DC3a, the pipeline framework was extended with the ability to
+    perform inter-slice communication. This allows an implementation of AP
+    that does not require a custom inter-slice communication scheme (i.e.
+    shared memory), greatly simplifying the code.
+\item \emph{Expanded Python Interface}:
+    A simplified version of the matching algorithms used by AP have been made
+    available in the applications framework; these could be expanded if
+    necessary. For DC3b, we also expect to provide a more flexible and python-
+    centric version of the AP.
+\item \emph{Probabilistic Matching}:
+    Positional error ellipses for both objects and difference sources are
+    available. Given a difference source matching multiple objects, these
+    can be used to pick the best matching object according to probabilistic
+    criteria (rather than simply picking the closest one). Alternatively
+    or in addition, all difference source to object matches could be
+    officially stored for later perusal.
+\item \emph{Correction for Refractive Effects}:
+    Color dependent refractive atmospheric effects are expected to have a
+    significant impact on object positions. Using stored colors for each
+    object and the zenith angle for the visit, we expect to be able to
+    meaningfully improve the object positions used as input to the spatial
+    match routines.
+\item \emph{Transactions and Data Volume}:
+    We hope to investigate the feasibility of updating the database and chunk
+    files in transactional fashion with visit-level granularity, so that from
+    a database perspective each visit appears to have either completed
+    successfully or not at all. We also plan to run tests in which the input
+    \code{Object} catalog is significantly larger than the one used for DC2
+    and DC3a; the goal will be to stress the I/O intensive portions of the AP
+    with a particular focus on more fully characterizing the performance of
+    the store phase.
+\end{itemize}
+
