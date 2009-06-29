@@ -11,8 +11,47 @@ first was the replacement of the {\tt VW} pixel access operations,
 while the second was the adoption of the {\tt Eigen} package for
 linear algebra operations.  
 
-The afw 3.1.
+The Applications Framework ({\tt afw}) release version 3.1 included the first stable
+release of the new pixel accessor and iterator functionality.  The entirety of the  {\tt ip\_diffim} 
+C++ code base had to be updated to use this new API.  
+
+The {\tt Eigen} matrix math library was adopted due to its speed and templated nature.  Compared to the {\tt VW} matrix
+math operations, its faster
+
+
 
 \subsubsection{Speed Ups}
 
+Specialized convolution by delta--function kernels, as well as overall caching improvement in the convolution.  Eigen
+is also way faster.
+
 \subsubsection{Algorithm Improvements}
+
+The major improvement in the {\tt ip_diffim} package over DC2 was in designing an infrastructure for
+the spatial modelling of the Kernel.  The SpatialCell class divides the image up into a grid, and attempts
+to build a single Kernel model for each Cell by choosing the brightest object to build a Kernel around.  
+If that model turns out to be inadequate (i.e. the resulting difference image is noisier than expected), 
+another object is used in the modelling.  This process is repeated until a good Kernel is found, or all objects are 
+deemed to be inadequate, in which case the Cell is considered ``empty''.  In this way we generate
+an even grid of constraints of the Kernel model across the image, which will facitlitate the creation of the spatial Kernel model.
+The spatial fitting is now itegrated closely with the SpatialCell class, iterating over all Cells and using their respective
+models as constraints on the Kernel.  
+
+
+Growing the Footprints by the right size.
+
+Decrease the number of eigen Kernels.
+
+\subsubsection{Results}
+
+\subsubsection{Future Work}
+
+Setting the Kernel size based on the Psf FWHM.
+
+Further investigation of the convolution vs. deconvolution kernel issue is warranted.  Using the {\tt SimDeep} dataset, we
+have determined that the derived Kernels are far noisier than expected even when the process is known to be a smoothing convolution.
+The Kernels are far less self--similar than expected; consequently their spatial modelling will be difficult.
+
+The SpatialCell functionality was initially written for fitting of the {\tt ip\_diffim} convolution Kernel.  However, it was subsequetly rewritten in a more advanced
+form for modelling of the spatially varying Point Spread Function.  A task post--DC3a is to update the {\tt ip\_diffim} to use this
+newer SpatialCell functionality.

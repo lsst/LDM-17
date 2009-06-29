@@ -120,8 +120,8 @@ integration time, and then subtracted from the science Exposure.
 Clipboard.  The flat Exposure is scaled by its mean or median, and
 divided out of the science Exposure.
 
-\item IlluminationCorrection : This is the same functionality as {\tt
-FlatCorrection}.  
+% \item IlluminationCorrection : This is the same functionality as {\tt
+% FlatCorrection}.  
 
 \item MaskBadPixelsDef : A list of instrumental pixel Defects is read 
 from the input Clipboard.  The corresponding bits are set in the
@@ -142,11 +142,15 @@ Both of these are synthesized from the final Mask by counting the
 number of pixels with the {\tt SAT} and {\tt CR} bits set,
 respectively.
 
-
 \end{itemize}
 
 
 \subsubsection{Results}
+
+The need for a standardized set of input metadata drove the need for XXX.
+
+The only truly testable portion of the ISR during DC3a was the identification 
+and masking of the cosmic rays sythesized for the exposureId = 1 images.  Jeonghee is looking at this.
 
 \subsubsection{Issues}
 
@@ -178,9 +182,7 @@ The input datasecs are in Fits convention, but our bboxes are
 0-indexed.  Currently this is taken care of in {\tt
 isr::BBoxFromDatasec}.
 
-\subsubsection{ISR Tasks Yet To Be Implemented Or Need to be Improved}
-
-
+\subsubsection{ISR Tasks Post-DC3a}
 
 The sub--stages (or features of the sub--stages) that remain to be
 implemented are :
@@ -207,9 +209,8 @@ requiring at the least all Amplifier images from a given CCD, and at
 the reasonable most all CCD images from a given Raft.
 
 \item Creation of the master calibration products, including bias,
-darks, flats, illumination correction images, pupil correction (is
-this the right place for this?), linearization tables, bad pixel
-masks, and cross--talk correction matrices.  Each of these requires a
+darks, flats, illumination correction images, pupil correction, linearization tables, 
+bad pixel masks, and cross--talk correction matrices.  Each of these requires a
 specialized set of input calibration data that was out of scope for
 DC3a.
 

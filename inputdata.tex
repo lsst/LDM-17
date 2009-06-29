@@ -9,24 +9,23 @@
 
 \subsubsection{Science Data Products}
 
-The ``raw'' archival science data from CFHT have actually gone through
-a modicum of processing by the CFHT {\tt ELIXIR}
+The ``raw'' archival science data obtained from CFHT have  gone through
+a modicum of pre--processing by the CFHT {\tt ELIXIR}
 pipeline\footnote{\url{http://cfht.hawaii.edu/Instruments/Imaging/MegaPrime/rawdata.html}}.
 In particular, the two amplifier readouts were spliced back together
-into 2112 by 4644 pixel images corresponding to a single CCD.  We need
+into 2112 by 4644 pixel images corresponding to a single CCD.  To prepare the data for DC3a processing, we need
 to undo this operation to some degree, while still maintaining
 consistency between the valid data sections, overscan regions, and
 approximate Wcs information in the image headers.
 
-For DC3a processing, we turned each of the 32 CCD images into 8 images
+For DC3a processing, we divided each of the 32 CCD images into 8 images
 that are approximately the anticipated size of LSST amplifier images.
-Synthesized amplifier images 0-3 come from image subsection {\tt
+Synthesized amplifier images 0-3 come from CFHT image subsection {\tt
 [0:1056,0:4612]} of the input images, and amplifier images 4-7 from
 {\tt [1056:2112,0:4612]} (there is an additional overscan region from
 $4612 \leq y \leq 4644$ that is ignored).  Each resulting amplifier
 image is 1056 x 1153 pixels, with 32 pixels of overscan implemented as
-``prescan'' (amplifiers 0-3) or ``postscan'' (amplifiers 4-7).  When
-segmenting the images, we adjust the following Metadata keywords :
+``prescan'' (amplifiers 0-3) or ``postscan'' (amplifiers 4-7).  When segmenting the images, we adjust the following Metadata keywords :
 
 % NOTE - I coped these sections straight out of 
 % prepdc3a/python/stageCfhtForDc3a.py.  Unfortunately
@@ -65,15 +64,13 @@ amplifier image from the original CCD image.
 \end{itemize}
 
 The visitId associated with each Image comes from the Metadata keyword
-{\tt OBSID}, while we assume that this image represents the first
-exposure (exposureId = 0) of the cosmic ray split.  The segmented
+{\tt OBSID}, and we assume that this image represents the first
+exposure (exposureId = 0) of the cosmic ray split.  The second exposure of the visit (exposureId = 1) 
+is synthesized by taking the actual
+CFHT image and adding a set of cosmic rays.  The segmented
 files are saved on disk as Images using the following formatting :
 {\tt 'raw-\%06d-e\%03d-c\%03d-a\%03d.fits' \% (visitId, exposureId,
 ccdId, ampId)}
-
-The second exposure of the visit is synthesized by taking the actual
-CFHT image and adding a set of cosmic rays.  This is saved to disk
-using the above formatting, with exposureId = 1.
 
 \subsubsection{Calibration Data Products}
 
@@ -93,3 +90,12 @@ AJC and JP.
 
 
 
+\subsection{Event Generation From Input Data}
+
+The input data exist on disk as Fits files, with all requisite metadata in their headers.
+Conversely, the paradigm for LSST is to have the pixel--level science data and associated Metadata as separate entities, the latter 
+ideally existing in a database.  Therefore to generate an event for DC3a processing, we must first address
+the images on disk, translate their natural metadata fields (e.g. 'GAIN') into LSST--format metadata fields (e.g. 'gain'), assemble
+the Metadata into a PropertySet ({\bf NOTE : KT is this still how its done?}), and send this as Event to the pipeline.
+
+This process required a metadata -> Metadata mapping for each dataset.  This was implmented as so.
