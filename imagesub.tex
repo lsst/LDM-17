@@ -161,23 +161,44 @@ is likely that pixels at the centers of the bright stars contribute to
 the stack with a strong dependence on seeing, making these poor
 objects for Psf matching.
 
-We note that we were unable to use the simulated images for the image
-subtraction portion of {\tt IPSD} since the template images are
-severely undersampled (0.1'' seeing with 0.3'' pixels).
+We note that we were unable to use the simulated images (both SimDeep
+and SimWide) for the image subtraction portion of {\tt IPSD} since the
+template images are severely undersampled (0.1'' seeing with 0.3''
+pixels).
 
 \subsubsection{Future Work}
 
-Setting the Kernel size based on the Psf FWHM.
+Further investigation of the convolution vs. deconvolution issue is
+certainly warranted.  Using single--depth images from the {\tt
+SimDeep} dataset, we have determined that the derived Kernels are far
+noisier than expected even when the process is known to be a
+(smoothing) convolution since we have controlled all the variables in
+creating the images -- we know both the seeings of the images and that
+the Psfs should be similarly different across the full dynamic range
+in brightness.  This is puzzling, since unit tests that apply both a
+known smearing Kernel and the addition of noise to the image recover
+the smearing Kernel around single sources and as the mean Kernel
+across all sources, with small values in the eigenKernels.  We are
+consulting with Paul Price who has written the equivalent of {\tt
+ip\_diffim} for the Pan-STARRS Image Processing Pipeline.  For
+reference, he is currently using an Alard--Lupton (sum of 3 Gaussians)
+basis having written and decided not to use a delta function basis.
+However, Pan-STARRS has not implemented a Principal Component Analysis
+of the derived single Kernels, which should address many of the
+perceived weaknesses of the delta function basis set (not generally
+smooth, especially at the edges; not generally trending to zero at the
+edges).  Nevertheless post--DC3a we will be implementing a sum of
+Gaussians basis set similar to Alard--Lupton for further testing.
 
-Further investigation of the convolution vs. deconvolution kernel
-issue is warranted.  Using the {\tt SimDeep} dataset, we have
-determined that the derived Kernels are far noisier than expected even
-when the process is known to be a smoothing convolution.  The Kernels
-are far less self--similar than expected; consequently their spatial
-modeling will be difficult.
+We will also address the scaling of the Kernel sizes with the full
+width at half maximum (FWHM) of the input images.  They should be
+large enough to have enough power where the Psfs are most different,
+but not too large to slow down processing.
 
-The SpatialCell functionality was initially written for fitting of the
-{\tt ip\_diffim} convolution Kernel.  However, it was subsequently
-rewritten in a more advanced form for modeling of the spatially
-varying Point Spread Function.  A task post--DC3a is to update the
-{\tt ip\_diffim} to use this newer SpatialCell functionality.
+Finally the {\tt SpatialCell} functionality was initially written for
+fitting of the {\tt ip\_diffim} convolution Kernel.  However, it was
+subsequently rewritten in a more advanced form for modeling of the
+spatially varying Point Spread Function.  A task post--DC3a is to
+update {\tt ip\_diffim} to use this newer SpatialCell functionality,
+essentially merging the {\tt ip\_diffim} Kernel and Psf fitting tasks
+with a common toolset.
