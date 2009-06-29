@@ -76,6 +76,10 @@ ccdId, ampId)}
 
 RHL can talk about making the calibration products database.
 
+According to Astier, ``the Elixir flats that you download from CADC
+are not fully correct on large scales. Namely, the flux of the same
+star still varies by a few percent center-to-corner''.
+
 \subsection{LSST Simulated Images and Catalogs}
 
 AJC.
@@ -92,10 +96,15 @@ AJC and JP.
 
 \subsection{Event Generation From Input Data}
 
-The input data exist on disk as Fits files, with all requisite metadata in their headers.
-Conversely, the paradigm for LSST is to have the pixel--level science data and associated Metadata as separate entities, the latter 
-ideally existing in a database.  Therefore to generate an event for DC3a processing, we must first address
-the images on disk, translate their natural metadata fields (e.g. 'GAIN') into LSST--format metadata fields (e.g. 'gain'), assemble
-the Metadata into a PropertySet ({\bf NOTE : KT is this still how its done?}), and send this as Event to the pipeline.
+The input data exist on disk as Fits files, with all requisite
+metadata in their headers.  Conversely, the paradigm for LSST is to
+have the pixel--level science data and associated Metadata as separate
+entities, the latter ideally existing in a database.  Therefore to
+generate an event for DC3a processing, we must first address the
+images on disk, translate their natural metadata fields (e.g. 'GAIN')
+into LSST--format metadata fields (e.g. 'gain'), assemble the Metadata
+into a PropertySet ({\bf NOTE : KT is this still how its done?}), and
+send this as Event to the pipeline.
 
-This process required a metadata -> Metadata mapping for each dataset.  This was implmented as so.
+This process required a metadata -> Metadata mapping for each dataset.
+This was implmented as so.

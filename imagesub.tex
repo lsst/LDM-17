@@ -54,27 +54,116 @@ factor of {\bf XXX}.
 
 \subsubsection{Algorithm Improvements}
 
+The software went through a major redesign since DC2, in particular
+based upon suggestions from management to make the package more
+object--oriented.  This was accomplished using the {\tt
+afw::detection::FootprintFunctor} class as a prototype and creating
+several pixel--processing classes whose sole purpose is to iterate
+over pixels and accumulate statistics.  The most noteworthy of these
+is the {\tt PsfMatchingFunctor} class, which builds a single Psf
+matching Kernel given 2 input images (the template and science image).
+Finally, the vast majority of the code structure was implemented in
+{\tt Python}.
+
 The major improvement in the {\tt ip\_diffim} package over DC2 was in
-designing an infrastructure for the spatial modelling of the Kernel.
-The SpatialCell class divides the image up into a grid, and attempts
-to build a single Kernel model for each Cell by choosing the brightest
-object to build a Kernel around.  If that model turns out to be
-inadequate (i.e. the resulting difference image is noisier than
-expected), another object is used in the modelling.  This process is
-repeated until a good Kernel is found, or all objects are deemed to be
+designing an infrastructure for the spatial modeling of the Kernel.
+The {\tt SpatialCell} class divides the image up into a grid, and
+attempts to build a single Kernel model for each Cell by choosing the
+brightest object to build a Kernel around (using a {\tt
+PsfMatchingFunctor}).  If that model turns out to be inadequate
+(i.e. the resulting difference image is noisier than is acceptable),
+another object is used in the modeling.  This process is repeated
+until a good Kernel is found, or all objects are deemed to be
 inadequate, in which case the Cell is considered ``empty''.  In this
 way we generate an even grid of constraints of the Kernel model across
-the image, which will facitlitate the creation of the spatial Kernel
-model.  The spatial fitting is now itegrated closely with the
-SpatialCell class, iterating over all Cells and using their respective
-models as constraints on the Kernel.
+the image, which will facilitate the creation of the spatial Kernel
+model.  The spatial fitting is now integrated closely with the {\tt
+SpatialCell} class, iterating over all Cells and using their
+respective models as constraints on the Kernel.
 
+The input variance is now accepted as an argument to the Psf matching
+step.  An initial estimate of the variance in the final difference
+image, used in the denominator of the weighted $\chi^2$ calculation
+that leads to the Kernel solution, is just a basic image subtraction
+without convolution.  In cases where the image being convolved has
+negligible variance, this is a good estimate.  However, if the
+convolution happens to an image with low signal--to--noise, this
+estimate will be poor.  In this case, the input variance may be
+recalculated using the difference of the science image and template
+convolved with the first Kernel solution.  This variance can be used
+in a second iteration of Kernel creation.  The variance and thus the
+Kernel are shown to converge after one iteration of this process, in
+the case where the image being convolved is single--depth.
 
-Growing the Footprints by the right size.
+Additional minor improvements in {\tt ip\_diffim} include a means of
+growing the {\tt Footprints} around sources by a fraction of the
+Kernel size.  This is to provide enough unconvolved pixels to
+constrain each of the Kernel elements.  The ratio at which the Kernel
+sum converges appears to be at a minimum a grow by a factor of 1.5,
+although a factor of 2.0 was used for DC3a to be conservative.  In
+addition, we have vastly decreased the number of eigenKernels being
+used in the spatial model.  Runs using 25 and 10 eigenKernels were
+performed; we predict that as we understand the Kernel creation more
+we should have to use no more than 5 eigenKernels in the spatial
+model.  This will speed up processing considerably.
 
-Decrease the number of eigen Kernels.
+\subsubsection{Results for CFHT}
 
-\subsubsection{Results}
+The single--source Kernels are working optimally, in the sense that
+the residuals in the difference image appear to be at the noise limit.
+To be explicit, after creation of the difference image we divide the
+image pixels by the square root of the variance pixels.  This is the
+$\chi$ value, and the distribution of this across the difference image
+should have a mean of 0.0 and root--mean--square deviation of 1.0.
+This is accomplished in practice for the vast majority of sources.
+However, for very bright stars (peak counts near 40,000 or above) the
+difference image frequently has too large of residuals.  These single
+Kernels are sigma clipped from the spatial Kernel fit.
+Figure~\ref{fig:diffim} illustrates an acceptable difference image
+({\it top row}) and one that fails ({\it bottom row}).  
+
+\begin{figure*}[htp]
+\centering
+\includegraphics[]{images/diffim.png}
+\caption[Example difference images.]
+{ Each row shows a set of difference images, displayed left--to--right
+as the template image, the science image, and the resulting difference
+image.  For the top row, the difference image is clean, with only
+objects at the border left unsubtracted (these pixels are masked due
+to the convolution).  Even objects off--center subtract cleanly, and
+some in fact are split in half.  The bottom row shows a set of images
+where the object did not subtract cleanly.  These effects were found
+in the brightest objects; we suspect this is partially due to the
+complicated shape of the star in the template image, and emphasizes
+that we need to be careful when constructing our image subtraction
+templates in future data challenges.  }
+\label{fig:diffim}
+\end{figure}
+
+We have been in contact with the CFHT team regarding aspects of their
+data that might make the shapes of bright stars different than the
+shapes of the fainter stars.  CFHT apply no linearity corrections to
+their data.  However, they have done tests using multiple exposure
+times on a given star field and find that star fluxes are not affected
+at the level of a few millimagnitudes (Astier 2009, private
+communication).  This suggests that non--linearity is not a
+significant issue.  More likely is that the shapes of the bright stars
+in the template images we are differencing against are complicated.
+Of particular note are the relative shapes of the cores of the
+objects, and the relative shapes of the wings of the objects.  If
+these two regimes require a different PSF--matching Kernel, the entire
+process will return a solution that is not optimal for either.  We
+suspect that the shapes of the brightest stars have changed during the
+coaddition process, which uses a median combine
+algorithm\footnote{This is seen in the template Fits header as {\tt
+COMBINET= 'MEDIAN ' / COMBINE\_TYPE config parameter for SWarp}.}.  It
+is likely that pixels at the centers of the bright stars contribute to
+the stack with a strong dependence on seeing, making these poor
+objects for Psf matching.
+
+We note that we were unable to use the simulated images for the image
+subtraction portion of {\tt IPSD} since the template images are
+severely undersampled (0.1'' seeing with 0.3'' pixels).
 
 \subsubsection{Future Work}
 
@@ -85,10 +174,10 @@ issue is warranted.  Using the {\tt SimDeep} dataset, we have
 determined that the derived Kernels are far noisier than expected even
 when the process is known to be a smoothing convolution.  The Kernels
 are far less self--similar than expected; consequently their spatial
-modelling will be difficult.
+modeling will be difficult.
 
 The SpatialCell functionality was initially written for fitting of the
-{\tt ip\_diffim} convolution Kernel.  However, it was subsequetly
-rewritten in a more advanced form for modelling of the spatially
+{\tt ip\_diffim} convolution Kernel.  However, it was subsequently
+rewritten in a more advanced form for modeling of the spatially
 varying Point Spread Function.  A task post--DC3a is to update the
 {\tt ip\_diffim} to use this newer SpatialCell functionality.
