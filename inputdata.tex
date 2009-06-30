@@ -34,6 +34,8 @@ image is 1056 x 1153 pixels, with 32 pixels of overscan implemented as
 % deal with the fact that the sections are originally defined 
 % in this convention?  This is dealt with in Isr.cc, BBoxFromDatasec.
 
+\RHL{Do we need this much detail?}
+
 \begin{itemize}
 
 \item {\tt RDNOISE} : Each amplifier has a different amount of
@@ -74,11 +76,18 @@ ccdId, ampId)}
 
 \subsubsection{Calibration Data Products}
 
-RHL can talk about making the calibration products database.
+The CFHT calibration data includes FITS keywords that define the range
+of dates for which it is valid.  In order to process CFHT science frames
+we needed to associate a given filter/date with the proper calibrations.  We
+accordingly generated a \texttt{.paf} (i.e. \texttt{Policy}) file that may
+be read into a \texttt{Policy} with nested fields that enable the fast
+lookup of the correct calibration file.
 
 According to Astier, ``the Elixir flats that you download from CADC
 are not fully correct on large scales. Namely, the flux of the same
-star still varies by a few percent center-to-corner''.
+star still varies by a few percent center-to-corner'';  we have not
+attempted to correct for this effect in DC3a,  although it is clear
+that the final LSST system will need to do so.
 
 \subsection{LSST Simulated Images and Catalogs}
 
@@ -103,8 +112,8 @@ entities, the latter ideally existing in a database.  Therefore to
 generate an event for DC3a processing, we must first address the
 images on disk, translate their natural metadata fields (e.g. 'GAIN')
 into LSST--format metadata fields (e.g. 'gain'), assemble the Metadata
-into a PropertySet ({\bf NOTE : KT is this still how its done?}), and
+into a PropertySet (\XXX{KT is this still how its done?}), and
 send this as Event to the pipeline.
 
-This process required a metadata -> Metadata mapping for each dataset.
-This was implmented as so.
+This process required a metadata $\rightarrow$ Metadata mapping for each dataset.
+This was implemented as so.
