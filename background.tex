@@ -2,3 +2,71 @@
 
 \subsection{Background Subtraction}
 
+% intro 
+
+A small number of new classes were developed to perform photometric
+background estimation.  A Statistics class was written to compute a
+variety of standard statistics (mean, median, standard deviation,
+etc.) for the pixel values in an Image or MaskedImage.  The classes
+Interpolate (base) and SplineInterpolate (derived) were written to
+provide code to perform a natural spline interpolation over x,y pairs,
+and a Background class, which uses the Statistics and Interpolate
+classes, was written to estimate the photometric background for use in
+sky subtraction.
+
+% philosophy 
+
+The basic philosophy in the algorithm is that an image is {\itshape
+relatively} sparsely populated with stellar PSFs, and that the
+majority of the pixel values are random variates about the local mean
+sky.
+
+% break up the image into a grid of sub-regions
+% get the 3-sigma clipped median in each sub-region (cite NR for fast median)
+% --> these values should be rough approximations to the sky in each grid cell
+
+Local sky levels were estimated in an image by first subdividing the
+image into a grid of subimages.  In each grid cell, a
+3$\sigma$-clipped mean was computed to represent the sky level.  Sky
+levels will often be contaminated with stellar flux from objects which
+are below the detection threshold, and a median would be a more robust
+measure of the central sky value under these circumstances.  However,
+as such sub-threshold sources will also contribute to the detected
+stellar PSFs, their biasing influence is statistically desirable in an
+estimate of the background -- they are a part of the background!  For
+this reason, a clipped mean was chosen over a median.  The clipped
+mean for each cell was assigned to the row,column coordinate of the
+cell's central pixel.
+
+% use a bicubic spline to construct a background image (site NR for bicubic spline)
+% - spline along each 'column' of medians to interpolate all pixels in the column
+% - spline across each row using the values from the columns
+
+The resulting grid of clipped means was interpolated to create a
+background image with the same dimensions as the original.  A bicubic
+spline interpolation algorithm was used to mesh the grid smoothly over
+the image (see Press et al. 2007).  For our bicubic interpolation, the
+grid values were first splined along the columns to produce smooth
+pixel values along each grid column.  The full background image was
+then produced by splining the interpolated column values across each
+row.  The first interpolation (along grid columns) is far less
+computationally intensive than the second (across {\itshape all}
+rows).  It would be equally valid to perform the first interpolation
+across the grid rows and the second along all columns.  However, the
+row-major structure of the LSST images made it advantageous to adopt
+the former option.
+
+% tests
+
+The background estimation code was successfully tested on images with
+known background levels: (1) all pixels set to a constant value, (2)
+pixel values increasing linearly across the frame, and (3) an image of
+noise having known statistical properties.  The tests are included
+with the source code.
+
+% not-a-knot
+
+The {\itshape natural} spline algorithm used for interpolation can
+suffer from ringing near the edges, and it is our intention to
+continue development by implementing a more robust {\itshape
+not-a-knot} spline in its place.
