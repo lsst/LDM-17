@@ -108,11 +108,12 @@ AJC and JP.
 The input data exist on disk as Fits files, with all requisite
 metadata in their headers.  Conversely, the paradigm for LSST is to
 have the pixel--level science data and associated Metadata as separate
-entities, the latter ideally existing in a database.  Therefore to
+entities, the latter ideally existing in a database but in any case
+being received separately from the camera system.  Therefore to
 generate an event for DC3a processing, we must first address the
-images on disk, translate their natural metadata fields (e.g. 'GAIN')
-into LSST--format metadata fields (e.g. 'gain'), assemble the Metadata
-into a PropertySet (\XXX{KT is this still how its done?}), and
+images on disk, translate their Fits metadata fields (e.g. 'GAIN')
+into LSST--format metadata fields (e.g. 'gain'), assemble selected Metadata
+representative of what the camera would know into a PropertySet, and
 send this as Event to the pipeline.
 
 This process required a metadata $\rightarrow$ Metadata mapping for each dataset.
