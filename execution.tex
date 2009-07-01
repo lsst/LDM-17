@@ -97,13 +97,10 @@ standard Python {\tt Exception} class.
 
 The result was an exception design that was simpler to throw and that
 targeted the location of the exception much more precisely.  Programmers
-are still not using the more advanced features of the exception facility
-such as re-throwing or additional parameters; if they are found to be
+are still not using the most advanced features of the exception facility
+such as adding additional parameters to exceptions; if they are found to be
 unneeded, the class can be further simplified in the future by removing
 them.
-
-\RHL{Macros such as \texttt{LSST\_EXCEPT\_ADD} are already
-used in e.g. \texttt{meas/algorithms}}
 
 \subsubsubsection{Provenance}
 
@@ -112,12 +109,10 @@ The Orca orchestration layer (see Section
 information.  In particular, the software environment and the contents
 of the policy files used to run the production are written both to log
 files and to the database.  Recording the software environment allows
-the exact software configuration used for the run to be reproduced
-later, while recording the policy files captures both platform
-configuration information such as the compute nodes and database used as
-well as all configurable science algorithm settings.
-\RHL{What do we mean by, ``the exact software configuration''? I didn't
-think that we yet captured e.g. compiler versions}
+the exact configuration of LSST-packaged software used for the run to be
+reproduced later, while recording the policy files captures both
+platform configuration information such as the compute nodes and
+database used as well as all configurable science algorithm settings.
 
 This provenance information, in combination with an event sent to the
 production, is sufficient to enable accurate reconstruction of a given
@@ -127,10 +122,6 @@ sequence of events sent to the production, the provenance allows exact
 duplication of a given run.  The recorded provenance proved highly
 useful while debugging algorithmic issues since it simplified the
 construction of small reproducible test cases demonstrating problems.
-\RHL{My impression was that we didn't yet have the ability to
-track down the stage configuration associated with an error, or
-is this what, ``a demonstration of
-automated reconstruction was deferred''?}
 
 The software environment is characterized by the versions of packages
 maintained by {\tt eups} that are ``setup'' at the time of production
