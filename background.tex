@@ -5,19 +5,19 @@
 % intro 
 
 A small number of new classes were developed to perform photometric
-background estimation.  A Statistics class was written to compute a
+background estimation.  A \code{Statistics} class was written to compute a
 variety of standard statistics (mean, median, standard deviation,
-etc.) for the pixel values in an Image or MaskedImage.  The classes
-Interpolate (base) and SplineInterpolate (derived) were written to
+etc.) for the pixel values in an \code{Image} or \code{MaskedImage}.  The classes
+\code{Interpolate} (base) and \code{SplineInterpolate} (derived) were written to
 provide code to perform a natural spline interpolation over x,y pairs,
-and a Background class, which uses the Statistics and Interpolate
+and a \code{Background} class, which uses the \code{Statistics} and \code{Interpolate}
 classes, was written to estimate the photometric background for use in
 sky subtraction.
 
 % philosophy 
 
 The basic philosophy in the algorithm is that an image is {\itshape
-relatively} sparsely populated with stellar PSFs, and that the
+relatively} sparsely populated with astrophysical sources, and that the
 majority of the pixel values are random variates about the local mean
 sky.
 
@@ -37,6 +37,8 @@ estimate of the background -- they are a part of the background!  For
 this reason, a clipped mean was chosen over a median.  The clipped
 mean for each cell was assigned to the row,column coordinate of the
 cell's central pixel.
+\RHL{The clipping symmetric, right?  And thus unbiased for a symmetrical
+  distribution such as a Gaussian}
 
 % use a bicubic spline to construct a background image (site NR for bicubic spline)
 % - spline along each 'column' of medians to interpolate all pixels in the column
@@ -45,7 +47,7 @@ cell's central pixel.
 The resulting grid of clipped means was interpolated to create a
 background image with the same dimensions as the original.  A bicubic
 spline interpolation algorithm was used to mesh the grid smoothly over
-the image (see Press et al. 2007).  For our bicubic interpolation, the
+the image \citep{PressNR}.  For our bicubic interpolation, the
 grid values were first splined along the columns to produce smooth
 pixel values along each grid column.  The full background image was
 then produced by splining the interpolated column values across each
@@ -53,7 +55,7 @@ row.  The first interpolation (along grid columns) is far less
 computationally intensive than the second (across {\itshape all}
 rows).  It would be equally valid to perform the first interpolation
 across the grid rows and the second along all columns.  However, the
-row-major structure of the LSST images made it advantageous to adopt
+row-major (i.e. natural C/C++) structure of the LSST images made it advantageous to adopt
 the former option.
 
 % tests
@@ -66,7 +68,8 @@ with the source code.
 
 % not-a-knot
 
-The {\itshape natural} spline algorithm used for interpolation can
+The {\itshape natural}\footnote{I.e. vanishing second derivative at the end knots}
+spline algorithm used for interpolation can
 suffer from ringing near the edges, and it is our intention to
 continue development by implementing a more robust {\itshape
 not-a-knot} spline in its place.
