@@ -122,6 +122,18 @@ sequence of events sent to the production, the provenance allows exact
 duplication of a given run.  The recorded provenance proved highly
 useful while debugging algorithmic issues since it simplified the
 construction of small reproducible test cases demonstrating problems.
+\iffalse
+\RHL{My impression was that we didn't yet have the ability to 
+down the stage configuration associated with an error, or
+is this what, ``a demonstration of 
+automated reconstruction was deferred''?}
+KTL - We can get the configuration easily.  What is not so readily
+available is the inputs to a given stage, many of which may not be
+pipeline data products (they are just internal).  This is why the text
+says "simplified" and not "automatically enabled".  The clipboard inputs
+can always be re-created by re-running the pipeline, but this may be
+inconvenient and inefficient.
+\fi
 
 The software environment is characterized by the versions of packages
 maintained by {\tt eups} that are ``setup'' at the time of production
