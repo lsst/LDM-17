@@ -27,18 +27,17 @@ sky.
 
 Local sky levels were estimated in an image by first subdividing the
 image into a grid of subimages.  In each grid cell, a
-3$\sigma$-clipped mean was computed to represent the sky level.  Sky
-levels will often be contaminated with stellar flux from objects which
-are below the detection threshold, and a median would be a more robust
-measure of the central sky value under these circumstances.  However,
-as such sub-threshold sources will also contribute to the detected
-stellar PSFs, their biasing influence is statistically desirable in an
-estimate of the background -- they are a part of the background!  For
-this reason, a clipped mean was chosen over a median.  The clipped
-mean for each cell was assigned to the row,column coordinate of the
-cell's central pixel.
-\RHL{The clipping symmetric, right?  And thus unbiased for a symmetrical
-  distribution such as a Gaussian}
+3$\sigma$-clipped\footnote{Clipping was symmetric, and thus unbiased
+for a symmetric distribution such as a Gaussian.} mean was computed to
+represent the sky level.  Sky levels will often be contaminated with
+stellar flux from objects which are below the detection threshold, and
+a median would be a more robust measure of the central sky value under
+these circumstances.  However, as such sub-threshold sources will also
+contribute to the detected stellar PSFs, their biasing influence is
+statistically desirable in an estimate of the background -- they are a
+part of the background!  For this reason, a clipped mean was chosen
+over a median.  The clipped mean for each cell was assigned to the
+row,column coordinate of the cell's central pixel. 
 
 % use a bicubic spline to construct a background image (site NR for bicubic spline)
 % - spline along each 'column' of medians to interpolate all pixels in the column
@@ -47,7 +46,7 @@ cell's central pixel.
 The resulting grid of clipped means was interpolated to create a
 background image with the same dimensions as the original.  A bicubic
 spline interpolation algorithm was used to mesh the grid smoothly over
-the image \citep{PressNR}.  For our bicubic interpolation, the
+the image.  For our bicubic interpolation, the
 grid values were first splined along the columns to produce smooth
 pixel values along each grid column.  The full background image was
 then produced by splining the interpolated column values across each
