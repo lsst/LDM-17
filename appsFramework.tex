@@ -1,0 +1,29 @@
+\subsection{Application Framework}
+
+Most of the additions to the applications framework
+classes are discussed elsewhere (e.g. \code{Statistics}, \Sec{secBackground}; \code{Psf}, \Sec{secPsf}),
+but the most far-reaching of the changes, the new image API, deserves its own section.
+
+\subsubsection{The Image Classes}
+\label{secImageClasses}
+
+In DC2 pixels in images and masks were managed using a toolkit from NASA-Ames, the ``Vision Workbench'' (\code{vw}).
+Access to the pixels in an image was achieved by explicitly following a pointer to a \code{vw} class,
+thereby exposing all of \code{vw} API, including any incompatible changes that might appear in
+the future.
+
+A further major problem with \code{vw} is that its concept of pixel access is restricted to a simple
+STL-like iterator, whereas many astronomical algorithms require examination of the neighbourhood of
+a pixel.
+
+At the end of DC2 we therefore decided to rewrite all of our image classes to use \code{boost::gil}
+(an image library originating at Adobe) which has a richer set of ways of accessing pixels;  in
+order to preserve encapsulation, we added a thin wrapper layer above the raw \code{boost::gil} calls.
+Another major goal of the rewrite was to make the code that manipulated the pixels of a single
+\code{Image} identical to that that manipulates a \code{MaskedImage}'s pixels --- thereby enabling
+generic programming of e.g. convolutions.
+
+All of these goals have been achieved for DC3a.  The new APIs have proved to be convenient and
+powerful, and the code generated is efficient,\footnote{at least with g++ versions $>= 4.2$} even when
+manipulating images, masks, and variances simultaneously when processing \code{MaskedImage}s.
+
