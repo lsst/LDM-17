@@ -1,0 +1,10 @@
+\subsection{Source Measurement}
+
+Source measurement occurs only in the context of an image, thus 
+\code{MeasureSources} - a set of centroid, shape, and photometry measurement 
+algorithms - is constructed from an \code{Exposure}; it is templated over 
+\code{Exposure}'s pixel type. \code{MeasureSources}  acts as the driver behind
+the generalized \code{Footprint} iterator \code{FootprintFunctor} in applying 
+its set of algorithms to a \code{Footprint} over the \code{Exposure}. 
+Which algorithms to use can be specified by name in a \code{Policy} file.
+

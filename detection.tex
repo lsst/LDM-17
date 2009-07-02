@@ -24,8 +24,7 @@ The fundamental objects are:\begin{itemize}
 \end{description}
 \item Miscellaneous
 \begin{description}
-    \item[lsst::meas::algorithms::PSF] PSF representation, a base API for
-        PSF should be moved to afw in DC3b/DC4
+    \item[lsst::meas::algorithms::PSF] (virtual) baseclass for PSF representation; cf. \Sec{secPsf}
     \end{description}
 \end{itemize}
 
@@ -57,15 +56,4 @@ the algorithms and is answered separately by \code{Policy}.
 In DC3a we detect on both difference images and on stacked images, which are 
 first smoothed using \code{afw::math::Kernel}. In either use case, the output
 is a \code{DetectionSet}.
-
-\subsubsection{Source Measurement}
-
-Source measurement occurs only in the context of an image, thus 
-\code{MeasureSources} - a set of centroid, shape, and photometry measurement 
-algorithms - is constructed from an \code{Exposure}; it is templated over 
-\code{Exposure}'s pixel type. \code{MeasureSources}  acts as the driver behind
-the generalized \code{Footprint} iterator \code{FootprintFunctor} in applying 
-its set of algorithms to a \code{Footprint} over the \code{Exposure}. 
-Which algorithms to use can be specified by name in a \code{Policy} file.
-
 

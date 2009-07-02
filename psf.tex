@@ -1,6 +1,82 @@
 % Section 6.4: PSF Determination
 
 \subsection{PSF Determination}
+\label{secPsf}
 
-\RHL{I need to write this}
+\subsubsection{Classes}
 
+The PSF virtual base class, \code{Psf}, is currently in the
+\code{lsst::meas::algorithms} package, but should be moved
+to \code{lsst::afw} for DC3b.
+
+\code{Psf} supports a PSF that is a function of position.  
+In addition to constructors and destructors, the class interface
+permits convolving an image with the PSF or evaluating a desired
+pixel (or returning an \code{Image}) of the PSF at a given position in a frame.
+
+There are two concrete \code{Psf} classes in DC3a: \code{dgPsf} (a circularly-symmetric double Gaussian) and
+\code{pcaPsf} (a linear combination of basis functions, modelled after SDSS's PSF representation).  Both of these
+classes are instantiated using a helper class, \code{PsfFactory}, that takes a string argument to identify the desired
+type of PSF; this enables us to add a new PSF representation without modifying the base class.\footnote{In fact, the new
+  PSF class could be separately compiled and loaded at run time using python's \code{import} command.}
+
+\subsubsection{Spatial Modelling}
+
+In modelling a PSF's spatial structure, we need to ensure that the PSF is well modelled at all
+points in the image, rather than just where we happen to have bright isolated stars.  It is
+therefore important to use stars which are as uniformly as possible distributed, even if this
+means that we have to accept fainter stars than we might like.
+
+A given image is divided up into cells, with each cell represented by an instance of \code{SpatialCell}. These cells
+each contribute only a limited number of objects to the spatial fit.  The \code{SpatialCellSet} class maintains all of
+these cells as an STL collection of \code{SpatialCell}s.  Each cell itself contains an STL collection of instances of
+classes derived from \code{SpatialCellCandidate} (e.g. the PSF stars themselves).
+
+\code{SpatialCellSet} uses the Visitor pattern \citep{GoF} to allow the user to apply a functor to the `best'
+\code{SpatialCellCandidate} in each \code{SpatialCell}, estimating a spatial model.  The user can then go through the
+candidate lists rejecting or approving each object; if needs be the spatial model can then be improved.  If all
+instances in a list are rejected from the spatial model, the least-bad one will be used.
+
+A superclass of \code{SpatialCellCandidate}, \code{SpatialCellImageCandidate}, contains an image
+of some sort; in the case of PSF determination, this is candidate PSF star, but the
+same framework could be used in \code{ip\_diffim} in which case the image would
+be a difference image kernel.
+
+
+\subsubsection{PSFs as sums of PCA components; \code{pcaPsf}}
+
+The DC3a PSF is based on a \code{lsst::afw::math::LinearCombinationKernel}, where
+the components are the eigen-images derived from a set of stars in the image (cf. \citet{photoADASS});
+we are not wedded to this representation post-DC3a.
+
+In terms of the previous section,  we first find a set of \code{Source}s in an image
+that may be good isolated stars,  and insert them into a \code{SpatialCellSet}.  The
+routine \code{createKernelFromPsfCandidates} visits each cell and performs the PCA
+to find the desired eigen-images using a Visitor and the \code{lsst::afw::image::ImagePca} class.
+Given this kernel, \code{fitSpatialKernelFromPsfCandidates} uses a different
+Visitor to evaluate the $\chi^2$ of the fit, and then \code{minuit} to find
+the best-fit spatial variation (modelled in terms of a 2-dimensional polynomial).  Finally,
+we call the \code{createPSF} factory function to generate a \code{Psf}.
+
+In semi-pseudo-code this looks like:
+\begin{center}
+  \begin{minipage}{13cm}
+    \small
+\begin{verbatim}
+mi = MaskedImageF()
+cellSet = SpatialCellSet(BBox(PointI(0, 0), width, height), 100)
+
+for source in sourceList:
+    cellSet.insertCandidate(makePsfCandidate(source, mi))
+
+kernel, eigenValues = \
+       createKernelFromPsfCandidates(cellSet, nEigenComponents, spatialOrder,
+                                     kernelSize, nStarPerCell)
+
+fitSpatialKernelFromPsfCandidates(kernel, cellSet, nStarPerCellSpatialFit, tol)
+
+psf = createPSF("PCA", kernel)
+\end{verbatim}
+  \end{minipage}
+\end{center}
+We have omitted the rejection of bad candidates in the interest of clarity.
