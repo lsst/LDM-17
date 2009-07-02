@@ -94,12 +94,41 @@ that the final LSST system will need to do so.
 AJC.
 
 \subsubsection{Science Data Products}
-
 AJC and JP.
+% JP
+The simulated images are generated from an input catalog.  The 
+input catalog includes the position in the sky (right ascension \& declination), 
+apparent magnitudes at 5500 \AA, a Spectral Energy Distribution file, a
+redshift, and when the object is a galaxy it includes the morphological
+information.  The catalog is input into the raytracing software which 
+outputs a FITS image, which is a single CCD.  The raytracing software requires 
+input that includes the atmosphere conditions, optics perturbations, observed
+airmass, and LSST filter.  After the raytracing software has generated a 
+single CCD Fits image, background and the associated noise is added to 
+each image.  The background calculation includes the night-time sky emission 
+along with the lunar emission.  The final processing steps include the 
+calculation of the TAN-SIP WCS polynomials, and updating the FITS header 
+which includes WCS information and book keeping information.  Amplifier
+information is made  by breaking up each CCD into 16 amplifier 
+images (512 $\times$ 2045 pixels), an overscan region of 5 pixels is added 
+along the long column, ansd read noise of 5 elections is added to all pixels.
+A software bias of 100 counts is added to all the pixels to avoid negative 
+counts.  All amplifier-level FITS images are in 16-bit unsigned integer 
+format.  The key words include the simulation run name (i.e. Wide, Deep, 
+or Ideal), dates processed at University of Washington and generated at Purdue, 
+along with CCD processing information (i.e. DATASEC, etc..) 
+
+information about Deep, Ideal, Wide? Purdue run time, CONDOR?
+Are these products or runs?
+
 
 \subsubsection{Calibration Data Products}
 
 AJC and JP.
+%JP
+Calibration data products are flat field images, dark frames, and bias 
+frames. The flat field images are currently set to unity. The dark 
+and bias frames are currently zero.  
 
 
 
