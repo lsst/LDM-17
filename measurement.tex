@@ -64,4 +64,10 @@ they are used to e.g. choose candidate PSF stars (\Sec{secChoosePSFStars}).
 
 \subsubsection{Photometry}
 
-\XXX{Write me}
+DC3a only supports a \code{"NAIVE"} photometric algorithm, measuring a PSF
+magnitude using a PSF instantiated at the correct sub-pixel centre,  and
+an aperture consisting of all pixels not more than a given radius from the
+centre of the source's peak pixel.
+
+The code is in fact more general than this, allowing the sum of the inner product
+of the image with any weight function over a set of pixels defined by a \code{Footprint}.
