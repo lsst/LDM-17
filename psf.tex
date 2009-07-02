@@ -57,8 +57,8 @@ Given this kernel, \code{fitSpatialKernelFromPsfCandidates} uses a different
 Visitor to evaluate the $\chi^2$ of the fit, and then \code{minuit} to find
 the best-fit spatial variation (modelled in terms of a 2-dimensional polynomial).  Finally,
 we call the \code{createPSF} factory function to generate a \code{Psf}.
-
 In semi-pseudo-code this looks like:
+
 \begin{center}
   \begin{minipage}{13cm}
     \small
