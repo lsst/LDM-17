@@ -1,10 +1,67 @@
 \subsection{Source Measurement}
+\label{secSourceMeasurement}
 
-Source measurement occurs only in the context of an image, thus 
-\code{MeasureSources} - a set of centroid, shape, and photometry measurement 
-algorithms - is constructed from an \code{Exposure}; it is templated over 
-\code{Exposure}'s pixel type. \code{MeasureSources}  acts as the driver behind
-the generalized \code{Footprint} iterator \code{FootprintFunctor} in applying 
-its set of algorithms to a \code{Footprint} over the \code{Exposure}. 
-Which algorithms to use can be specified by name in a \code{Policy} file.
+Measuring Sources' properties is an open-ended task;  not only is the
+number of properties (centroid, shape, psf-photometry, galaxy-photometry,
+bulge-disk decomposition, ...) open ended, but the algorithm to be
+used for each property is the subject of active research, or at least
+controversy.  DC3a therefore uses a flexible driver class for measuring
+sources, \code{MeasureSources}.  The class knows which \textit{properties}
+should be measured (currently centroid, shape, and photometry), but
+it knows nothing of which \textit{algorithms} should be employed.  
 
+\subsubsection{Source Measurement Factories}
+\label{secSourceMeasurementFactories}
+
+Because the code that actually measures things needs to look at pixel
+values, the classes that do the work are templated on the image type
+and contain a method, \code{apply}, that takes an image, a position,
+and any other required information (e.g. a \code{Psf}) and return the
+desired information.
+
+For example, centroiding is achieved using \code{MeasureCentroid<MaskedImageT>} and\break \code{MeasureCentroid::apply}
+returns a \code{Centroid} (with members such as \code{getXErr()}).  \code{MeasureCentroid} itself is a Singleton which
+maintains a registry of available algorithms.  These algorithms are contained in separate source files, and register
+themselves by initialising a variable at file scope; this registration associates a string (e.g. \code{"NAIVE"}) with a
+class (e.g. \code{NaiveMeasureCentroid}).
+
+Once this registration is achieved, \code{MeasureSources}'s constructor can look up algorithms by name (e.g. in a policy
+file) even if the algorithmic code (e.g. \code{BestMeasureCentroid}) was loaded dynamically.
+
+\subsubsection{Centroiding}
+
+Two centroiding algorithms are available for DC3a, a simple unweighted first moment
+of the 3\by3 region around a pixel (\code{"NAIVE"}) and a simplification of the algorithm employed by
+SDSS (\code{"SDSS"}, \citet{SDSSAstrom}).
+
+The SDSS algorithm involves smoothing the object with an approximation to the PSF, then examining
+the 3\by3 region around the peak in the smoothed image.  We fit a quartic approximation to
+a Gaussian to the 3 ``vertical'' sets of 3 pixels, determining a maximum in each --- these three
+maxima define a line.  We then repeat this operation for the 3 ``horizontal'' sets of 3 pixels,
+defining another line.  The intersection of these two lines defines the centroid.  Unlike the
+SDSS code, we do not attempt to debias this centre for the known shape of the true PSF at this
+point in the frame.
+
+It is not clear that this approach delivers the combination of accuracy and robustness that will be required to meet
+LSST's astrometric requirements.
+
+\subsubsection{Shape Measurement}
+
+Only one algorithm is available for DC3a, the adaptive moment algorithm
+employed by the SDSS.  The idea is to measure
+$$
+M_{nm} \equiv \int x^n y^m I(x, y) w(x, y) \,dx\,dy
+$$
+where $nm = \{20, 11, 02\}$ and $w(x, y)$ is a 2-dimensional Gaussian weight function.  The
+parameters of this Gaussian are then adjusted until the measured
+moments, $M_{nm}$, are consistent with $I$ and $w$ having the same second moments.
+
+In the context of weak lensing, these $M_{nm}$ can be used to estimate shapes providing
+that they are also measured for the PSF at the position of the object, and a fourth
+moment is also measured to allow for polarisability;  neither of these are done in the
+DC3a implementation.   We do not expect to use these adaptive moments for lensing, but
+they are used to e.g. choose candidate PSF stars (\Sec{secChoosePSFStars}).
+
+\subsubsection{Photometry}
+
+\XXX{Write me}

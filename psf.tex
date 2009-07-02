@@ -18,7 +18,7 @@ There are two concrete \code{Psf} classes in DC3a: \code{dgPsf} (a circularly-sy
 \code{pcaPsf} (a linear combination of basis functions, modelled after SDSS's PSF representation).  Both of these
 classes are instantiated using a helper class, \code{PsfFactory}, that takes a string argument to identify the desired
 type of PSF; this enables us to add a new PSF representation without modifying the base class.\footnote{In fact, the new
-  PSF class could be separately compiled and loaded at run time using python's \code{import} command.}
+  PSF class could be separately compiled and loaded at run time using python's \code{import} command.}  The implementation of \code{PsfFactory} is similar to the factories employed in Source Measurement (\Sec{secSourceMeasurementFactories}).
 
 \subsubsection{Spatial Modelling}
 
@@ -42,6 +42,15 @@ of some sort; in the case of PSF determination, this is candidate PSF star, but 
 same framework could be used in \code{ip\_diffim} in which case the image would
 be a difference image kernel.
 
+\subsubsection{Choice of PSF stars}
+\label{secChoosePSFStars}
+
+The standard LSST detection algorithm (\Sec{secDetection}) is run to find a set
+of candidate objects, followed by the measuring the objects' positions and
+second moments (\Sec{secSourceMeasurement}).  We then form a 2-dimensional
+histogram (i.e. an image) from the $M_{20}$ and $M_{02}$ (i.e. \code{xx} and \code{yy}) moments
+and find \textit{its} maximum and second moments;  objects close to this maximum
+are taken as our initial candidate list for stars to measure the PSF.
 
 \subsubsection{PSFs as sums of PCA components; \code{pcaPsf}}
 
