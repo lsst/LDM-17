@@ -17,8 +17,7 @@ The GAS takes various parameters which can be set to speed the match.
 \begin{description}
 \item[{\tt getMinimumImageScale(), getMaximumImageScale}] If the plate scale (in arcseconds per pixel) of the image is known or can be constrained, the volume of parameter space that {\tt astrometry.net} needs to search can be dramatically reduced. If the image scale is exactly known, use {\tt setImageScaleArcsecPerPixel()}
 
-\item[{\tt setParity()}] Astromical images are normally oriented with North up and East to the right, or rotated from the same. However, the image may be inverted, so that North is up when East is to the left. {\tt astrometry.net} searches for both possible configurations, unless the parity is specified. Specifying the parity can reduce the time taken to solve an image by a factor of two. Legal values for parity are {\tt NORMAL_PARITY}, {\tt FLIPPED_PARITY}, or {\tt UNKNOWN_PARITY}, the default.
-\end{description}
+\item[{\tt setParity()}] Astromical images are normally oriented with North up and East to the right, or rotated from the same. However, the image may be inverted, so that North is up when East is to the left. {\tt astrometry.net} searches for both possible configurations, unless the parity is specified. Specifying the parity can reduce the time taken to solve an image by a factor of two. Legal values for parity are \code{NORMAL\_PARITY}, \code{FLIPPED\_PARITY}, or \code{UNKNOWN\_PARITY}, the default.
 
 \item[{\tt setNumBrightObjects()}] Although there may be many hundreds of sources on an image, typically a small fraction of these are necessary to solve an image. This function instructs {\tt astrometry.net} to only use the brightest $N$ stars when making a match. Using fewer stars generally results in a faster match, but using too few can result in the algorithm failing to return any match.
 \end{description}
