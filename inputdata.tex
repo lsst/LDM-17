@@ -91,46 +91,75 @@ that the final LSST system will need to do so.
 
 \subsection{LSST Simulated Images and Catalogs}
 
-AJC.
+Three sets of simulated images were generated for the LSST data
+management pipeline: ``Deep'' images comprise 96 CCD images of the
+same field (with varying seeing, airmass and sky backgrounds) and were
+designed for use in image stacks, ``Wide'' images comprise 163 CCDS
+which sample 3 rafts from the center to the edge of the focal plane
+over a range of airmasses and seeing conditions, ``Ideal'' images
+comprise a simulation with no atmosphere, no optical distortions,
+airmass of unity, 0.1 arcsec seeing and no sky background (this
+defines an idealized view of the sky for use as a truth table).
+
+The underlying stellar and galaxy catalogs are based on the
+simulations of \cite{Juric+Ivesic} and \cite{kitzbischler}
+respectively.  To reproduce the LSST sky coverage the 2x2 deg galaxy
+catalogs from Kitzbichler & White are tiled across the sky.  The SED
+of each galaxy is estimated using the Bruzual & Charlot (2003) stellar
+population models. Using the models of Batissta et al (2006) each
+galaxy in the Millennium Simulation is assigned a morphological
+profile. The current implementation assigns each galaxy a
+disk-to-total flux ratio, position angle in the sky, inclination along
+the line-of-sight, bulge radius, and disk radius.
+
+Stars are specified by SED, and positions. The SEDs for stars are
+derived from Kurucz models (i.e.\ excluding dwarf and giant
+stars). The model used to generate main sequence stars is based on
+work done by Juric et. al. This includes user-specified amounts of
+thick-disk, thin-disk, and halo stars. Each version of a catalog
+contains metadata on metallicity, temperature, luminosity-type, and
+surface gravity.
+
+From these data, images with varying PSF (from 0.4 to 1.8 arcseconds),
+airmass (from 1.0 to 2.0), sky background ( with low, new moon, and
+high, full moon and 20 degrees from the Moon), and varying mirror and
+optics specifications (including aberrations) were generated.  The
+limiting magnitude of these catalogs was $r<26$ and the catalogs were
+made available with the resulting images.
 
 \subsubsection{Science Data Products}
-AJC and JP.
-% JP
-The simulated images are generated from an input catalog.  The 
-input catalog includes the position in the sky (right ascension \& declination), 
-apparent magnitudes at 5500 \AA, a Spectral Energy Distribution file, a
-redshift, and when the object is a galaxy it includes the morphological
-information.  The catalog is input into the raytracing software which 
-outputs a FITS image, which is a single CCD.  The raytracing software requires 
-input that includes the atmosphere conditions, optics perturbations, observed
-airmass, and LSST filter.  After the raytracing software has generated a 
-single CCD Fits image, background and the associated noise is added to 
-each image.  The background calculation includes the night-time sky emission 
-along with the lunar emission.  The final processing steps include the 
-calculation of the TAN-SIP WCS polynomials, and updating the FITS header 
-which includes WCS information and book keeping information.  Amplifier
-information is made  by breaking up each CCD into 16 amplifier 
-images (512 $\times$ 2045 pixels), an overscan region of 5 pixels is added 
-along the long column, ansd read noise of 5 elections is added to all pixels.
-A software bias of 100 counts is added to all the pixels to avoid negative 
-counts.  All amplifier-level FITS images are in 16-bit unsigned integer 
-format.  The key words include the simulation run name (i.e. Wide, Deep, 
-or Ideal), dates processed at University of Washington and generated at Purdue, 
-along with CCD processing information (i.e. DATASEC, etc..) 
 
-information about Deep, Ideal, Wide? Purdue run time, CONDOR?
-Are these products or runs?
+Images were output in standard FITS format. Each 65MB FITS file
+represents a single 4096x4096 CCD 15 second exposure with 0.2 arcsec
+pixels and covers 13.6x13.6 arcminutes of the sky. Each FITS file
+contains keywords required by the LSST data reduction pipelines
+including date, data sections, saturation level, and world coordinate
+system (WCS).  Amplifier based images were constructed by breaking up
+each CCD into 16 amplifier images (512 $\times$ 2045 pixels), addition
+of an overscan region of 5 pixels, and inclusion of read noise of 5
+elections.  A software bias of 100 counts was added to all the pixels
+to avoid negative counts.  All amplifier-level FITS images were cast
+as 16-bit unsigned integer. The FITS keywords for these images include
+the simulation run name (i.e. Wide, Deep, or Ideal), dates processed
+at University of Washington and generated at Purdue, along with CCD
+processing information (i.e. DATASEC, etc..)
 
+The Image Simulation results predict non-linear distortions in the
+coordinate system, at the sub-pixel level, across a CCD. To meet the
+LSST science-goal astrometric requirements (15 milliarcsec) and to
+account for these non-linear optical distrotions, a TAN-SIP WCS
+solution was implemented for these images. TAN-SIP provides a
+polynomial relation between CCD positions and the position on the sky
+(where the order of the polynomial is user-specified). The TAN-SIP
+convention is supported by the publically available software package
+WCSTools and by Saoimage DS9. 
 
 \subsubsection{Calibration Data Products}
 
-AJC and JP.
-%JP
-Calibration data products are flat field images, dark frames, and bias 
-frames. The flat field images are currently set to unity. The dark 
-and bias frames are currently zero.  
-
-
+Calibration data products for the simulated images include flat field
+images, dark frames, and bias frames. The flat field images were set
+to a mean value of unity and the dark and bias frames had a mean value
+of zero.
 
 \subsection{Event Generation From Input Data}
 
@@ -145,5 +174,5 @@ into LSST--format metadata fields (e.g. 'gain'), assemble selected Metadata
 representative of what the camera would know into a PropertySet, and
 send this as Event to the pipeline.
 
-This process required a metadata $\rightarrow$ Metadata mapping for each dataset.
-This was implemented as so.
+This process required a metadata $\rightarrow$ Metadata mapping for
+each dataset.  This was implemented as so.
