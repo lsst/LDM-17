@@ -4,7 +4,85 @@
 
 \subsection{Summary of Runs}
 
+Much as with DC2, we executed numerous but short pipeline runs over
+a sampling of the data from the CFHT-LS fields D3 and D4 and from the
+simulated data collections, SimDeep and SimWide.  These short runs
+were used to do initial debugging, performance analysis, and quality
+analysis which resulted in numerous bug fixes and important algorithm
+optimizations.  These short runs also allowed to explore different
+policy parameter settings to understand the trade off between data
+quality and performance.  
+
+For our final, detailed analysis of the data quality and processing
+performance, we focused on two productions runs with identical
+versions of the software and configuration: {\tt rlp1233} and {\tt
+rlp1234}.  As summarized in Table \ref{T7-1}.  These two runs
+processed different subsets of the focal plane for 85 visits to the
+CFHT-LS D3 on our own LSST cluster.  These visit were selected based
+on the availability of the calibration data needed to calibrate raw
+science images.  The Image Processing and Source Detection (IPSD)
+pipeline featured 1 master pipeline and 31 slice processes running
+across four nodes of the cluster (thus each run processed 31 amplifier
+images in parallel).  The Association pipeline (ap) ran on node 10
+within one master process and one slice process.  The ``NightMOPS''
+pipeline (part of the Moving Objects Prediction System) ran on node 9
+with 1 master process and 5 slice processes.  Taking a lesson from
+DC2, we did not use any of the ``slower'' cluster nodes (nodes 1-4)
+for pipeline processes as they would have pulled down the over
+performance of the pipeline.  We note that we had other infrastructure
+processes on the cluster nodes running which did not interfere
+noticeably with the pipeline processes.  Node 4 (which did not have
+any pipeline processes on it) hosted the event broker process, and
+node 9 (which had extra unused processor cores available) hosted the
+event monitor which loaded logging events into the database.
+
+One of the intended goals of the DC3a was exercise the use of the
+parallel filesystem, Lustre, we installed on the LSST cluster.  Much
+as with DC2, we found Lustre to be fairly unstable under heavy IO,
+apparently causing catastrophic failure of the filesystem.  This may
+have been due to an insufficient number of fileserver nodes for the
+level of IO we were attempting; however, schedule and hardware
+resource limitations prevented our exploring the causes in any
+detail.  Consequently, the final runs were conducted using NFS-mounted
+filesystems (which are known to perform poorly most conditions).  
+
+Ultimately, the simulated data was not used as part of the final
+analysis.  While the two simulated collections were instrumental
+in understanding and correcting processing problems, we found that the
+quality of the template images were insufficient for producing useful
+difference images and database results.  
+
+In addition to the runs on our own LSST cluster, we also conducted
+runs on the NCSA Abe cluster.  The purpose of these runs were to
+explore the scalability of the pipeline processing up to higher
+numbers of slices.  In particular, we have executed runs that process
+entire CFHT focal plane exposures simultaneously.  This was done by
+running the IPSD pipeline on Abe with 288 slice processes across 36
+8-core nodes.  DC3a schedule constraints limited the detailed analysis
+that could be completed for this report; however, we found that the
+pipeline scaled well at this level.  These runs provided additional
+qualitative accomplishments:
+
+\begin{itemize}
+\item they revealed configurable system limits that must be increased:
+\begin{itemize}
+\item the event broker must support over 1000 simultaneous open file
+  descriptors 
+\item the MySQL database must support $\gtrsim$ 300 simultaneous
+  connections.  
+\end{itemize}
+\item we demonstrated the integration of grid-based job management
+  (via Condor-g) into our orchestration layer
+\item we demonstrated the successful use of the parallel Lustre
+  filesystem.  
+\end{itemize}
+
+\noindent Additional information about the results of these runs on
+Abe can be found in section \ref{sec:timing}.  
+
+
 \subsection{Science Data Quality}
 
 \subsection{Timing Results}
+\label{sec:timing}
 
