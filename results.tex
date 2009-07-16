@@ -80,9 +80,160 @@ qualitative accomplishments:
 \noindent Additional information about the results of these runs on
 Abe can be found in section \ref{sec:timing}.  
 
+Table \ref{tbl:runsummary} summarizes the pertinent production runs
+referenced in this section.
+
+\begin{table}[htbp]
+\centering
+\caption{Average Processing Times Per Visit
+\label{tbl:runsummary}}
+\vspace{\baselineskip}
+\begin{tabular}{ | r | r | r | r | r | r |}
+\hline\hline
+runId & nVisits & nAmps & inputImages & outputImages & outputFrac \\ \hline
+rlp1233 & 85  & 31 &  &  &  \\ \hline
+rlp1234 & 85  & 31 &  &  &  \\ \hline
+Total   & --- &    &  &  &  \\ \hline
+\end{tabular}
+\end{table}
 
 \subsection{Science Data Quality}
 
 \subsection{Timing Results}
 \label{sec:timing}
+
+As in DC2, we use the logging framework (in which every log message is
+time-stamped) to instrument our pipeline processing code.  We can
+calculate how much time is spent on the different contributors to the
+overall processing time, including I/O, middleware overhead,
+scientific processing.  
+
+\begin{table}[htbp]
+\begin{center}
+\caption{Average Processing Times Per Visit
+\label{tbl:visitstats}}
+\vspace{\baselineskip}
+\begin{tabular}{ l | c | c |}
+\hline\hline
+          & Total Processing Time, corrected
+          & Application Processing Time \\ 
+Pipeline  & average $\pm$  $3\sigma$ (s) & average $\pm$ $3\sigma$ (s) \\ \hline
+IPSD      & 264.7 $\pm$ 20.2 & 264.1 $\pm$ 20.1  \\ 
+nightmops & 10.6  $\pm$  4.4 & 0.174 $\pm$  4.4  \\ 
+ap        & 1.4   $\pm$  0.7 & 0.021 $\pm$  0.7  \\ \hline
+\hline
+\end{tabular}
+
+\end{center}
+\end{table}
+
+
+In table \ref{visitstats}, we summarize the statistics for processing
+a single visit through each pipeline.  For each quantity, the error
+given represents the calculated $3\sigma$ variation of the
+distribution of values.  The total time is corrected to remove the
+time the pipelines spend waiting for data events to arrive.  For the
+IPSD and nightmops pipelines, this is the time it waits for a new data
+event to arrive.  As mentioned in section \ref{brokerprob}, we
+throttled the time between to data events to match the expected visit
+processing time to avoid having too many unconsumed data events pile
+up in the event broker; this typically resulted in an extra 20-30
+second wait for a data event before processing could resume.  The ap
+pipeline, on the other hand, receives its initial event from the IPSD
+pipeline; thus, it had to wait on average 4.4 minutes for the IPSD
+pipeline to complete before it could do its work.
+
+The ``Application Processing Time'' tallies on the time spent in total
+by all the pipeline stages in their preprocess, process, and
+postprocess functions where I/O is carried out and application
+algorithms are applied.  (The times in these functions are included
+only in cases where a stage actually provides an implementations for
+them.)  It excludes the overhead by the pipeline framework for
+managing the execution of the stages.  As the numbers show, the
+pipeline adds very little to the processing time of a visit.  A more
+precise analysis of the pipeline overhead is presented below.  
+
+The variation in the processing is in general much smaller in DC3a as
+it was in DC2: in the latter, the $3\sigma$ half-width was 108
+seconds in the image processing pipeline, while we now have 20
+seconds.  Furthermore as illustrated in Fig. \ref{fig:visitdist}, the
+processing times do not feature the unexplained double-peaked
+distributions we saw in DC2.  In summary, our we're getting much more
+consistent processing times in DC3a than we did in DC2.  
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=\textwidth,viewport=25 25 775 250,clip]{visitdist.pdf}
+\caption{Histogram of the times to process each visit (not including
+  time waiting on data events).  The $y$-axis measure the fraction of
+  the 170 visits in each time bin.  
+\label{fig:visitdist}}
+\end{center}
+\end{figure}
+
+Tables \ref{tbl:ipsdstages} and \ref{tbl:otherstages}
+
+\begin{table}[p]
+\begin{center}
+\small
+\caption{IPSD: Average Processing Times Per Stage
+\label{tbl:visitstats}}
+\vspace{\baselineskip}
+\begin{tabular}{lrlrr}
+\hline\hline
+\# & tp & Name & \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+\hline
+ 1 &    &                     sliceInfo &  0.002 &  0.001 \\
+ 2 &    &                       symLink &  0.001 &  0.001 \\
+ 3 &  I &                   imageInput0 &  1.804 &  0.527 \\
+ 4 & *\phantom{I} &                visitMetadata0 &  0.076 &  0.975 \\
+ 5 &    &            transformMetadata0 &  0.013 &  0.007 \\
+ 6 &    &             validateMetadata0 &  0.002 &  0.001 \\
+ 7 &  I &          visitMetadataOutput0 &  0.001 &  0.001 \\
+ 8 &  I &    rawImageAndMetadataOutput0 &  1.999 &  0.374 \\
+ 9 & *\phantom{I}  &   identifyCalibrationProducts &  0.020 &  0.008 \\
+10 & *I &              calibrationInput & 11.927 &  2.810 \\
+11 &    &  transformCalibrationMetadata &  0.004 &  0.003 \\
+12 & *S &                          isr0 &  1.604 &  0.135 \\
+13 & *S &               sourceDetection &  1.685 &  0.449 \\
+14 &  I &    calibAndBkgdExposureOutput & 10.627 &  1.536 \\
+15 &  S &             sourceMeasurement &  1.093 &  2.028 \\
+16 & *I &   exposureAndWcsSourcesOutput &  0.228 &  0.245 \\
+17 & *S &              psfDetermination &  0.207 &  0.149 \\
+18 &  I &                     psfOutput &  0.120 &  0.097 \\
+19 &  I &                   imageInput1 &  1.761 &  0.494 \\
+20 &    &                visitMetadata1 &  0.038 &  0.033 \\
+21 &    &            transformMetadata1 &  0.013 &  0.005 \\
+22 &    &             validateMetadata1 &  0.002 &  0.002 \\
+23 &  I &          visitMetadataOutput1 &  0.002 &  0.002 \\
+24 &  I &    rawImageAndMetadataOutput1 &  2.126 &  0.553 \\
+25 & *S &                          isr1 &  1.709 &  0.466 \\
+26 & *I &               wcsSourcesInput &  0.034 &  0.029 \\
+27 & *S &              wcsDetermination &  0.194 &  0.050 \\
+28 & *I &     calibratedExposuresOutput & 10.514 &  1.819 \\
+29 & *\phantom{I}  &              CcdMetadataStage &  0.002 &  0.001 \\
+30 & *I &         templateMetadataInput &  0.062 &  0.089 \\
+31 & *\phantom{I}  &             templateDimension &  0.016 &  0.005 \\
+32 & *\phantom{I}  &                  templateBBox &  0.004 &  0.001 \\
+33 & *I &         templateSubimageInput & 27.218 &  3.925 \\
+34 &  I &        templateSubimageOutput &  5.574 &  1.043 \\
+35 & *S &              imageDifference0 & 82.343 &  9.706 \\
+36 & *S &              imageDifference1 & 80.247 & 11.998 \\
+37 & *S &         differenceImageOutput & 10.172 &  1.606 \\
+38 & *S &                  addAndDetect &  7.966 &  0.126 \\
+39 &    &          diaSourceMeasurement &  0.473 &  2.211 \\
+40 & *\phantom{I}  &             sourceToDiaSource &  0.050 &  0.082 \\
+41 & *S &          sourceClassification &  0.008 &  0.007 \\
+42 & *I &              diaSourceOutput0 &  1.947 &  4.220 \\
+43 & *I &              diaSourceOutput1 &  0.106 &  0.143 \\
+44 & *\phantom{I}  &              associationEvent &  0.002 &  0.001 \\
+45 & *I &                   sdqaOutput0 &  0.047 &  0.015 \\
+46 & *I &                   sdqaOutput1 &  0.028 &  0.010 \\
+\hline
+\multicolumn{5}{l}{Type codes: I = input/output stage, * = production stage,} \\
+\multicolumn{5}{l}{S = Stage applying a scientific algorithm} \\
+\end{tabular}
+\end{center}
+\end{table}
+
 
