@@ -58,10 +58,21 @@ explore the scalability of the pipeline processing up to higher
 numbers of slices.  In particular, we have executed runs that process
 entire CFHT focal plane exposures simultaneously.  This was done by
 running the IPSD pipeline on Abe with 288 slice processes across 36
-8-core nodes.  DC3a schedule constraints limited the detailed analysis
-that could be completed for this report; however, we found that the
-pipeline scaled well at this level.  These runs provided additional
-qualitative accomplishments:
+8-core nodes.  While Image I/O was carried out using the Lustre
+filesystem attached to that platform, database I/O occurred with the
+database residing on the LSST cluster ({\tt lsst10}).  
+
+DC3a schedule constraints limited the detailed analysis
+that could be completed for this report; nevertheless, we see that the
+pipeline scaled fairly well at this level.  One critical barrier to
+scaling, however, was in the event broker (powered by the
+third-party product, activemq), which failed while processing the
+thirteenth visit which in turn disabled the pipelines.  The reasons
+are unclear; though, it appears to be due to the total volume of
+events processed rather than the rate of at which the events were
+generated.  
+
+These Abe runs provided additional qualitative accomplishments:
 
 \begin{itemize}
 \item they revealed configurable system limits that must be increased:
@@ -93,6 +104,7 @@ referenced in this section.
 runId & nVisits & nAmps & inputImages & outputImages & outputFrac \\ \hline
 rlp1233 & 85  & 31 &  &  &  \\ \hline
 rlp1234 & 85  & 31 &  &  &  \\ \hline
+rlpabe041 & 12  & 288 &  &  &  \\ \hline
 Total   & --- &    &  &  &  \\ \hline
 \end{tabular}
 \end{table}
@@ -127,8 +139,7 @@ ap        & 1.4   $\pm$  0.7 & 0.021 $\pm$  0.7  \\ \hline
 \end{center}
 \end{table}
 
-
-In table \ref{visitstats}, we summarize the statistics for processing
+In table \ref{tbl:visitstats}, we summarize the statistics for processing
 a single visit through each pipeline.  For each quantity, the error
 given represents the calculated $3\sigma$ variation of the
 distribution of values.  The total time is corrected to remove the
@@ -136,12 +147,23 @@ time the pipelines spend waiting for data events to arrive.  For the
 IPSD and nightmops pipelines, this is the time it waits for a new data
 event to arrive.  As mentioned in section \ref{brokerprob}, we
 throttled the time between to data events to match the expected visit
-processing time to avoid having too many unconsumed data events pile
+nnprocessing time to avoid having too many unconsumed data events pile
 up in the event broker; this typically resulted in an extra 20-30
 second wait for a data event before processing could resume.  The ap
 pipeline, on the other hand, receives its initial event from the IPSD
 pipeline; thus, it had to wait on average 4.4 minutes for the IPSD
 pipeline to complete before it could do its work.
+
+\begin{figure}[b]
+\begin{center}
+\includegraphics[width=\textwidth,viewport=25 25 775 250,clip]{images/visitdist.pdf}
+\caption{Histogram of the times to process each visit (not including
+  time waiting on data events).  The $y$-axis measure the fraction of
+  the 170 visits in each time bin.  
+\label{fig:visitdist}}
+\end{center}
+\end{figure}
+
 
 The ``Application Processing Time'' tallies on the time spent in total
 by all the pipeline stages in their preprocess, process, and
@@ -161,23 +183,32 @@ processing times do not feature the unexplained double-peaked
 distributions we saw in DC2.  In summary, our we're getting much more
 consistent processing times in DC3a than we did in DC2.  
 
-\begin{figure}[htbp]
-\begin{center}
-\includegraphics[width=\textwidth,viewport=25 25 775 250,clip]{images/visitdist.pdf}
-\caption{Histogram of the times to process each visit (not including
-  time waiting on data events).  The $y$-axis measure the fraction of
-  the 170 visits in each time bin.  
-\label{fig:visitdist}}
-\end{center}
-\end{figure}
+Tables \ref{tbl:ipsdstages} and \ref{tbl:otherstages} list the average
+time spent in actual {\it application code} each stage for each pipeline.
+(That is, these include the time spent in the {\tt preprocess()}, 
+{\tt process()}, and {\tt postprocess()} functions only when these
+were provided by a stage implementation.)  The type (``tp'') column
+differentiates between stages that handle I/O and those that only
+apply a scientific algorithm to the data.  
 
-Tables \ref{tbl:ipsdstages} and \ref{tbl:otherstages}
+As in DC2, the costliest stages are those that do image subraction
+(stages 35 and 36) at 80 seconds per image.  This is down
+significantly from DC2's 175 seconds; although, in DC3 we now do image
+subtraction on both exposures from a visit.  The variation in the time
+is down considerably as well.  One of the tunable parameters we found
+can have a significant effect on the subtraction time is the 
+{\tt maxPrincipalComponents} policy parameter, which controls the number
+of principal components calculated for the ... step and which in this
+run was set to 10.  We believe that we can probably reduce this
+paramter to 5; subsequent tests with this value ({\tt rlp1248})
+indicate that this would reduce the duration of the image subtraction
+stage by another 20 seconds.
 
 \begin{table}[p]
 \begin{center}
 \small
-\caption{IPSD: Average Processing Times Per Stage
-\label{tbl:visitstats}}
+\caption{IPSD: Average Processing Times (s) Per Stage for {\tt rlp1233, rlp1234}
+\label{tbl:ipsdstages}}
 \vspace{\baselineskip}
 \begin{tabular}{lrlrr}
 \hline\hline
@@ -236,4 +267,34 @@ Tables \ref{tbl:ipsdstages} and \ref{tbl:otherstages}
 \end{center}
 \end{table}
 
+
+\begin{table}[p]
+\begin{center}
+\small
+\caption{Night-MOPS and Association: Average Processing Times (s) Per
+  Stage for {\tt rlp1233, rlp1234} 
+\label{tbl:otherstages}}
+\vspace{\baselineskip}
+\begin{tabular}{lrlrr|lrlrr}
+\hline\hline
+\multicolumn{5}{c|}{Association} & \multicolumn{5}{c}{Night-MOPS} \\
+\# & tp & Name & \multicolumn{1}{c}{average}&\multicolumn{1}{c|}{$3\sigma$} &
+\# & tp & Name & \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+\hline
+1 &    & symLink                  &  0.001 &  0.006 & 1 & *S & NightMopsStage           & 10.228 &  4.485 \\ 
+2 &  I & load                     &  0.458 &  0.081 & 2 & *I & output                   &  0.155 &  0.597 \\ 
+3 & *I & diaSourceInput           &  0.015 &  0.017 & 3 & *  & associationEvent         &  0.020 &  0.078 \\ 
+4 & *S & MatchDiaSourcesStage     &  0.005 &  0.005 &&&&&\\ 
+5 & *S & diaSourceMatchOutput     &  0.259 &  0.406 &&&&&\\ 
+6 & *I & predInput                &  0.003 &  0.004 &&&&&\\ 
+7 & *S & MatchMopsPredsStage      &  0.002 &  0.002 &&&&&\\ 
+8 & *I & predMatchAndObjectOutput &  0.112 &  0.231 &&&&&\\ 
+9 & *I & store                    &  0.379 &  0.248 &&&&&\\ 
+\hline
+\multicolumn{10}{l}{Type codes: I = input/output stage, S = Stage
+  applying a scientific algorithm, * = production stage,} \\
+\multicolumn{5}{l}{} \\
+\end{tabular}
+\end{center}
+\end{table}
 
