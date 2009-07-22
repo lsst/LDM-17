@@ -154,9 +154,9 @@ pipeline, on the other hand, receives its initial event from the IPSD
 pipeline; thus, it had to wait on average 4.4 minutes for the IPSD
 pipeline to complete before it could do its work.
 
-\begin{figure}[b]
+\begin{figure}[hb]
 \begin{center}
-\includegraphics[width=\textwidth,viewport=25 25 775 250,clip]{images/visitdist.pdf}
+\includegraphics[width=\textwidth,bb=0 0 800 276,viewport=25 25 775 250,clip]{images/visitdist.pdf}
 \caption{Histogram of the times to process each visit (not including
   time waiting on data events).  The $y$-axis measure the fraction of
   the 170 visits in each time bin.  
@@ -181,7 +181,10 @@ seconds in the image processing pipeline, while we now have 20
 seconds.  Furthermore as illustrated in Fig. \ref{fig:visitdist}, the
 processing times do not feature the unexplained double-peaked
 distributions we saw in DC2.  In summary, our we're getting much more
-consistent processing times in DC3a than we did in DC2.  
+consistent processing times in DC3a than we did in DC2.  This has an
+important impact on the overall performance because the total time
+spent on a stage is driven primarily by the duration of the slice that
+took the longest time.  
 
 Tables \ref{tbl:ipsdstages} and \ref{tbl:otherstages} list the average
 time spent in actual {\it application code} each stage for each pipeline.
@@ -190,19 +193,6 @@ time spent in actual {\it application code} each stage for each pipeline.
 were provided by a stage implementation.)  The type (``tp'') column
 differentiates between stages that handle I/O and those that only
 apply a scientific algorithm to the data.  
-
-As in DC2, the costliest stages are those that do image subraction
-(stages 35 and 36) at 80 seconds per image.  This is down
-significantly from DC2's 175 seconds; although, in DC3 we now do image
-subtraction on both exposures from a visit.  The variation in the time
-is down considerably as well.  One of the tunable parameters we found
-can have a significant effect on the subtraction time is the 
-{\tt maxPrincipalComponents} policy parameter, which controls the number
-of principal components calculated for the ... step and which in this
-run was set to 10.  We believe that we can probably reduce this
-paramter to 5; subsequent tests with this value ({\tt rlp1248})
-indicate that this would reduce the duration of the image subtraction
-stage by another 20 seconds.
 
 \begin{table}[p]
 \begin{center}
@@ -250,9 +240,9 @@ stage by another 20 seconds.
 34 &  I &        templateSubimageOutput &  5.574 &  1.043 \\
 35 & *S &              imageDifference0 & 82.343 &  9.706 \\
 36 & *S &              imageDifference1 & 80.247 & 11.998 \\
-37 & *S &         differenceImageOutput & 10.172 &  1.606 \\
+37 & *I &         differenceImageOutput & 10.172 &  1.606 \\
 38 & *S &                  addAndDetect &  7.966 &  0.126 \\
-39 &    &          diaSourceMeasurement &  0.473 &  2.211 \\
+39 & *S &          diaSourceMeasurement &  0.473 &  2.211 \\
 40 & *\phantom{I}  &             sourceToDiaSource &  0.050 &  0.082 \\
 41 & *S &          sourceClassification &  0.008 &  0.007 \\
 42 & *I &              diaSourceOutput0 &  1.947 &  4.220 \\
@@ -267,6 +257,18 @@ stage by another 20 seconds.
 \end{center}
 \end{table}
 
+As in DC2, the costliest stages are those that do image subraction
+(stages 35 and 36) at 80 seconds per image.  This is down
+significantly from DC2's 175 seconds; although, in DC3 we now do image
+subtraction on both exposures from a visit.  The variation in the time
+is down considerably as well.  One of the tunable parameters we found
+that can have a significant effect on the subtraction time is the 
+{\tt maxPrincipalComponents} policy parameter, which controls the number
+of principal components calculated for the ... step and which in this
+run was set to 10.  We believe that we can probably reduce this
+parameter to 5 without loss in processing fidelity; subsequent tests
+with this value ({\tt rlp1248}) indicate that this would reduce the
+duration of the image subtraction stage by another 20 seconds.
 
 \begin{table}[p]
 \begin{center}
@@ -283,7 +285,7 @@ stage by another 20 seconds.
 \hline
 1 &    & symLink                  &  0.001 &  0.006 & 1 & *S & NightMopsStage           & 10.228 &  4.485 \\ 
 2 &  I & load                     &  0.458 &  0.081 & 2 & *I & output                   &  0.155 &  0.597 \\ 
-3 & *I & diaSourceInput           &  0.015 &  0.017 & 3 & *  & associationEvent         &  0.020 &  0.078 \\ 
+3 & *I & diaSourceInput           &  0.015 &  0.017 & 3 & *\phantom{I}  & associationEvent         &  0.020 &  0.078 \\ 
 4 & *S & MatchDiaSourcesStage     &  0.005 &  0.005 &&&&&\\ 
 5 & *S & diaSourceMatchOutput     &  0.259 &  0.406 &&&&&\\ 
 6 & *I & predInput                &  0.003 &  0.004 &&&&&\\ 
