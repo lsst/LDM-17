@@ -110,6 +110,77 @@ Total   & --- &    &  &  &  \\ \hline
 \end{table}
 
 \subsection{Science Data Quality}
+We chose several areas for which to assess the scientific data quality of the DC3a outputs:
+\begin{itemize}
+\item Cosmic ray rejection
+\item WCS accuracy
+\item Difference image quality
+\item Recovery of known solar system objects
+\end{itemize}
+Other areas could of course be added to this list, but the ones chosen
+are judged to be the most demanding for the software system to meet,
+and are each directly related to science requirements. 
+\paragraph{Cosmic Ray Rejection}
+\paragraph{WCS Accuracy}
+The WCS determination algorithm is implemented as part of the Image
+Characterization Pipeline (ICP), and is discussed in section \ref{sec:wcs}.
+The achieved WCS accuracy is crucial for subsequent processing,
+especially for production of difference images.  The procedure used to
+assess the WCS accuracy is as follows:
+\begin{itemize}
+
+\item A set of exposures from visits processed by a particular run is
+  picked for analysis. For each exposure:
+\begin{enumerate}
+\item The WCS\_Sources identified by the ICP for WCS determination are retrieved from the
+  science database for the run.
+\item The pixel coordinates for each WCS\_Source are converted from
+  ccd coordinates to amplifier coordinates, and are input to the
+  wcstools program ``xy2sky'' along with the corresponding amplifier
+  science image to yield predicted sky coordinates for the
+  WCS\_Source.
+\item The star catalog used for WCS determination is searched for the
+  predicted sky coordinates.  The distance between the predicted sky
+  position and the nearest catalog object is recorded in an output file
+\end{enumerate}
+\item A histogram of the distances is calculated, and its properties
+  used as metrics for WCS performance.
+\end{itemize}
+
+Figure \ref{fig:wcs1} shows the resulting histograms for typical
+exposures from runs rlp1233 (visit 695833-e0) and rlp1234 (visit
+696554-e0). Both histograms show very similar behavior, with the peak
+of the histogram around 30 mas, about 0.2 pixel.  In both cases there
+is a shallow tail that extends to large distances, beyond the plotting
+limit in the figure.  Figure \ ref{fig:wcs2} shows that the tail is
+far more significant than is initially apparent, since the tail
+results from very poor wcs fits that are confined to individual
+amplifiers.
+ 
+\begin{figure}[hb]
+\begin{center}
+\includegraphics{images/rlp1233_1234_match.png}
+\caption{Histogram of the distances between positions predicted from WCS, and
+  true catalog positions for rlp1233/695833-e0 on the left and
+  rlp1234/696554-e0 on the right}  
+\label{fig:wcs1}
+\end{center}
+\end{figure}
+
+\begin{figure}[hb]
+\begin{center}
+\includegraphics{images/rlp1233_ccd1_match.png}
+\caption{Histogram of the distances between positions predicted from WCS, and
+  true catalog positions for rlp1233/695833-e0, showing the individual
+amplifiers from ccd1}  
+\label{fig:wcs2}
+\end{center}
+\end{figure}
+
+
+
+\paragraph{Difference Image Quality}
+\paragraph{Recovery of Known Solar system Objects}
 
 \subsection{Timing Results}
 \label{sec:timing}
