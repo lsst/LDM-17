@@ -152,11 +152,21 @@ exposures from runs rlp1233 (visit 695833-e0) and rlp1234 (visit
 696554-e0). Both histograms show very similar behavior, with the peak
 of the histogram around 30 mas, about 0.2 pixel.  In both cases there
 is a shallow tail that extends to large distances, beyond the plotting
-limit in the figure.  Figure \ ref{fig:wcs2} shows that the tail is
-far more significant than is initially apparent, since the tail
+limit in the figure.  Figure \ref{fig:wcs2} shows that the tail is
+far more significant than is initially apparent, since it
 results from very poor wcs fits that are confined to individual
 amplifiers.
- 
+
+For DC3a purposes, we define WCS failure for an image to occur when
+more than 50\% of the predicted WCS\_Source positions are in error by
+more than 1 arcsec.  This is roughly the level beyond which the difference
+image matching kernels can no longer compensate for image misalignments. With
+this criterion, for run rlp1233 there were 109 failures out of 2629
+images processeed, or 4\%.   For rlp1234 there were 14 failures out
+of 2509 images processed, or 0.5\%.  It must be noted however, that this criterion for WCS failure will
+need to be considerably stricter for DC3b and beyond, because
+processing of image stacks for deep detection and measurement, and the
+determination of astrometric models all require much better WCS quality.
 \begin{figure}[hb]
 \begin{center}
 \includegraphics{images/rlp1233_1234_match.png}
@@ -179,7 +189,65 @@ amplifiers from ccd1}
 
 
 
+
 \paragraph{Difference Image Quality}
+
+Visual inspection of DC3a difference images shows three distinct
+categories. First, difference images produced from images with failed 
+WCS's show either ``bipolar'' subtractions in the case of failures
+near the cutoff criterion, or completely nonfunctional subtractions in
+the case of extreme WCS failures.  Images with successful WCS's
+generate subtractions that look good except in the vicinity of bright
+stars,where a high spatial frequency pattern is evident.  Examples of
+these three categories are shown in Figure \ref{fig:diffim1}.
+
+In the remainder of this discussion, we leave aside the roughly X\% of
+the difference images that involved WCS failures, since they tell us
+little about the performance of the difference image algorithm itself.
+In the absence of variable or moving sources, an ideal difference
+image will have a mean of zero, and show uncorrelated random
+fluctuations at the level expected from the variance of the input
+images.  We therefore define a ``figure of merit image'' as
+\begin{equation}
+f(x,y)~=~d(x,y)/\sqrt {v(x,y)}
+\end{equation} 
+
+where $f$ is the figure of merit, $d$ is the difference image, and $v$
+is the predicted variance image.  A typical figure of merit image is
+shown in Figure \ref{fig:diffim2}.  A plot along a horizontal line through
+the subtracted bright star near the center of the image is shown in
+Figure \ref{fig:diffim3}.  This plot shows several aspects of the difference
+image quality:
+
+\begin{itemize}
+\item The average level of the image is near zero, as expected
+\item Away from bright stars, the level of the noise is near 1.0, the
+  expected value
+\item In the footprint of bright stars, the noise is larger than
+  expected by a large factor, about 20 in this particular case.
+\end{itemize}  
+
+\begin{figure}[hb]
+\begin{center}
+\includegraphics{images/rlp1233_v695833-e0-c001-a03-fom_img.png}
+\caption{A figure-of-merit image for
+  rlp1233/695833-e0-c001-a03}  
+\label{fig:diffim2}
+\end{center}
+\end{figure}
+
+\begin{figure}[hb]
+\begin{center}
+\includegraphics{images/rlp1233_v695833-e0-c001-a03-fom_plot.png}
+\caption{Line section through figure-of-merit image for
+  rlp1233/695833-e0-c001-a03.  The line is chosen to pass through the
+  subtracted bright star at (338,725), which is near the center of the
+image in Figure \ref{fig:diffim2}}  
+\label{fig:diffim3}
+\end{center}
+\end{figure}
+
+
 \paragraph{Recovery of Known Solar system Objects}
 
 \subsection{Timing Results}
