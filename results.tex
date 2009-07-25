@@ -115,12 +115,33 @@ We chose several areas for which to assess the scientific data quality of the DC
 \item Cosmic ray rejection
 \item WCS accuracy
 \item Difference image quality
+\item Difference image lightcurve quality
 \item Recovery of known solar system objects
 \end{itemize}
 Other areas could of course be added to this list, but the ones chosen
 are judged to be the most demanding for the software system to meet,
 and are each directly related to science requirements. 
 \paragraph{Cosmic Ray Rejection}
+The DC3a processing flow contains two methods of rejecting cosmic
+rays, that can be used as alternatives or in tandem.  For the DC3a
+reference runs, the two methods were used in tandem.
+\begin{itemize}
+\item As presented in section \ref{sec:isr}, the ISR detects and
+  interpolates over cosmic rays in individual images
+\item The Association Pipeline (AP) makes use of the two exposures per
+  visit organization of the survey to discriminate against cosmic
+  rays.  A positive flux DIASource present in only a single exposure
+  of a visit will be considered a cosmic ray.
+\end{itemize}
+Quantitative analysis of the ISR cosmic ray rejection analysis method
+has been performed by comparing the number of pixels affected by
+synthetic cosmic rays in the e1 visit with the number identified as
+cosmic rays by the ISR.  The fraction successfully identified is
+nearly 100\% for rlp1233.  Analysis of the performance of the AP based
+method has proven to be difficult when run in tandem with the ISR
+method, and will require a separate set of runs with the ISR method
+turned off.  The joint analyis will lead to an optimized cosmic ray
+rejection technique for DC3b.
 \paragraph{WCS Accuracy}
 The WCS determination algorithm is implemented as part of the Image
 Characterization Pipeline (ICP), and is discussed in section \ref{sec:wcs}.
@@ -201,7 +222,7 @@ generate subtractions that look good except in the vicinity of bright
 stars,where a high spatial frequency pattern is evident.  Examples of
 these three categories are shown in Figure \ref{fig:diffim1}.
 
-In the remainder of this discussion, we leave aside the roughly X\% of
+In the remainder of this discussion, we leave aside the roughly 2\% of
 the difference images that involved WCS failures, since they tell us
 little about the performance of the difference image algorithm itself.
 In the absence of variable or moving sources, an ideal difference
@@ -255,6 +276,34 @@ image in Figure \ref{fig:diffim2}}
 \end{center}
 \end{figure}
 
+\paragraph{Difference Light Curve Quality}
+Leaving out images that had WCS failures, run rlp1233 yielded 63000
+objects with difference sources detected above threshold in at least
+one visit. As Figure \ref{fig:lightcurve1} shows, the number of visits
+for which difference sources were detected varies widely with the object, between 1 and
+about 75.  The latter number is close to the number of visits
+processed in rlp1233, which is 85.  Spot checking of these sources in
+the images suggests that the vast majority are the result of artifacts
+in the difference images, with residuals around bright stars being the
+most frequent cause.  The highly structured nature of the difference
+image residuals, combined with the relatively large kernel footprint,
+causes further artifacts, since multiple peaks can be detected in a
+single footprint.  In general, though it will certainly be the case
+that real astrophysical signals from variable stars and transient
+events are present in this data, it is currently impractical to
+separate them from the noise with the analysis tools readily
+available.
+
+\begin{figure}[hb]
+\begin{center}
+\includegraphics{images/rlp1233DiffLCHisto.png}
+\caption{Histogram of number of Objects with DIASources in a given number of
+  visits in rlp1233}  
+\label{fig:lightcurve1}
+\end{center}
+\end{figure}
+
+  
 
 \paragraph{Recovery of Known Solar system Objects}
 
