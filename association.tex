@@ -54,8 +54,7 @@ pipeline is then awaited; predicted positions for moving objects are read from
 the database once it arrives. Next, difference sources within moving object
 error ellipses are found and stored in the database, again as difference
 source/moving object id pairs. Finally, the difference sources to generate new
-objects from are identified using criteria discussed in more detail below; ids
-for these sources are also stored in the database.
+objects from are identified; ids for these sources are also stored in the database.
 
 The store phase of the association pipeline is in charge of updating
 historical knowledge of the sky. This entails writing out delta files for
@@ -88,9 +87,8 @@ Due to the similarity in AP architecture between DC2 and DC3a, the AP
 performance profile remains broadly similar between the two data challenges.
 We note that the computational and IO burden during the load phase increased
 for DC3a due to proper motion correction of object positions (see below);
-however, unlike in DC2, the AP was compiled with optimization (\code{-O3}) and
-was configured to read chunk files from a parallel filesystem (lustre)
-rather than NFS. As a result, the load phase was observed to complete in under
+however, unlike in DC2, the AP was compiled with optimization (\code{-O3}).
+As a result, the load phase was observed to complete in under
 1 second for the runs analyzed (artificially low timings for visits after the
 first were ignored: DC3a runs repeatedly visited the same field, and chunk
 files were therefore cached almost immediately at the OS/filesystem level).
@@ -117,8 +115,27 @@ DC2 timing swings of several seconds within a run were observed.
 
 \subsubsection{Changes for DC3a}
 
-TODO: describe proper motion correction, operation on difference source pairs,
-source characterization
+Two main changes to the AP were made for DC3a:
+\begin{itemize}
+\item \emph{Proper motion correction}:
+    The AP now includes a proper motion vector along with each object stored
+    in its chunk files (positions are assumed to be J2000.0). These are used
+    to extrapolate object positions to the current visit epoch prior to
+    indexing them in the AP load phase.
+\item \emph{Source classification}:
+    The image processing and detection pipeline (IPSD) has a new source
+    classification stage which allows a set of policy specifiable Python
+    classes to examine the difference sources of both visit exposures
+    (either in isolation, or as a list of difference source pairs) and to set
+    source flags accordingly. Three classifier prototypes were implemented:
+    one that checks whether a difference source is present in both visit
+    exposures, one that checks whether a difference source corresponds to a
+    positive flux excursion, and one that attempts to determine whether the
+    difference sources in a pair have different shapes. The AP examines these
+    flags; difference source pairs with positive flux in at least one exposure
+    and different shapes are treated as cosmic rays; no new objects are
+    created for these.
+\end{itemize}
 
 \subsubsection{Future Work}
 
@@ -141,12 +158,6 @@ Features to be implemented and/or investigated in the DC3b timeframe include:
     criteria (rather than simply picking the closest one). Alternatively
     or in addition, all difference source to object matches could be
     officially stored for later perusal.
-\item \emph{Correction for Refractive Effects}:
-    Color dependent refractive atmospheric effects are expected to have a
-    significant impact on object positions. Using stored colors for each
-    object and the zenith angle for the visit, we expect to be able to
-    meaningfully improve the object positions used as input to the spatial
-    match routines.
 \item \emph{Transactions and Data Volume}:
     We hope to investigate the feasibility of updating the database and chunk
     files in transactional fashion with visit-level granularity, so that from
