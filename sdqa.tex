@@ -71,12 +71,15 @@ Our DC3a implementation also
 includes tables for associating SDQA Ratings with image data at the CCD and FPA levels.
 The schema's tables closely parallel the SDQA classes that we have identified in our UML (universal modeling language) design.
 
-\begin{figure}
+\begin{figure}[htb]
+\begin{centering}
 %\epsscale{0.5}
 %\plotone{images/O7A2_1}
-\includegraphics[scale=0.5,bb=0 0 925 573]{images/O7A2_1}
+%\includegraphics[scale=0.5,bb=0 0 925 573]{images/O7A2_1}
+\includegraphics[scale=0.5]{images/O7A2_1}
 \caption{SDQA database-schema design (``F.K.'' stands for foreign key, and ``1~{\jot 24pt}~1*..'' stands for one record to many records).} 
  \label{DB}
+\end{centering}
 \end{figure}
 
 The Science\_Amp\_Exposure database table stores metadata for
@@ -208,12 +211,15 @@ color-color plots\footnote{
 http://spider.ipac.caltech.edu/staff/laher/lsst/borne\_696\_Jan09-ver2.pdf
 }.
 
-\begin{figure}
+\begin{figure}[htb]
+\begin{centering}
 % \epsscale{0.2}
 % \plotone{images/O7A2_2}
-\includegraphics[scale=0.5,bb=0 0 363 285]{images/O7A2_2}
+%\includegraphics[scale=0.5,bb=0 0 363 285]{images/O7A2_2}
+\includegraphics[width=3in]{images/O7A2_2}
 \caption{Artificial neural network with single-hidden-layer architecture.} 
  \label{ANN}
+\end{centering}
 \end{figure}
 
 
@@ -250,18 +256,24 @@ queries the PTF database for image metadata and SDQA data to display and plot.  
 objectives for LSST in DC3b is to further develop the SDQA GUI for LSST use, i.e., set it up to 
 query and visualize LSST databases and image archives.
 
-\begin{figure}[tbp]
+\begin{figure}[htbp]
+\begin{centering}
 % \epsscale{1.0}
 % \plotone{images/PTFSDQSGUI1}
-\includegraphics[width=\textwidth,scale=0.5,bb=0 0 1357 878,clip]{images/PTFSDQSGUI1}
+%\includegraphics[width=\textwidth,scale=0.5,bb=0 0 1357 878,clip]{images/PTFSDQSGUI1}
+\includegraphics[width=5in]{images/PTFSDQSGUI1}
 \caption{PTF SDQA GUI screen shot showing image display from query of PTF database.} 
  \label{PTFSDQAGUI1}
+\end{centering}
 \end{figure}
 
-\begin{figure}[tbp]
+\begin{figure}[htbp]
+\begin{centering}
 %\epsscale{1.0}
 %\plotone{images/PTFSDQSGUI2}
-\includegraphics[width=\textwidth,bb=0 0 1356 877,clip]{images/PTFSDQSGUI2}
+%\includegraphics[width=\textwidth,bb=0 0 1356 877,clip]{images/PTFSDQSGUI2}
+\includegraphics[width=5in]{images/PTFSDQSGUI2}
 \caption{PTF SDQA GUI screen shot showing SDQA time-series plots from query of PTF database.} 
  \label{PTFSDQAGUI2}
+\end{centering}
 \end{figure}

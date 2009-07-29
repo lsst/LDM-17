@@ -94,7 +94,7 @@ Abe can be found in section \ref{sec:timing}.
 Table \ref{tbl:runsummary} summarizes the pertinent production runs
 referenced in this section.
 
-\begin{table}[htbp]
+\begin{table}[hp]
 \centering
 \caption{Average Processing Times Per Visit
 \label{tbl:runsummary}}
@@ -188,9 +188,9 @@ of 2509 images processed, or 0.5\%.  It must be noted however, that this criteri
 need to be considerably stricter for DC3b and beyond, because
 processing of image stacks for deep detection and measurement, and the
 determination of astrometric models all require much better WCS quality.
-\begin{figure}[hb]
+\begin{figure}[htb]
 \begin{center}
-\includegraphics{images/rlp1233_1234_match.png}
+\includegraphics[width=6in]{images/rlp1233_1234_match.png}
 \caption{Histogram of the distances between positions predicted from WCS, and
   true catalog positions for rlp1233/695833-e0 on the left and
   rlp1234/696554-e0 on the right}  
@@ -198,9 +198,9 @@ determination of astrometric models all require much better WCS quality.
 \end{center}
 \end{figure}
 
-\begin{figure}[hb]
+\begin{figure}[htb]
 \begin{center}
-\includegraphics{images/rlp1233_ccd1_match.png}
+\includegraphics[width=6in]{images/rlp1233_ccd1_match.png}
 \caption{Histogram of the distances between positions predicted from WCS, and
   true catalog positions for rlp1233/695833-e0, showing the individual
 amplifiers from ccd1}  
@@ -248,26 +248,26 @@ image quality:
   expected by a large factor, about 20 in this particular case.
 \end{itemize}  
 
-\begin{figure}[hb]
+\begin{figure}[htb]
 \begin{center}
-\includegraphics{images/rlp1233_v695833-e0-c001-mosaic.png}
+\includegraphics[width=6in]{images/rlp1233_v695833-e0-c001-mosaic.png}
 \caption{A mosaic of different types of difference images, all from rlp1233/695833-e0-c001}  
 \label{fig:diffim1}
 \end{center}
 \end{figure}
 
-\begin{figure}[hb]
+\begin{figure}[htb]
 \begin{center}
-\includegraphics{images/rlp1233_v695833-e0-c001-a03-fom_img.png}
+\includegraphics[width=6in]{images/rlp1233_v695833-e0-c001-a03-fom_img.png}
 \caption{A figure-of-merit image for
   rlp1233/695833-e0-c001-a03}  
 \label{fig:diffim2}
 \end{center}
 \end{figure}
 
-\begin{figure}[hb]
+\begin{figure}[htb]
 \begin{center}
-\includegraphics{images/rlp1233_v695833-e0-c001-a03-fom_plot.png}
+\includegraphics[width=6in]{images/rlp1233_v695833-e0-c001-a03-fom_plot.png}
 \caption{Line section through figure-of-merit image for
   rlp1233/695833-e0-c001-a03.  The line is chosen to pass through the
   subtracted bright star at (338,725), which is near the center of the
@@ -294,9 +294,9 @@ events are present in this data, it is currently impractical to
 separate them from the noise with the analysis tools readily
 available.
 
-\begin{figure}[hb]
+\begin{figure}[htb]
 \begin{center}
-\includegraphics{images/rlp1233DiffLCHisto.png}
+\includegraphics[width=6in]{images/rlp1233DiffLCHisto.png}
 \caption{Histogram of number of Objects with DIASources in a given number of
   visits in rlp1233}  
 \label{fig:lightcurve1}
@@ -316,7 +316,7 @@ calculate how much time is spent on the different contributors to the
 overall processing time, including I/O, middleware overhead,
 scientific processing.  
 
-\begin{table}[htbp]
+\begin{table}[ht]
 \begin{center}
 \caption{Average Processing Times Per Visit
 \label{tbl:visitstats}}
@@ -350,9 +350,10 @@ pipeline, on the other hand, receives its initial event from the IPSD
 pipeline; thus, it had to wait on average 4.4 minutes for the IPSD
 pipeline to complete before it could do its work.
 
-\begin{figure}[hb]
+\begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=\textwidth,bb=0 0 800 276,viewport=25 25 775 250,clip]{images/visitdist.pdf}
+%\includegraphics[width=\textwidth,bb=0 0 800 276,viewport=25 25 775 250,clip]{images/visitdist.pdf}
+\includegraphics[width=\textwidth]{images/visitdist.pdf}
 \caption{Histogram of the times to process each visit (not including
   time waiting on data events).  The $y$-axis measure the fraction of
   the 170 visits in each time bin.  
@@ -390,11 +391,11 @@ were provided by a stage implementation.)  The type (``tp'') column
 differentiates between stages that handle I/O and those that only
 apply a scientific algorithm to the data.  
 
-\begin{table}[p]
+\begin{table}[htbp]
 \begin{center}
-\small
 \caption{IPSD: Average Processing Times (s) Per Stage for {\tt rlp1233, rlp1234}
 \label{tbl:ipsdstages}}
+\small
 \vspace{\baselineskip}
 \begin{tabular}{lrlrr}
 \hline\hline
@@ -466,7 +467,7 @@ parameter to 5 without loss in processing fidelity; subsequent tests
 with this value ({\tt rlp1248}) indicate that this would reduce the
 duration of the image subtraction stage by another 20 seconds.
 
-\begin{table}[p]
+\begin{table}[htbp]
 \begin{center}
 \small
 \caption{Night-MOPS and Association: Average Processing Times (s) Per

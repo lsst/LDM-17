@@ -1,14 +1,143 @@
+\pagebreak
 \section*{Executive Summary}
 \addcontentsline{toc}{section}{Executive Summary}
 
+Data Challenge 3 (DC3) is the third in a series of prototypes of the LSST Data Management
+System (DMS). Through these data challenges, we seek to identify the most challenging technical
+problems to building a DMS that meets the LSST science goals. We prototype specific solutions to
+these challenges with the expectation that by the start of the construction phase of the telescope,
+we will have a well-defined plan for how to build a DMS that can perform at the level needed by
+first light. Despite the prototyping nature of the data challenges, we are not producing throwaway
+code; rather, we expect that the software we produce in the data challenges will serve as the
+foundation for the DMS that will be completed during the construction phase.
+
+\subsubsection*{DC3a in Context}
+
+The DMS software architecture can be described as essentially containing
+two types of components. One type is a component representing a specific
+science application -- a discrete stage in the series of steps needed to
+go from raw image data to science result. The other type of component 
+is part of the infrastructure which orchestrates the execution of the science app 
+stages, provides the necessary data I/O, allows logging capabilities, and allows 
+for the parallel distribution of the science computation. We refer to the first
+class of components as the \textit{science applications} and the second class
+as the \textit{middleware} or \textit{infrastructure}; a collected series of
+sequential steps is called a \textit{pipeline}.
+
+In Data Challenge 1 (DC1), we focussed on the DMS middleware design for 
+supporting nightly processing; this software scaffolding --- the \textit{pipeline
+framework} --- modeled the 
+infrastructure necessary to support science algorithms but did not actually
+execute them, using instead \textit{resource consumers},
+which simulated the expected computational node of the algorithms but
+produced no useable science output. 
+
+In Data Challenge 2 (DC2), we focussed on replacing those resource consumers 
+with real implementations of significant components of the scientific algorithms.
+We also updated the pipeline harness framework as development of the
+scientific algorithms revealed new framework requirements. 
+
+The scope of DC3 is significantly larger than that of the previous
+data challenges, including both a more capable implementation of the 
+Alert Production and a first prototype implementation of the Data Release 
+Production.
+
+Because of the large scope of DC3, we have divided it into two phases,
+DC3a and b.  DC3a includes only the Alert Production capabilities,
+while DC3b adds the Data Release Production.  Other goals of DC3a 
+include improvements to the application framework
+and middleware, along with the following new capabilities:
+the Instrument Signature
+Removal (ISR) pipeline, World Coordinate System (WCS)
+determination within the Image Characterization (IC) pipeline,
+and an initial SDQA system. Also improvements were sought
+in both the science quality and the execution speed of the
+science applications, as well as new capabilities
+within the software build system.
+
 \subsubsection*{Results}
 
-\subsubsection*{Middleware and Infrastructure}
 
-\subsubsection*{Development Environment}
+We executed many short runs for purposes of performance analysis,
+quality analysis, and debugging, resulting in important algorithm
+optimizations as well as numerous bug fixes. As in DC2, the astronomical 
+images we used as input were from the CFHT-LS Deep Survey fields D3 and D4.
+We also executed some but not all stages using 
+images from the simulated data collections, SimWide and SimDeep,
+and these runs were instrumental in understanding and correcting
+processing problems.
 
-\subsubsection*{Required software developments for DC3b}
+We then executed larger-scale DC3a production runs on the NCSA cluster.
+For final analysis of data quality and processing performance, we have 
+concentrated on two production runs on the NCSA LSST cluster, with the 
+run IDs \texttt{rlp1233} and \texttt{rlp1234}. These runs used 
+identical versions of the software, configured identically, over 
+different subsets of the focal plane for 85 visits to the CFHT-LS
+D3 field.
 
-\subsubsection*{Scaling to LSST}
+To collect additional data to measure the scalability of the pipelines,
+we also executed runs of the IPSD pipeline on the NCSA cluster Abe. 
+These runs were performed across 36 8-core nodes, allowing for the
+entire focal plane
+of a CFHT-LS exposure to be processed. (Some of the supporting
+software services, such as the event broker and the database, 
+remained on the NCSA LSST cluster.) These runs showed that the
+pipelines scaled reasonably well to this level, although running at
+this scale did reveal some additional configuration requirements
+for the events broker and the MySQL database. Running on Abe
+involved the use of grid-based job management (using Condor-G)
+as part of the orchestration layer.
+
+The Abe runs also allowed us to demonstrate successful use of the 
+parallel Lustre filesystem. However, as in DC2, Lustre was unstable 
+under heavy I/O on the NCSA LSST cluster; schedule and hardware
+resource limitations prevented us from exploring the causes in 
+any detail, with the result that the NCSA LSST cluster runs were all
+performed under the NFS shared file system. 
+
+\subsubsection*{Science Quality and Execution Speed}
+
+After the DC3a runs were complete, several criteria were used to judge 
+the science quality of the outputs. These criteria include assessment
+of the accuracy of the WCS determination, the accuracy of the
+cosmic ray rejection, and the quality of the difference images and their
+lightcurves.
+
+Accurate WCS determination is crucial to subsequent processing.
+For this analysis, we define a WCS determination to have failed
+when more than 50\% of the predicted WCS\_Source positions are
+in error by more than 1 arcsec, which is roughly the limit beyond
+which difference engine matching kernels can no longer compensate.
+For run \texttt{rlp1233}, 4\% of the WCS determinations failed
+by this criterion; for \texttt{rlp1234} the failure rate was 0.5\%.
+
+Two methods are used to detect cosmic rays, one in the ISR
+pipeline (and therefore considering single exposures) and another 
+in the Association pipeline (therefore considering exposure pairs). 
+The ISR identified nearly 100\% of synthetic cosmic rays introduced into test
+images. Because of the interaction between these two methods,
+analysis of the Association-based detection method has proven
+to be difficult, and will require a separate set of runs with
+the ISR method turned off.
+
+The quality of difference images tended to one of three modes.
+When the WCS determination was very bad, the subtraction was
+completely non-functional. When the WCS determination was
+near the cut-off criterion, a distinctive two-lobed pattern appeared
+around bright sources in the difference image. When WCS determination
+was successful, the subtractions look good except in the vicinity
+of bright stars, where a high spacial frequency pattern appears.
+
+That residual pattern around bright starts results, in turn, 
+in false source detections. Because these residuals are highly
+structured within the kernel footprint, multiple peaks are detected
+in a single footprint. We do not have a practical way to separate
+such artifacts from real astrophysical signals or transient events.
+
+Processing times in DC3a are much more consistent than in DC2,
+which has an important impact on the overall performance, since
+the total time spent on a stage is driven primarily by the duration
+of the slice that took the longest time.
+
 
 

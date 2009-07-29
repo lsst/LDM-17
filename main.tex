@@ -9,7 +9,7 @@
 \newcommand{\by}{$\times$}
 
 \shorttitle{LSST Data Challenge 3a}
-\shortauthors{Axelrod, Plante et al.}
+\shortauthors{Axelrod, et al.}
 
 \DeclareGraphicsExtensions{.pdf,.jpg,.png,.eps}
 
@@ -17,6 +17,31 @@
                                         % we can comment the definition and find all the \XXXs
 
 \newcommand{\RHL}[1]{{\bf RHL: #1\qquad}}     % A comment from RHL.  None should remain in the final document!
+
+% -- a @%< hack to redefine placement of abstract in \maketitle
+\makeatletter
+\def\@maketitle{%
+ \newpage
+ \begingroup
+  \let\footnote\thanks
+  \let\email\make@authoremail
+  \let\affil\make@affil
+  \let\altaffilmark\make@altaffilmark
+  \let\altaffiltext\make@altaffiltext
+  \let\and\make@and
+  \@title
+  \@author
+  \@date
+  \par
+  %\@abstract
+  \@ifxundefined\keyword@list{}{%
+   \expandafter\@keywords
+   \expandafter{\keyword@list}%
+  }%
+ \endgroup
+ \clearpage
+}%
+\makeatother
 
 
 \begin{document}
@@ -48,14 +73,24 @@
 \and\author{Richard A. Shaw}
 \affil{National Optical Astronomy Observatory}
 
-\pagebreak
-\begin{abstract}
+\begin{centering}
+\textbf{ABSTRACT}
+
+\begin{quotation}\noindent%
 This report describes the third in a series of formal prototypes of
 the LSST Data Management System referred to as Data Challenge 3a (DC3a).
-. . .
-\end{abstract}
+The focus of this data challenge is to enhance both the science applications
+and the software infrastructure supporting those applications to add
+increased functionality as guided by our analysis of the results of DC2. 
+We enumerate the goals and metrics for DC3a, summarize the architecture
+of the DC3a pipeline system, and review the science application and middleware
+components that make up the system.  Finally, we present the results
+of executing DC3a on data from the CFHT Legacy Survey and simulated
+exposures created for LSST Data Management, and highlight the important 
+conclusions that will be used as input into the next data challenge.  
+\end{quotation}
+\end{centering}
 
-\pagebreak
 \tableofcontents
 
 % -- section 0
