@@ -2,7 +2,7 @@
 
 \subsection{WCS Determination}
 
-Wcs, or World Coordinate System is a convention for mapping positions on an astronomical image to coordinates in the sky. We require that our Wcs map our positions with an accuracy of better than 0.1", driven by the need to subtract images from templates in the {\tt diff\_im} stage. For DC3a we implemented a method of determining a Wcs solution for an image using the {\tt astrometry.net}\footnote{http://astrometry.net} package written by Dustin Lang. 
+WCS, or World Coordinate System is a convention for mapping positions on an astronomical image to coordinates in the sky. We require that our Wcs map our positions with an accuracy of better than 0.1", driven by the need to subtract images from templates in the {\tt diff\_im} stage. For DC3a we implemented a method of determining a Wcs solution for an image using the {\tt astrometry.net}\footnote{http://astrometry.net} package written by Dustin Lang. 
 
 {\tt astrometry.net} takes as input a list of positions pixel positions of sources in an image, and compares pattern of stellar positions, or asterisms, with a template list of stars with known right ascension and declination. It can be used to match images of arbitary pixel scale, location on sky, and magnitude limit, provided there is a sufficient overlap between the set of sources in the image, and those in the template. 
 
