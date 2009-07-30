@@ -44,7 +44,7 @@ have been due to an insufficient number of fileserver nodes for the
 level of IO we were attempting; however, schedule and hardware
 resource limitations prevented our exploring the causes in any
 detail.  Consequently, the final runs were conducted using NFS-mounted
-filesystems (which are known to perform poorly most conditions).  
+filesystems (which are known to perform poorly under most conditions).  
 
 Ultimately, the simulated data was not used as part of the final
 analysis.  While the two simulated collections were instrumental
@@ -96,16 +96,17 @@ referenced in this section.
 
 \begin{table}[hp]
 \centering
-\caption{Average Processing Times Per Visit
+\caption{Summary of Production Runs analyzed in this report}
 \label{tbl:runsummary}}
 \vspace{\baselineskip}
-\begin{tabular}{ | r | r | r | r | r | r |}
+\begin{tabular}{rccccc}
 \hline\hline
-runId & nVisits & nAmps & inputImages & outputImages & outputFrac \\ \hline
-rlp1233 & 85  & 31 &  &  &  \\ \hline
-rlp1234 & 85  & 31 &  &  &  \\ \hline
-rlpabe041 & 12  & 288 &  &  &  \\ \hline
-Total   & --- &    &  &  &  \\ \hline
+          &         &       & \multicolumn{3}{c}{Images Processed: Num/Size} \\
+runId     & nVisits & nAmps & Raw Images & Ancil. Images & Output Images \\ \hline
+rlp1233   & 85      & 31  & 5146/24 GB    & 88/13 GB       & 60525/240 GB \\ 
+rlp1234   & 85      & 31  & 5146/24 GB    & 88/13 GB       & 60525/240 GB \\ 
+rlpabe041 & 12      & 288 & 3456/33 GB    & 15/2 GB        & 79368/313 GB \\ \hline
+Total     & ---     & 250 & 13748/81 GB   & 191/28 GB      & 2000418/793 GB \\ \hline
 \end{tabular}
 \end{table}
 
@@ -388,68 +389,73 @@ time spent in actual {\it application code} each stage for each pipeline.
 (That is, these include the time spent in the {\tt preprocess()}, 
 {\tt process()}, and {\tt postprocess()} functions only when these
 were provided by a stage implementation.)  The type (``tp'') column
-differentiates between stages that handle I/O and those that only
-apply a scientific algorithm to the data.  
+indicates the type of processing done by each stage, differentiating
+between file-based I/O, database I/O, and the application of a
+scientific algorithm.  
 
 \begin{table}[htbp]
 \begin{center}
-\caption{IPSD: Average Processing Times (s) Per Stage for {\tt rlp1233, rlp1234}
+\caption{IPSD: Average Processing Times (s) Per Stage for {\tt
+    rlp1233, rlp1234} and {\tt rlpabe041}
 \label{tbl:ipsdstages}}
 \small
 \vspace{\baselineskip}
-\begin{tabular}{lrlrr}
+\begin{tabular}{lrlcrrc|crr}
 \hline\hline
-\# & tp & Name & \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+   &    &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
+              &&& \multicolumn{2}{c}{{\tt rlpabe041}} \\
+\# & tp & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
+              &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
 \hline
- 1 &    &                     sliceInfo &  0.002 &  0.001 \\
- 2 &    &                       symLink &  0.001 &  0.001 \\
- 3 &  I &                   imageInput0 &  1.804 &  0.527 \\
- 4 & *\phantom{I} &                visitMetadata0 &  0.076 &  0.975 \\
- 5 &    &            transformMetadata0 &  0.013 &  0.007 \\
- 6 &    &             validateMetadata0 &  0.002 &  0.001 \\
- 7 &  I &          visitMetadataOutput0 &  0.001 &  0.001 \\
- 8 &  I &    rawImageAndMetadataOutput0 &  1.999 &  0.374 \\
- 9 & *\phantom{I}  &   identifyCalibrationProducts &  0.020 &  0.008 \\
-10 & *I &              calibrationInput & 11.927 &  2.810 \\
-11 &    &  transformCalibrationMetadata &  0.004 &  0.003 \\
-12 & *S &                          isr0 &  1.604 &  0.135 \\
-13 & *S &               sourceDetection &  1.685 &  0.449 \\
-14 &  I &    calibAndBkgdExposureOutput & 10.627 &  1.536 \\
-15 &  S &             sourceMeasurement &  1.093 &  2.028 \\
-16 & *I &   exposureAndWcsSourcesOutput &  0.228 &  0.245 \\
-17 & *S &              psfDetermination &  0.207 &  0.149 \\
-18 &  I &                     psfOutput &  0.120 &  0.097 \\
-19 &  I &                   imageInput1 &  1.761 &  0.494 \\
-20 &    &                visitMetadata1 &  0.038 &  0.033 \\
-21 &    &            transformMetadata1 &  0.013 &  0.005 \\
-22 &    &             validateMetadata1 &  0.002 &  0.002 \\
-23 &  I &          visitMetadataOutput1 &  0.002 &  0.002 \\
-24 &  I &    rawImageAndMetadataOutput1 &  2.126 &  0.553 \\
-25 & *S &                          isr1 &  1.709 &  0.466 \\
-26 & *I &               wcsSourcesInput &  0.034 &  0.029 \\
-27 & *S &              wcsDetermination &  0.194 &  0.050 \\
-28 & *I &     calibratedExposuresOutput & 10.514 &  1.819 \\
-29 & *\phantom{I}  &              CcdMetadataStage &  0.002 &  0.001 \\
-30 & *I &         templateMetadataInput &  0.062 &  0.089 \\
-31 & *\phantom{I}  &             templateDimension &  0.016 &  0.005 \\
-32 & *\phantom{I}  &                  templateBBox &  0.004 &  0.001 \\
-33 & *I &         templateSubimageInput & 27.218 &  3.925 \\
-34 &  I &        templateSubimageOutput &  5.574 &  1.043 \\
-35 & *S &              imageDifference0 & 82.343 &  9.706 \\
-36 & *S &              imageDifference1 & 80.247 & 11.998 \\
-37 & *I &         differenceImageOutput & 10.172 &  1.606 \\
-38 & *S &                  addAndDetect &  7.966 &  0.126 \\
-39 & *S &          diaSourceMeasurement &  0.473 &  2.211 \\
-40 & *\phantom{I}  &             sourceToDiaSource &  0.050 &  0.082 \\
-41 & *S &          sourceClassification &  0.008 &  0.007 \\
-42 & *I &              diaSourceOutput0 &  1.947 &  4.220 \\
-43 & *I &              diaSourceOutput1 &  0.106 &  0.143 \\
-44 & *\phantom{I}  &              associationEvent &  0.002 &  0.001 \\
-45 & *I &                   sdqaOutput0 &  0.047 &  0.015 \\
-46 & *I &                   sdqaOutput1 &  0.028 &  0.010 \\
+ 1 &    &                     sliceInfo &&  0.002 &  0.001 &&&  0.001 &  0.002 \\
+ 2 &    &                       symLink &&  0.001 &  0.001 &&&  0.001 &  0.002 \\
+ 3 &  I &                   imageInput0 &&  1.804 &  0.527 &&&  1.457 &  1.177 \\
+ 4 & *  &                visitMetadata0 &&  0.076 &  0.975 &&&  9.640 &  3.985 \\
+ 5 &    &            transformMetadata0 &&  0.013 &  0.007 &&&  0.024 &  0.122 \\
+ 6 &    &             validateMetadata0 &&  0.002 &  0.001 &&&  0.002 &  0.003 \\
+ 7 &  I &          visitMetadataOutput0 &&  0.001 &  0.001 &&&  0.001 &  0.002 \\
+ 8 &  I &    rawImageAndMetadataOutput0 &&  1.999 &  0.374 &&&  0.629 &  0.790 \\
+ 9 & *  &   identifyCalibrationProducts &&  0.020 &  0.008 &&&  0.024 &  0.036 \\
+10 & *I &              calibrationInput && 11.927 &  2.810 &&&  4.453 &  3.566 \\
+11 &    &  transformCalibrationMetadata &&  0.004 &  0.003 &&&  0.004 &  0.004 \\
+12 & *S &                          isr0 &&  1.604 &  0.135 &&&  1.571 &  0.664 \\  % 0
+13 & *S &               sourceDetection &&  1.685 &  0.449 &&&  1.695 &  1.992 \\  % 0
+14 &  I &    calibAndBkgdExposureOutput && 10.627 &  1.536 &&&  3.145 &  2.595 \\
+15 &  S &             sourceMeasurement &&  1.093 &  2.028 &&&  3.155 &  5.759 \\  % +
+16 & *I &   exposureAndWcsSourcesOutput &&  0.228 &  0.245 &&& 11.075 & 10.217 \\
+17 & *S &              psfDetermination &&  0.207 &  0.149 &&&  0.212 &  0.141 \\  % 0
+18 &  I &                     psfOutput &&  0.120 &  0.097 &&&  0.121 &  0.081 \\
+19 &  I &                   imageInput1 &&  1.761 &  0.494 &&&  1.693 &  1.624 \\
+20 &    &                visitMetadata1 &&  0.038 &  0.033 &&& 10.039 &  0.004 \\
+21 &    &            transformMetadata1 &&  0.013 &  0.005 &&&  0.011 &  0.007 \\
+22 &    &             validateMetadata1 &&  0.002 &  0.002 &&&  0.001 &  0.001 \\
+23 &  I &          visitMetadataOutput1 &&  0.002 &  0.002 &&&  0.001 &  0.001 \\
+24 &  I &    rawImageAndMetadataOutput1 &&  2.126 &  0.553 &&&  0.910 &  1.317 \\
+25 & *S &                          isr1 &&  1.709 &  0.466 &&&  1.633 &  0.596 \\  % 0
+26 & *I &               wcsSourcesInput &&  0.034 &  0.029 &&& 10.045 &  0.034 \\
+27 & *S &              wcsDetermination &&  0.194 &  0.050 &&&  0.249 &  0.506 \\  % +
+28 & *I &     calibratedExposuresOutput && 10.514 &  1.819 &&& 11.000 &  6.178 \\
+29 & *  &              CcdMetadataStage &&  0.002 &  0.001 &&&  0.003 &  0.024 \\
+30 & *I &         templateMetadataInput &&  0.062 &  0.089 &&&  0.432 &  1.181 \\
+31 & *  &             templateDimension &&  0.016 &  0.005 &&&  0.033 &  0.007 \\
+32 & *  &                  templateBBox &&  0.004 &  0.001 &&&  0.030 &  0.192 \\
+33 & *I &         templateSubimageInput && 27.218 &  3.925 &&& 57.291 & 34.928 \\
+34 &  I &        templateSubimageOutput &&  5.574 &  1.043 &&&  2.209 &  1.212 \\
+35 & *S &              imageDifference0 && 82.343 &  9.706 &&& 77.912 &  5.336 \\  % -
+36 & *S &              imageDifference1 && 80.247 & 11.998 &&& 75.806 &  8.876 \\  % -
+37 & *I &         differenceImageOutput && 10.172 &  1.606 &&&  3.260 &  2.316 \\
+38 & *S &                  addAndDetect &&  7.966 &  0.126 &&& 12.335 &  2.423 \\  % +
+39 & *S &          diaSourceMeasurement &&  0.473 &  2.211 &&&  7.830 & 23.511 \\  % +
+40 & *  &             sourceToDiaSource &&  0.050 &  0.082 &&&  0.125 &  0.109 \\
+41 & *S &          sourceClassification &&  0.008 &  0.007 &&&  0.059 &  0.405 \\  % +
+42 & *I &              diaSourceOutput0 &&  1.947 &  4.220 &&& 10.210 &  0.232 \\
+43 & *I &              diaSourceOutput1 &&  0.106 &  0.143 &&& 10.206 &  0.182 \\
+44 & *  &              associationEvent &&  0.002 &  0.001 &&&  0.001 &  0.001 \\
+45 & *I &                   sdqaOutput0 &&  0.047 &  0.015 &&& 10.056 &  0.012 \\
+46 & *I &                   sdqaOutput1 &&  0.028 &  0.010 &&& 10.050 &  0.170 \\
 \hline
-\multicolumn{5}{l}{Type codes: I = input/output stage, * = production stage,} \\
-\multicolumn{5}{l}{S = Stage applying a scientific algorithm} \\
+\multicolumn{10}{l}{Type codes: FI = input/output stage, * = production stage,
+S = scientific algorithm stage} \\
 \end{tabular}
 \end{center}
 \end{table}
@@ -471,7 +477,7 @@ duration of the image subtraction stage by another 20 seconds.
 \begin{center}
 \small
 \caption{Night-MOPS and Association: Average Processing Times (s) Per
-  Stage for {\tt rlp1233, rlp1234} 
+  Stage.
 \label{tbl:otherstages}}
 \vspace{\baselineskip}
 \begin{tabular}{lrlrr|lrlrr}
@@ -496,4 +502,86 @@ duration of the image subtraction stage by another 20 seconds.
 \end{tabular}
 \end{center}
 \end{table}
+
+Comparing the LSST cluster runs with the Abe run reveals how the IPSD 
+pipeline holds up to scaling.  Note that the Abe run processed 9 times
+more data.  Of the 11 science stages, we see that for four of them,
+the average processing time was the same within one sigma.  For five
+of them, the time went up significantly.  However, for the two most
+expensive stages--image subtraction--the time went down.  In general,
+the variation in the average times went up.  We again note that for
+the IPSD pipeline the time spent in each stage is essentially the time
+of the longest-running slice in a visit.  
+
+Based on these times, we might conclude that the stages where
+processing times did not change demonstrate near perfect scaling; that
+is, the processing time does not change as we add more data onto more
+nodes.  However, the improvement we see in the image subtraction
+stages perhaps reflect hardware differences such as Abe's slightly
+faster processors (2.33 GHz versus 2.0 GHz) or increased available
+memory (8 GB per node versus 4 GB).  This better hardware could also
+be benefitting all stages.  To discern the contribution made by the
+better hardware, we would need to compare these results with
+smaller-scale runs--i.e. 31 slices--on Abe.  Nevertheless, relative
+gain for images subtraction is modest--$\sim 5\%$--which is comparable
+to the one-sigma variation for the shorter science stages and, thus,
+would not make a big difference.  The remaining science stages do show
+a degredation in the scaling.  
+
+Since the times above reflect the slowest slice in a stage, we might
+expect these times to go up since by exploring more data, we should
+expect to sample more challenging data that require more processing
+time and consequently slow down the processing of an entire visit.  To
+understand the scaling of the underlying algorithm, it is perhaps
+better to not look at the distribution in the slowest slices in a
+visit but rather in all of the slices over all of the visits.  This
+appears in table \ref{tbl:allscislices}.  The last column expresses
+the difference in terms of the oft-cited speed-up factor (where 1
+represents perfect linear speed-up).  The values larger than 1 are
+presumably due to Abe's better hardware.  In these statistics
+illustrate very good scaling for most of the science stages.  In only 
+only three of the stages ({\tt addAndDetect, diaSourceMeasurement,}
+and {\tt sourceClassification}) do we see some degredation.  The
+reasons for this are unclear at this point and thus will warrant more
+testing.  
+
+\begin{table}[htbp]
+\begin{center}
+\caption{IPSD: Average Processing Times (s) Per Stage across all
+  Slices and Visits
+\label{tbl:allscislices}}
+\vspace{\baselineskip}
+\begin{tabular}{llcrrc|crr|c}
+\hline\hline
+   &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
+         &&& \multicolumn{2}{c|}{{\tt rlpabe041}} & \\
+\# & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
+         &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c|}{$3\sigma$} 
+   & Speed-up \\ 
+\hline
+12 &                 isr0 &&  1.514 &  0.113 &&&  1.389 &  0.275 & 1.1 \\  % -
+13 &      sourceDetection &&  1.638 &  0.110 &&&  1.479 &  0.465 & 1.1 \\  % - 
+15 &    sourceMeasurement &&  0.232 &  0.772 &&&  0.234 &  1.184 & 1.0 \\  % 0 
+17 &     psfDetermination &&  0.112 &  0.120 &&&  0.107 &  0.123 & 0.9 \\  % 0 
+25 &                 isr1 &&  1.585 &  0.163 &&&  1.439 &  0.184 & 1.1 \\  % 0 
+27 &     wcsDetermination &&  0.172 &  0.085 &&&  0.191 &  0.403 & 0.9 \\  % 0 
+35 &     imageDifference0 && 71.174 & 15.573 &&& 62.082 & 14.898 & 1.1 \\  % - 
+36 &     imageDifference1 && 69.289 & 15.198 &&& 61.069 & 15.717 & 1.1 \\  % - 
+38 &         addAndDetect &&  7.851 &  0.680 &&&  9.354 &  3.400 & 0.6 \\  % + 
+39 & diaSourceMeasurement &&  0.114 &  0.610 &&&  0.261 &  2.979 & 0.4 \\  % + 
+41 & sourceClassification &&  0.005 &  0.005 &&&  0.008 &  0.029 & 0.8 \\  % + 
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+Data input and output (I/O) takes on average 46\% of the time spent
+processing a visit in the IPSD pipeline (or 24\% if we discount
+non-essential I/O).  Comparison of the LSST cluster runs ({\tt
+rlp1233} \& {\tt rlp1234}) with the Abe run is revealing, particularly
+when we break it differentiate between file-based I/O and database
+I/O.  
+
+
+
 
