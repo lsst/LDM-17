@@ -95,49 +95,106 @@ resource limitations prevented us from exploring the causes in
 any detail, with the result that the NCSA LSST cluster runs were all
 performed under the NFS shared file system. 
 
-\subsubsection*{Science Quality and Execution Speed}
+\subsubsection*{Science Data Quality}
+We evaluated the science data quality of DC3a in three areas that are
+judged to be the most demanding for the software system to meet, 
+and are each directly related to science requirements. 
+\begin{itemize}
+\item WCS accuracy
+\item Difference image quality
+\item Difference image lightcurve quality
+\end{itemize}
+\paragraph{WCS Accuracy}
+The World Coordinate system (WCS) is a geometrical mapping between
+image pixel coordinates and sky coordinates.  An accurate WCS is the
+foundation for processing steps such as image coaddition, image differencing, and the
+fitting of
+astrometric models. Within the context of DC3a, the WCS has an
+especially direct effect on the quality of the difference images. 
 
-After the DC3a runs were complete, several criteria were used to judge 
-the science quality of the outputs. These criteria include assessment
-of the accuracy of the WCS determination, the accuracy of the
-cosmic ray rejection, and the quality of the difference images and their
-lightcurves.
+The WCS quality was evaluated in an automated way with a program that
+checked every image that was processed.  The WCS-predicted sky
+coordinates of stars in the images were compared with the catalog
+positions of the same stars.  The level of the discrepancies measure the WCS quality.
+The results of the analysis for the two benchmark DC3a runs show that
+\begin{itemize}
+\item Most images result in acceptable WCS quality, with median errors
+  of about 40 milli-arcsec
+\item A small number of images have a failed WCS, which is in error by
+  many arcsec.
+\end{itemize}
+For the two benchmark runs, there were respectively 109 failures out
+of 2629 images processed (4\%), and 14 out of 2509 (0.5\%).  The
+causes of the failures will be investigated during the DC3b planning
+process.  Additionally, we will set more stringent WCS quality goals
+for DC3b, since they will be required for full data release processing.
 
-Accurate WCS determination is crucial to subsequent processing.
-For this analysis, we define a WCS determination to have failed
-when more than 50\% of the predicted WCS\_Source positions are
-in error by more than 1 arcsec, which is roughly the limit beyond
-which difference engine matching kernels can no longer compensate.
-For run \texttt{rlp1233}, 4\% of the WCS determinations failed
-by this criterion; for \texttt{rlp1234} the failure rate was 0.5\%.
 
-Two methods are used to detect cosmic rays, one in the ISR
-pipeline (and therefore considering single exposures) and another 
-in the Association pipeline (therefore considering exposure pairs). 
-The ISR identified nearly 100\% of synthetic cosmic rays introduced into test
-images. Because of the interaction between these two methods,
-analysis of the Association-based detection method has proven
-to be difficult, and will require a separate set of runs with
-the ISR method turned off.
+\paragraph{Difference Image Quality}
 
-The quality of difference images tended to one of three modes.
-When the WCS determination was very bad, the subtraction was
-completely non-functional. When the WCS determination was
-near the cut-off criterion, a distinctive two-lobed pattern appeared
-around bright sources in the difference image. When WCS determination
-was successful, the subtractions look good except in the vicinity
-of bright stars, where a high spacial frequency pattern appears.
+To investigate difference image quality, a representative subset of the DC3a difference images
+were first visually inspected.  They fall into three distinct
+categories. First, difference images produced from images with failed 
+WCS's show either ``bipolar'' subtractions in the case of marginal failures or completely nonfunctional subtractions in
+the case of extreme WCS failures.  Images with successful WCS's
+generate subtractions that look good except in the vicinity of bright
+stars,where a high spatial frequency pattern is evident.  
 
-That residual pattern around bright starts results, in turn, 
-in false source detections. Because these residuals are highly
-structured within the kernel footprint, multiple peaks are detected
-in a single footprint. We do not have a practical way to separate
-such artifacts from real astrophysical signals or transient events.
+We leave aside the roughly 2\% of
+the difference images that involved WCS failures, since they tell us
+little about the performance of the difference image algorithm itself.
+In the absence of variable or moving sources, an ideal difference
+image will have a mean of zero, and show uncorrelated random
+fluctuations at the level expected from the variance of the input
+images.  We therefore defined a ``figure-of-merit image'' as the ratio
+of the difference image to the expected fluctuation level, which
+varies with the flux in the input image.
+A plot along a horizontal line through
+the subtracted bright star in a typical figure-of-merit image is shown in
+Figure 1.  This plot shows several aspects of the difference
+image quality:
 
-Processing times in DC3a are much more consistent than in DC2,
-which has an important impact on the overall performance, since
-the total time spent on a stage is driven primarily by the duration
-of the slice that took the longest time.
+\begin{itemize}
+\item The average level of the image is near zero, as expected
+\item Away from bright stars, the level of the noise is near 1.0, the
+  expected value
+\item In the footprint of bright stars, the noise is larger than
+  expected by a large factor, about 20 in this particular case.
+\end{itemize}  
 
+The large residuals in the footprint of bright stars cause problems
+for downstream alert processing, and are believed to result from the
+kernel basis functions chosen for the image subtraction algorithm.
+For DC3b, we will ensure that these residuals are greatly reduced.
+
+\begin{figure}[hb]
+\begin{center}
+\includegraphics{images/rlp1233_v695833-e0-c001-a03-fom_plot.png}
+\caption{Line section through figure-of-merit image for
+  rlp1233/695833-e0-c001-a03.  The line is chosen to pass through a
+  subtracted bright star at (338,725)}
+\label{Figure 1}
+\end{center}
+\end{figure}
+
+\paragraph{Difference Light Curve Quality}
+Leaving out images that had WCS failures, run rlp1233 yielded 63000
+objects with difference sources detected above threshold in at least
+one visit. The number of visits
+for which difference sources were detected varies widely with the object, between 1 and
+about 75.  The latter number is close to the number of visits
+processed in rlp1233, which is 85.  Spot checking of these sources in
+the images suggests that the vast majority are the result of artifacts
+in the difference images, with residuals around bright stars being the
+most frequent cause.  The highly structured nature of the difference
+image residuals, combined with the relatively large kernel footprint,
+causes further artifacts, since multiple peaks can be detected in a
+single footprint.  In general, though it will certainly be the case
+that real astrophysical signals from variable stars and transient
+events are present in this data, it is currently impractical to
+separate them from the noise with the analysis tools readily
+available.  We expect that improvement of the difference image
+algorithm for DC3b will fundamentally improve this situation, allowing
+science quality to be meaningfully assessed against requirements.
 
 
