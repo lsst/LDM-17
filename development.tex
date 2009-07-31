@@ -2,72 +2,127 @@
 
 \section{Software Development Practices}
 
-The development practices of the LSST development team were 
-described in detail in the report on Data Challenge 2. This
-section restates some central points and describes some new
-features of the software development environment.
-
+The development practices of the LSST development team were described in detail
+in the report on Data Challenge 2. This section restates some central points and
+describes some new features of the software development environment.
 
 \subsection{Technical Control Team}
 
-A goal of DC3 was to increase the formalization of the
-development process as a way to compensate for the increasing
-size of the increasingly distributed development team.
-Accomplishing this goal called for a more central role for
-the Technical Control Team (TCT), known in DC2 as the
-Configuration Control Board (CCB), which serves as an internal
-forum on key topics for the development of LSST Data Management software, including 
-major design issues, the tools to be used, and standards and policies.
-The TCT meets monthly to set development policy 
+LSST DMS is a distributed development project stretching from Princeton to UC
+Davis. This geographical distribution makes it important to have
+well-considered, well-documented coding practices.
 
+A goal of DC3 was to increase the formalization of the development process as a
+way to compensate for the increasing size of the increasingly distributed
+development team. Accomplishing this goal called for a more central role for the
+Technical Control Team (TCT), known in DC2 as the Configuration Control Board
+(CCB), which serves as an internal forum on key topics for the development of
+LSST Data Management software, including major design issues, the tools to be
+used, and standards and policies. The TCT meets monthly to set development
+policy on matters such as consideration and approval of LSST coding standards,
+overall LSST package boundaries (that is, at the broadest level, determining
+which component in the LSST stack is responsible for which functionality), and
+the adoption of third-party open source software packages for use within the
+LSST stack.
 
+\subsection{Open Source Software: Use and Distribution}
 
+The use of third-party open source packages is essential for LSST; these
+packages represent standard off-the-shelf solutions for many of those LSST DMS
+requirements which are not unique to LSST, freeing developers to concentrate on
+those areas of LSST DMS for which no off-the-shelf solution exists. But these
+packages must be carefully considered, and they must be agreed upon by the TCT.
+In some rare cases, the TCT can withdraw its acceptance of a package. After DC2,
+for example, it was judged that the CORAL and SEAL third-party packages
+(developed by CERN) should be removed from the LSST stack, primarily because the
+difficulty of building these packages from source outside the CERN-approved
+Scientific Linux environment in which it was developed forced us to distribute
+it as a pre-compiled binary, severely limiting the platforms on which the LSST
+DC2 stack could run. The TCT determined that the functionality CORAL and SEAL
+provided could be provided more effectively and flexibly with a comparatively
+small amount of LSST-created code, thereby releasing the platform constraints.
 
-(settling 
-questions such as, when are developers expected to work
-on branches or 
-
-
-
-, come to agreement on 
-
-approval of the use of third-party software packages,
-
+The LSST stack is itself licensed, by TCT determination, under the GPL3 Gnu
+General Public License\footnote{http://dev.lsstcorp.org/trac/wiki/SWLicense}.
+GPL3 allows others to copy, redistribute, extend, or modify the software as long
+as source code for such extensions is still distributed in source form. It does
+not allow the software to be used as part of a proprietary software package.
 
 
 \subsection{UML Modeling}
 
-UML modeling continues to play a central role in the code
-development process. 
+UML modeling continues to play a central role in the code development process.
+UML is a set of conventions for diagramming abstract models
+for object-oriented development. There is a general LSST model meant for the
+final production code, and specializations of that model for the specific subset
+of that model that falls within the scope of the current data challenge. 
 
-Software classes for LSST are designed in UML, the Unified
-Modeling Language, before coding. UML is a general set of 
-standards for diagramming abstract models for object-oriented
-development. There is a general LSST model meant for the
-final production code, and specializations of that model for
-the specific subset of that model that falls within the scope
-of the current data challenge. At the end of each data
-challenge, the general LSST model is updated with 
+UML design of a component is driven by use cases, the scenarios under which the 
+component will be used. As in previous data challenges, the UML models are 
+created and maintained using a commercial software package, Enterprise 
+Architect\footnote{http://www.sparxsystems.com.au/}, allowing for interactive
+and collaborative design. The Enterprise Architect installation is hosted
+by LSST in Tucson, but can be accessed remotely using remote desktop viewing
+via VNC (Virtual Network Computing) utilities. 
 
-As in previous data challenges, the UML models are created
-and maintained using a commercial software package, 
-Enterprise Architect, allowing for interactive and collaborative
-design.
+New components or software stages are first designed in UML, and before 
+any code is written the model is given a design review. 
+At the end of each data challenge, the general LSST model is updated using 
+the UML documents created as part of that data challenge; the designer
+indicates which aspects of the UML design for the data challenge are intended
+to become a permanent part of the general LSST model and which aspects are
+for that data challenge alone.
 
-New components or software stages are first designed in UML,
-and before any code is written the model is reviewed 
 
 \subsection{Software Development Environment}
 
+One new form of software quality assurance brought into DC3a was the use
+of automated testing of code builds. This involved the use of an 
+automated ``buildbot'' which on a daily basis builds the software stack 
+from scratch, and builds all components from the LSST software trunk against
+a standard stack of utilites, producing a report via web 
+interface\footnote{http://dev.lsstcorp.org/buildbot/} for displaying the
+results of a build. If someone checks in a package which doesn't 
+compile correctly against the LSST stack, the buildbot will send out
+a warning email. A waterfall display shows a graphical timeline of builds; if a
+package build fails, that package is displayed in red on the timeline.
+The LSST buildbot was implemented using the standard
+open source package \texttt{buildbot}\footnote{http://buildbot.net/trac}
+and some LSST-specific scripts.
 
+For DC3b, it is anticipated that the buildbot will be expanded to include
+automated checking of the package source code to verify compliance with
+the associated LSST coding standard. The TCT has investigated several
+static analysis tools for C++ standards checking. Such tools can verify
+compliance with many of the LSST coding standards, although some of
+our standards (such as 3-4 of the C++ standard, which calls for function
+names to be verbs) cannot easily be checked by machine and, therefore,
+total automated coverage of our coding standards is unlikely.
 
+\subsection{Software Integration Schedule}
 
+There is a strong sense among the development group that the software
+integration process for DC3a had a significant flaw. For previous data
+challenges, DC1 and DC2, teams independently developed code on their own
+platforms and then brought the components together for during an ``integration
+week,'' when a large segment of the development team gathered at NCSA for a week
+and worked through the integration process in a tiger-team fashion. For DC3,
+this had an unfortunate consequence, in that there was effectively no test bed
+during the initial stages of coding, since until the integration phase
+there was no system running all of the components necessary to complete 
+even a partial pipeline run. (Substantial code refactoring and the move
+from a 32-bit to a 64-bit operating system for development meant that the 
+DC2 stack could not simply be frozen and used for this purpose.)
 
-This included the creation of an automated ``buildbot'' which
-on a daily basis builds the hardware stack from scratch.
+For the purposes of DC3a, a short-term solution was provided by
+\texttt{simpleStageTest.py}, a simple harness allowing some application stages
+to be executed independently. This allowed for some additional debugging
+capabilities.
 
-\subsection{Coding and Documentation Standards}
-
-Code standards for C++ and Python were 
-
+Following DC3a, it was felt to be essential that an installation capable
+of running the pipelines be maintained throughout the coding process,
+so that pipeline testing --- particularly, the assessment of the 
+science value of stage results, and the ability to interactively tune
+the parameters of stage algorithms --- can be performed in an on-going fashion
+rather than being deferred to the last stages of the data challenge.
 
