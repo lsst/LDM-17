@@ -50,7 +50,7 @@ event monitor which loaded logging events into the database.
  1 &         &                    sliceInfo & 24 &\stc{FDO}& rawImageAndMetadataOutput1 \\
  2 &         &                      symLink & 25 &*\stc{S} &                       isr1 \\
  3 & \stc{FI}&                  imageInput0 & 26 &*\stc{DI}&            wcsSourcesInput \\
- 4 &*\stc{}  &               visitMetadata0 & 27 &*\stc{S} &           wcsDetermination \\
+ 4 & \stc{DI}&               visitMetadata0 & 27 &*\stc{S} &           wcsDetermination \\
  5 &         &           transformMetadata0 & 28 &*\stc{FO}&  calibratedExposuresOutput \\
  6 &         &            validateMetadata0 & 29 &*\stc{}  &           CcdMetadataStage \\
  7 & \stc{FO}&         visitMetadataOutput0 & 30 &*\stc{FI}&      templateMetadataInput \\
@@ -66,7 +66,7 @@ event monitor which loaded logging events into the database.
 17 &*\stc{S} &             psfDetermination & 40 &*\stc{}  &          sourceToDiaSource \\  
 18 & \stc{FO}&                    psfOutput & 41 &*\stc{S} &       sourceClassification \\
 19 & \stc{FI}&                  imageInput1 & 42 &*\stc{DO}&           diaSourceOutput0 \\
-20 &         &               visitMetadata1 & 43 &*\stc{DO}&           diaSourceOutput1 \\
+20 & \stc{DI}&               visitMetadata1 & 43 &*\stc{DO}&           diaSourceOutput1 \\
 21 &         &           transformMetadata1 & 44 &*\stc{}  &           associationEvent \\
 22 &         &            validateMetadata1 & 45 &*\stc{DO}&                sdqaOutput0 \\
 23 & \stc{FO}&         visitMetadataOutput1 & 46 &*\stc{DO}&                sdqaOutput1 \\
@@ -160,10 +160,7 @@ These Abe runs provided additional qualitative accomplishments:
 \noindent Additional information about the results of these runs on
 Abe can be found in section \ref{sec:timing}.  
 
-Table \ref{tbl:runsummary} summarizes the pertinent production runs
-referenced in this section.
-
-\begin{table}[hp]
+\begin{table}[htbp]
 \centering
 \caption{Summary of Production Runs analyzed in this report
 \label{tbl:runsummary}}
@@ -178,6 +175,9 @@ rlpabe041 & 12      & 288 & 3456/33 GB    & 15/2 GB        & 79368/313 GB \\ \hl
 Total     & ---     & 250 & 13748/81 GB   & 191/28 GB      & 200418/793 GB \\ \hline
 \end{tabular}
 \end{table}
+
+Table \ref{tbl:runsummary} summarizes the pertinent production runs
+referenced in this section.
 
 
 \subsection{Science Data Quality}
@@ -249,19 +249,9 @@ far more significant than is initially apparent, since it
 results from very poor wcs fits that are confined to individual
 amplifiers.
 
-For DC3a purposes, we define WCS failure for an image to occur when
-more than 50\% of the predicted WCS\_Source positions are in error by
-more than 1 arcsec.  This is roughly the level beyond which the difference
-image matching kernels can no longer compensate for image misalignments. With
-this criterion, for run rlp1233 there were 109 failures out of 2629
-images processeed, or 4\%.   For rlp1234 there were 14 failures out
-of 2509 images processed, or 0.5\%.  It must be noted however, that this criterion for WCS failure will
-need to be considerably stricter for DC3b and beyond, because
-processing of image stacks for deep detection and measurement, and the
-determination of astrometric models all require much better WCS quality.
-\begin{figure}[htb]
+\begin{figure}[p]
 \begin{center}
-\includegraphics[width=6in]{images/rlp1233_1234_match.png}
+\includegraphics[height=3.35in]{images/rlp1233_1234_match.png}
 \caption{Histogram of the distances between positions predicted from WCS, and
   true catalog positions for rlp1233/695833-e0 on the left and
   rlp1234/696554-e0 on the right}  
@@ -269,9 +259,9 @@ determination of astrometric models all require much better WCS quality.
 \end{center}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[p]
 \begin{center}
-\includegraphics[width=6in]{images/rlp1233_ccd1_match.png}
+\includegraphics[height=3.35in]{images/rlp1233_ccd1_match.png}
 \caption{Histogram of the distances between positions predicted from WCS, and
   true catalog positions for rlp1233/695833-e0, showing the individual
 amplifiers from ccd1}  
@@ -279,7 +269,25 @@ amplifiers from ccd1}
 \end{center}
 \end{figure}
 
+For DC3a purposes, we define WCS failure for an image to occur when
+more than 50\% of the predicted WCS\_Source positions are in error by
+more than 1 arcsec.  This is roughly the level beyond which the difference
+image matching kernels can no longer compensate for image misalignments. With
+this criterion, for run rlp1233 there were 109 failures out of 2629
+images processeed, or 4\%.   For rlp1234 there were 14 failures out
+of 2509 images processed, or 0.5\%.  It must be noted however, that
+this criterion for WCS failure will need to be considerably stricter
+for DC3b and beyond, because processing of image stacks for deep
+detection and measurement, and the determination of astrometric models
+all require much better WCS quality.
 
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=6in]{images/rlp1233_v695833-e0-c001-mosaic.png}
+\caption{A mosaic of different types of difference images, all from rlp1233/695833-e0-c001}  
+\label{fig:diffim1}
+\end{center}
+\end{figure}
 
 \paragraph{Difference Image Quality}
 
@@ -318,26 +326,18 @@ image quality:
   expected by a large factor, about 20 in this particular case.
 \end{itemize}  
 
-\begin{figure}[htb]
+\begin{figure}[p]
 \begin{center}
-\includegraphics[width=6in]{images/rlp1233_v695833-e0-c001-mosaic.png}
-\caption{A mosaic of different types of difference images, all from rlp1233/695833-e0-c001}  
-\label{fig:diffim1}
-\end{center}
-\end{figure}
-
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=6in]{images/rlp1233_v695833-e0-c001-a03-fom_img.png}
+\includegraphics[height=3.25in]{images/rlp1233_v695833-e0-c001-a03-fom_img.png}
 \caption{A figure-of-merit image for
   rlp1233/695833-e0-c001-a03}  
 \label{fig:diffim2}
 \end{center}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[p]
 \begin{center}
-\includegraphics[width=6in]{images/rlp1233_v695833-e0-c001-a03-fom_plot.png}
+\includegraphics[height=3.25in]{images/rlp1233_v695833-e0-c001-a03-fom_plot.png}
 \caption{Line section through figure-of-merit image for
   rlp1233/695833-e0-c001-a03.  The line is chosen to pass through the
   subtracted bright star at (338,725), which is near the center of the
@@ -366,7 +366,7 @@ available.
 
 \begin{figure}[htb]
 \begin{center}
-\includegraphics[width=6in]{images/rlp1233DiffLCHisto.png}
+\includegraphics[height=3.25in]{images/rlp1233DiffLCHisto.png}
 \caption{Histogram of number of Objects with DIASources in a given number of
   visits in rlp1233}  
 \label{fig:lightcurve1}
@@ -390,7 +390,7 @@ scientific processing.
 \caption{Average Processing Times Per Visit
 \label{tbl:visitstats}}
 \vspace{\baselineskip}
-\begin{tabular}{ l | c | c |}
+\begin{tabular}{ l | c | c }
 \hline\hline
           & Total Processing Time, corrected
           & Application Processing Time \\ 
@@ -405,7 +405,7 @@ ap        & 1.4   $\pm$  0.7 & 0.021 $\pm$  0.7  \\ \hline
 \end{table}
 
 
-In table \ref{tbl:visitstats}, we summarize the statistics for processing
+In Table \ref{tbl:visitstats}, we summarize the statistics for processing
 a single visit through each pipeline.  For each quantity, the error
 given represents the calculated $3\sigma$ variation of the
 distribution of values.  The total time is corrected to remove the
@@ -453,7 +453,7 @@ important impact on the overall performance because the total time
 spent on a stage is driven primarily by the duration of the slice that
 took the longest time.  
 
-Tables \ref{tbl:scistagetimes} through \ref{tbl:otherstagetimes} list
+Tables \ref{tbl:scistagetimes} --- \ref{tbl:otherstagetimes} list
 the average time spent in actual {\it application code} each stage for
 each pipeline.  (That is, these include the time spent in the {\tt
 preprocess()}, {\tt process()}, and {\tt postprocess()} functions
@@ -497,8 +497,8 @@ subtraction on both exposures from a visit.  The variation in the time
 is down considerably as well.  One of the tunable parameters we found
 that can have a significant effect on the subtraction time is the 
 {\tt maxPrincipalComponents} policy parameter, which controls the number
-of principal components calculated for the ... step and which in this
-run was set to 10.  We believe that we can probably reduce this
+of principal components calculated for the ... step and which in these
+runs was set to 10.  We believe that we can probably reduce this
 parameter to 5 without loss in processing fidelity; subsequent tests
 with this value ({\tt rlp1248}) indicate that this would reduce the
 duration of the image subtraction stage by another 20 seconds.
@@ -577,10 +577,51 @@ testing.
 
 Data input and output (I/O) takes on average 46\% of the time spent
 processing a visit in the IPSD pipeline (or 24\% if we discount
-non-essential I/O).  Comparison of the LSST cluster runs ({\tt
-rlp1233} \& {\tt rlp1234}) with the Abe run is revealing, particularly
-when we break it differentiate between file-based I/O and database
-I/O.  
+non-essential I/O).  Comparison of the LSST cluster runs 
+({\tt   rlp1233} \& {\tt rlp1234}) with the Abe run is revealing,
+particularly when we break it differentiate between file-based I/O and
+database I/O.  Table \ref{tbl:diostagetimes} compares the times for
+database I/O stages.  We can understand these numbers by recalling
+that the database server ran on all cases on the development cluster;
+in particular when running on Abe, the database was no longer
+``local'' to the cluster.  In all but two of the stages, Abe paid a
+10-second penalty, suggestive of network latencies.  The two stages
+that apparently did not pay this penalty were stages that also
+included file-based I/O; it's unclear why these stages were not
+affected.  Overall, these results for database I/O could bear more
+experiments because we cannot yet tell what
+the contribution to the time comes from having nine times the number
+of simultaneous database clients.  (Note that no special parallelizing
+of database access was in place.)
+
+\begin{table}[hbtp]
+\begin{center}
+\caption{IPSD Database I/O Stages: Average Processing Times (s) Per Stage
+\label{tbl:diostagetimes}}
+\small
+\vspace{\baselineskip}
+\begin{tabular}{llcrrc|crr}
+\hline\hline
+   &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
+         &&& \multicolumn{2}{c}{{\tt rlpabe041}} \\
+\# & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
+         &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+\hline
+ 4 &                 visitMetadata0 &&  0.076 &  0.975 &&&  9.640 &  3.985 \\
+ 8 &  rawImageAndMetadataOutput0$^*$&&  1.999 &  0.374 &&&  0.629 &  0.790 \\
+16 & exposureAndWcsSourcesOutput$^*$&&  0.228 &  0.245 &&& 11.075 & 10.217 \\
+20 &                 visitMetadata1 &&  0.038 &  0.033 &&& 10.039 &  0.004 \\
+24 &  rawImageAndMetadataOutput1$^*$&&  2.126 &  0.553 &&&  0.910 &  1.317 \\
+26 &                wcsSourcesInput &&  0.034 &  0.029 &&& 10.045 &  0.034 \\
+42 &               diaSourceOutput0 &&  1.947 &  4.220 &&& 10.210 &  0.232 \\
+43 &               diaSourceOutput1 &&  0.106 &  0.143 &&& 10.206 &  0.182 \\
+45 &                    sdqaOutput0 &&  0.047 &  0.015 &&& 10.056 &  0.012 \\
+46 &                    sdqaOutput1 &&  0.028 &  0.010 &&& 10.050 &  0.170 \\
+\hline
+\multicolumn{9}{l}{$^*$includes both database and file-based I/O}
+\end{tabular}
+\end{center}
+\end{table}
 
 \begin{table}[htbp]
 \begin{center}
@@ -616,32 +657,33 @@ I/O.
 \end{center}
 \end{table}
 
-\begin{table}[hbtp]
-\begin{center}
-\caption{IPSD Database I/O Stages: Average Processing Times (s) Per Stage
-\label{tbl:diostagetimes}}
-\small
-\vspace{\baselineskip}
-\begin{tabular}{llcrrc|crr}
-\hline\hline
-   &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
-         &&& \multicolumn{2}{c}{{\tt rlpabe041}} \\
-\# & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
-         &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
-\hline
- 8 &  rawImageAndMetadataOutput0$^*$&&  1.999 &  0.374 &&&  0.629 &  0.790 \\
-16 & exposureAndWcsSourcesOutput$^*$&&  0.228 &  0.245 &&& 11.075 & 10.217 \\
-24 &  rawImageAndMetadataOutput1$^*$&&  2.126 &  0.553 &&&  0.910 &  1.317 \\
-26 &                wcsSourcesInput &&  0.034 &  0.029 &&& 10.045 &  0.034 \\
-42 &               diaSourceOutput0 &&  1.947 &  4.220 &&& 10.210 &  0.232 \\
-43 &               diaSourceOutput1 &&  0.106 &  0.143 &&& 10.206 &  0.182 \\
-45 &                    sdqaOutput0 &&  0.047 &  0.015 &&& 10.056 &  0.012 \\
-46 &                    sdqaOutput1 &&  0.028 &  0.010 &&& 10.050 &  0.170 \\
-\hline
-\multicolumn{9}{l}{$^*$includes both database and file-based I/O}
-\end{tabular}
-\end{center}
-\end{table}
+Table \ref{tbl:fiostagetimes} presents the comparison
+for the stages involved in file-based I/O; three of these stages
+involve both also do database I/O.  Note that due to the problems we
+encountered using the Lustre parallel filesystem on the development
+cluster, the smaller runs were done using NFS.  This filesystem is
+known to perform poorly under most conditions, and our results bear
+this out.  On the other hand, the file-based I/O performance of the
+Lustre filesystem on Abe performed very well, reading 9 times more
+data in the same or less time for all but two of the stages listed in
+Table \ref{tbl:fiostagetimes}.  
+
+One of the exceptions, stage 16, is one of the three that also
+involved in database I/O.  As discussed above, the Abe performance
+is suggestive of the the I/O being dominated by the database
+component.  The other exception is stage 33 in which all the parallel
+processes had to read the same template image at the same time; in
+this stage, redundantly reading 9 times the data took twice as long.
+This is in contrast with all of the other file I/O stages where each
+process read in or wrote out a \textit{different} file.  
+
+For completeness, we also present the timings for the remaining
+stages in Table \ref{tbl:miscstagetimes}.  The handle neither science
+processing nor I/O but rather carry out small book-keeping tasks.
+They all take a short time and half of them are not expected to have
+counterparts in the production pipelines.   We also show the timing
+results for the stages that make up the NightMOPS and Association
+pipelines in Table \ref{tbl:otherstagetimes}.  
 
 \begin{table}[htbp]
 \begin{center}
@@ -658,12 +700,10 @@ I/O.
 \hline
  1 &                     sliceInfo &&  0.002 &  0.001 &&&  0.001 &  0.002 \\
  2 &                       symLink &&  0.001 &  0.001 &&&  0.001 &  0.002 \\
- 4 &                visitMetadata0 &&  0.076 &  0.975 &&&  9.640 &  3.985 \\
  5 &            transformMetadata0 &&  0.013 &  0.007 &&&  0.024 &  0.122 \\
  6 &             validateMetadata0 &&  0.002 &  0.001 &&&  0.002 &  0.003 \\
  9 &   identifyCalibrationProducts &&  0.020 &  0.008 &&&  0.024 &  0.036 \\
 11 &  transformCalibrationMetadata &&  0.004 &  0.003 &&&  0.004 &  0.004 \\
-20 &                visitMetadata1 &&  0.038 &  0.033 &&& 10.039 &  0.004 \\
 21 &            transformMetadata1 &&  0.013 &  0.005 &&&  0.011 &  0.007 \\
 22 &             validateMetadata1 &&  0.002 &  0.002 &&&  0.001 &  0.001 \\
 29 &              CcdMetadataStage &&  0.002 &  0.001 &&&  0.003 &  0.024 \\
@@ -705,10 +745,6 @@ I/O.
 \end{tabular}
 \end{center}
 \end{table}
-
-
-
-
 Finally, we also examined the time spent by the pipeline harness
 framework to manage and execute the stages repeatedly and in
 sequence, what we refer to as the pipeline overhead.  One way to
