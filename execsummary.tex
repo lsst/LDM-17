@@ -28,12 +28,12 @@ first class of components as the \textit{science applications} and the
 second class as the \textit{middleware} or \textit{infrastructure}; a
 collected series of sequential steps is called a \textit{pipeline}.
 
-In Data Challenge 1 (DC1), we focussed on the DMS middleware design
+In Data Challenge 1 (DC1), we focused on the DMS middleware design
 for supporting nightly processing; this software scaffolding ---
 the \textit{pipeline framework} --- modeled the infrastructure
 necessary to support science algorithms but did not actually execute
 them, using instead \textit{resource consumers}, which simulated the
-expected computational node of the algorithms but produced no useable
+expected computational node of the algorithms but produced no usable
 science output.  In Data Challenge 2 (DC2), we replaced the resource
 consumers with real implementations for the most challenge aspects of
 image processing and alert production. We also updated the pipeline
@@ -269,7 +269,7 @@ concentrate on the stages that are dedicated to applying science
 algorithms, we see that most of them (including image subtraction)
 appear to scale near-perfectly, as shown in
 Table \ref{ex:tbl:allscislices}; though, three stages show some
-degredation.  
+degradation.  
 
 \begin{table}[htbp]
 \begin{center}
@@ -311,21 +311,22 @@ conditions, and our results bear this out.  On the other hand, the
 file-based I/O performance of the Lustre filesystem on Abe performed
 very well, reading 9 times more data in the same or less time.  The one
 exception was the stage in which all parallel processes had to read
-the same template image at the same time; here, redundanly reading 9
-times the data took twice as long.  More scaling experiments are
-planned to understand file-based I/O performance.  
+the same template image at the same time; here, redundantly reading 9
+times the data took twice as long.  Even the 31-slice case obviously
+suffers as reading one template image normally takes 5 seconds on one
+node.  More scaling experiments are planned to understand file-based
+I/O performance.  
 
 Database performance dropped as we went to the large run on Abe.  It
 appears that this is in large part due to network latency effect since
 the database ran on the development cluster while the pipeline ran on
-Abe.  This bears more experiments because we cannot yet tell what the
-contribution to the time comes from having nine time the number of
-simultaneous database clients.  No special parallelizing of database
-access was in place.  
+Abe.  This can bear more experiments because we cannot yet tell what
+the contribution to the time comes from having nine times the number
+of simultaneous database clients.  No special parallelizing of
+database access was in place.  
 
 Overall, we will need to spend more effort developing good I/O
 strategies in future data challenges.  In particular, we need
 experiment more with optimizing the use of parallel filesystems and
 deploying distributed databases.  
-
 
