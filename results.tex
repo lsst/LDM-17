@@ -1,4 +1,5 @@
 % Section 7: Results
+\newcommand{\stc}[1]{\hbox to 2.5em{{#1}\hfil}}
 
 \section{Results}
 
@@ -35,6 +36,74 @@ noticeably with the pipeline processes.  Node 4 (which did not have
 any pipeline processes on it) hosted the event broker process, and
 node 9 (which had extra unused processor cores available) hosted the
 event monitor which loaded logging events into the database.
+
+\begin{table}[htbp]
+\begin{center}
+\caption{The stages comprising the IPSD pipeline
+\label{tbl:ipsdstages}}
+\small
+\vspace{\baselineskip}
+\begin{tabular}{rrl|rrl}
+\hline\hline
+\# &\multicolumn{1}{l}{Type$^a$}& Name      & \# &\multicolumn{1}{l}{Type$^a$} & Name   \\ 
+\hline
+ 1 &         &                    sliceInfo & 24 &\stc{FDO}& rawImageAndMetadataOutput1 \\
+ 2 &         &                      symLink & 25 &*\stc{S} &                       isr1 \\
+ 3 & \stc{FI}&                  imageInput0 & 26 &*\stc{DI}&            wcsSourcesInput \\
+ 4 &*\stc{}  &               visitMetadata0 & 27 &*\stc{S} &           wcsDetermination \\
+ 5 &         &           transformMetadata0 & 28 &*\stc{FO}&  calibratedExposuresOutput \\
+ 6 &         &            validateMetadata0 & 29 &*\stc{}  &           CcdMetadataStage \\
+ 7 & \stc{FO}&         visitMetadataOutput0 & 30 &*\stc{FI}&      templateMetadataInput \\
+ 8 &\stc{FDO}&   rawImageAndMetadataOutput0 & 31 &*\stc{}  &          templateDimension \\
+ 9 &*\stc{}  &  identifyCalibrationProducts & 32 &*\stc{}  &               templateBBox \\
+10 &*\stc{FI}&             calibrationInput & 33 &*\stc{FI}&      templateSubimageInput \\
+11 &         & transformCalibrationMetadata & 34 & \stc{FO}&     templateSubimageOutput \\
+12 &*\stc{S} &                         isr0 & 35 &*\stc{S} &           imageDifference0 \\  
+13 &*\stc{S} &              sourceDetection & 36 &*\stc{S} &           imageDifference1 \\  
+14 & \stc{FO}&   calibAndBkgdExposureOutput & 37 &*\stc{FO}&      differenceImageOutput \\
+15 &*\stc{S} &            sourceMeasurement & 38 &*\stc{S} &               addAndDetect \\  
+16 &*\stc{FDO}& exposureAndWcsSourcesOutput & 39 &*\stc{S} &       diaSourceMeasurement \\
+17 &*\stc{S} &             psfDetermination & 40 &*\stc{}  &          sourceToDiaSource \\  
+18 & \stc{FO}&                    psfOutput & 41 &*\stc{S} &       sourceClassification \\
+19 & \stc{FI}&                  imageInput1 & 42 &*\stc{DO}&           diaSourceOutput0 \\
+20 &         &               visitMetadata1 & 43 &*\stc{DO}&           diaSourceOutput1 \\
+21 &         &           transformMetadata1 & 44 &*\stc{}  &           associationEvent \\
+22 &         &            validateMetadata1 & 45 &*\stc{DO}&                sdqaOutput0 \\
+23 & \stc{FO}&         visitMetadataOutput1 & 46 &*\stc{DO}&                sdqaOutput1 \\
+\hline
+\multicolumn{6}{l}{$^a$Stage Type codes: S = scientific algorithm, * = necessary for production mode,} \\
+\multicolumn{6}{l}{\phantom{$^a$Stage Type codes:} F = File I/O, D = Database I/O, I = Data Input, O = Data Output} \\
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[hbtp]
+\begin{center}
+\small
+\caption{The stage comprising the Association and NightMOPS pipelines
+\label{tbl:otherstages}}
+\vspace{\baselineskip}
+\begin{tabular}{rrl|rrl}
+\hline\hline
+\multicolumn{3}{c|}{Association} & \multicolumn{3}{c}{NightMOPS}  \\
+\# & \multicolumn{1}{l}{Type$^a$}& Name & \# & \multicolumn{1}{l}{Type$^a$}& Name  \\ 
+\hline
+ 1 &         & symLink                  &  1 &*\stc{S} & NightMopsStage \\ 
+ 2 &*\stc{DI}& load                     &  2 &*\stc{DO}& output         \\ 
+ 3 &*\stc{DI}& diaSourceInput           &  3 &*\stc{}  & associationEvent  \\ 
+ 4 &*\stc{S} & MatchDiaSourcesStage     &  && \\ 
+ 5 &*\stc{DO}& diaSourceMatchOutput     &  && \\ 
+ 6 &*\stc{DI}& predInput                &  && \\ 
+ 7 &*\stc{S} & MatchMopsPredsStage      &  && \\ 
+ 8 &*\stc{DO}& predMatchAndObjectOutput &  && \\ 
+ 9 &*\stc{DO}& store                    &  && \\ 
+\hline
+\multicolumn{6}{l}{$^a$Stage Type codes: S = scientific algorithm, * = necessary for production mode,} \\
+\multicolumn{6}{l}{\phantom{$^a$Stage Type codes:} F = File I/O, D = Database I/O, I = Data Input, O = Data Output} \\
+\end{tabular}
+\end{center}
+\end{table}
+
 
 One of the intended goals of the DC3a was exercise the use of the
 parallel filesystem, Lustre, we installed on the LSST cluster.  Much
@@ -384,78 +453,39 @@ important impact on the overall performance because the total time
 spent on a stage is driven primarily by the duration of the slice that
 took the longest time.  
 
-Tables \ref{tbl:ipsdstages} and \ref{tbl:otherstages} list the average
-time spent in actual {\it application code} each stage for each pipeline.
-(That is, these include the time spent in the {\tt preprocess()}, 
-{\tt process()}, and {\tt postprocess()} functions only when these
-were provided by a stage implementation.)  The type (``tp'') column
-indicates the type of processing done by each stage, differentiating
-between file-based I/O, database I/O, and the application of a
-scientific algorithm.  
+Tables \ref{tbl:scistagetimes} through \ref{tbl:otherstagetimes} list
+the average time spent in actual {\it application code} each stage for
+each pipeline.  (That is, these include the time spent in the {\tt
+preprocess()}, {\tt process()}, and {\tt postprocess()} functions
+only when these were provided by a stage implementation.)  For the
+IPSD pipeline, we have broken up data according to the function type
+of the stage (as marked in \ref{tbl:ipsdstages}) for the ease of
+noticing trends.  
 
 \begin{table}[htbp]
 \begin{center}
-\caption{IPSD: Average Processing Times (s) Per Stage for {\tt
-    rlp1233, rlp1234} and {\tt rlpabe041}
-\label{tbl:ipsdstages}}
-\small
+\caption{IPSD Science Stages: Average Processing Times (s) Per Stage
+\label{tbl:scistagetimes}}
 \vspace{\baselineskip}
-\begin{tabular}{lrlcrrc|crr}
+\begin{tabular}{llcrrc|crr}
 \hline\hline
-   &    &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
-              &&& \multicolumn{2}{c}{{\tt rlpabe041}} \\
-\# & tp & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
-              &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+   &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
+         &&& \multicolumn{2}{c}{{\tt rlpabe041}} \\
+\# & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
+         &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
 \hline
- 1 &    &                     sliceInfo &&  0.002 &  0.001 &&&  0.001 &  0.002 \\
- 2 &    &                       symLink &&  0.001 &  0.001 &&&  0.001 &  0.002 \\
- 3 &  I &                   imageInput0 &&  1.804 &  0.527 &&&  1.457 &  1.177 \\
- 4 & *  &                visitMetadata0 &&  0.076 &  0.975 &&&  9.640 &  3.985 \\
- 5 &    &            transformMetadata0 &&  0.013 &  0.007 &&&  0.024 &  0.122 \\
- 6 &    &             validateMetadata0 &&  0.002 &  0.001 &&&  0.002 &  0.003 \\
- 7 &  I &          visitMetadataOutput0 &&  0.001 &  0.001 &&&  0.001 &  0.002 \\
- 8 &  I &    rawImageAndMetadataOutput0 &&  1.999 &  0.374 &&&  0.629 &  0.790 \\
- 9 & *  &   identifyCalibrationProducts &&  0.020 &  0.008 &&&  0.024 &  0.036 \\
-10 & *I &              calibrationInput && 11.927 &  2.810 &&&  4.453 &  3.566 \\
-11 &    &  transformCalibrationMetadata &&  0.004 &  0.003 &&&  0.004 &  0.004 \\
-12 & *S &                          isr0 &&  1.604 &  0.135 &&&  1.571 &  0.664 \\  % 0
-13 & *S &               sourceDetection &&  1.685 &  0.449 &&&  1.695 &  1.992 \\  % 0
-14 &  I &    calibAndBkgdExposureOutput && 10.627 &  1.536 &&&  3.145 &  2.595 \\
-15 &  S &             sourceMeasurement &&  1.093 &  2.028 &&&  3.155 &  5.759 \\  % +
-16 & *I &   exposureAndWcsSourcesOutput &&  0.228 &  0.245 &&& 11.075 & 10.217 \\
-17 & *S &              psfDetermination &&  0.207 &  0.149 &&&  0.212 &  0.141 \\  % 0
-18 &  I &                     psfOutput &&  0.120 &  0.097 &&&  0.121 &  0.081 \\
-19 &  I &                   imageInput1 &&  1.761 &  0.494 &&&  1.693 &  1.624 \\
-20 &    &                visitMetadata1 &&  0.038 &  0.033 &&& 10.039 &  0.004 \\
-21 &    &            transformMetadata1 &&  0.013 &  0.005 &&&  0.011 &  0.007 \\
-22 &    &             validateMetadata1 &&  0.002 &  0.002 &&&  0.001 &  0.001 \\
-23 &  I &          visitMetadataOutput1 &&  0.002 &  0.002 &&&  0.001 &  0.001 \\
-24 &  I &    rawImageAndMetadataOutput1 &&  2.126 &  0.553 &&&  0.910 &  1.317 \\
-25 & *S &                          isr1 &&  1.709 &  0.466 &&&  1.633 &  0.596 \\  % 0
-26 & *I &               wcsSourcesInput &&  0.034 &  0.029 &&& 10.045 &  0.034 \\
-27 & *S &              wcsDetermination &&  0.194 &  0.050 &&&  0.249 &  0.506 \\  % +
-28 & *I &     calibratedExposuresOutput && 10.514 &  1.819 &&& 11.000 &  6.178 \\
-29 & *  &              CcdMetadataStage &&  0.002 &  0.001 &&&  0.003 &  0.024 \\
-30 & *I &         templateMetadataInput &&  0.062 &  0.089 &&&  0.432 &  1.181 \\
-31 & *  &             templateDimension &&  0.016 &  0.005 &&&  0.033 &  0.007 \\
-32 & *  &                  templateBBox &&  0.004 &  0.001 &&&  0.030 &  0.192 \\
-33 & *I &         templateSubimageInput && 27.218 &  3.925 &&& 57.291 & 34.928 \\
-34 &  I &        templateSubimageOutput &&  5.574 &  1.043 &&&  2.209 &  1.212 \\
-35 & *S &              imageDifference0 && 82.343 &  9.706 &&& 77.912 &  5.336 \\  % -
-36 & *S &              imageDifference1 && 80.247 & 11.998 &&& 75.806 &  8.876 \\  % -
-37 & *I &         differenceImageOutput && 10.172 &  1.606 &&&  3.260 &  2.316 \\
-38 & *S &                  addAndDetect &&  7.966 &  0.126 &&& 12.335 &  2.423 \\  % +
-39 & *S &          diaSourceMeasurement &&  0.473 &  2.211 &&&  7.830 & 23.511 \\  % +
-40 & *  &             sourceToDiaSource &&  0.050 &  0.082 &&&  0.125 &  0.109 \\
-41 & *S &          sourceClassification &&  0.008 &  0.007 &&&  0.059 &  0.405 \\  % +
-42 & *I &              diaSourceOutput0 &&  1.947 &  4.220 &&& 10.210 &  0.232 \\
-43 & *I &              diaSourceOutput1 &&  0.106 &  0.143 &&& 10.206 &  0.182 \\
-44 & *  &              associationEvent &&  0.002 &  0.001 &&&  0.001 &  0.001 \\
-45 & *I &                   sdqaOutput0 &&  0.047 &  0.015 &&& 10.056 &  0.012 \\
-46 & *I &                   sdqaOutput1 &&  0.028 &  0.010 &&& 10.050 &  0.170 \\
+12 &                  isr0 &&  1.604 &  0.135 &&&  1.571 &  0.664 \\  % 0
+13 &       sourceDetection &&  1.685 &  0.449 &&&  1.695 &  1.992 \\  % 0
+15 &     sourceMeasurement &&  1.093 &  2.028 &&&  3.155 &  5.759 \\  % +
+17 &      psfDetermination &&  0.207 &  0.149 &&&  0.212 &  0.141 \\  % 0
+25 &                  isr1 &&  1.709 &  0.466 &&&  1.633 &  0.596 \\  % 0
+27 &      wcsDetermination &&  0.194 &  0.050 &&&  0.249 &  0.506 \\  % +
+35 &      imageDifference0 && 82.343 &  9.706 &&& 77.912 &  5.336 \\  % -
+36 &      imageDifference1 && 80.247 & 11.998 &&& 75.806 &  8.876 \\  % -
+38 &          addAndDetect &&  7.966 &  0.126 &&& 12.335 &  2.423 \\  % +
+39 &  diaSourceMeasurement &&  0.473 &  2.211 &&&  7.830 & 23.511 \\  % +
+41 &  sourceClassification &&  0.008 &  0.007 &&&  0.059 &  0.405 \\  % +
 \hline
-\multicolumn{10}{l}{Type codes: FI = input/output stage, * = production stage,
-S = scientific algorithm stage} \\
 \end{tabular}
 \end{center}
 \end{table}
@@ -472,36 +502,6 @@ run was set to 10.  We believe that we can probably reduce this
 parameter to 5 without loss in processing fidelity; subsequent tests
 with this value ({\tt rlp1248}) indicate that this would reduce the
 duration of the image subtraction stage by another 20 seconds.
-
-\begin{table}[htbp]
-\begin{center}
-\small
-\caption{Night-MOPS and Association: Average Processing Times (s) Per
-  Stage.
-\label{tbl:otherstages}}
-\vspace{\baselineskip}
-\begin{tabular}{lrlrr|lrlrr}
-\hline\hline
-\multicolumn{5}{c|}{Association} & \multicolumn{5}{c}{Night-MOPS} \\
-\# & tp & Name & \multicolumn{1}{c}{average}&\multicolumn{1}{c|}{$3\sigma$} &
-\# & tp & Name & \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
-\hline
-1 &    & symLink                  &  0.001 &  0.006 & 1 & *S & NightMopsStage           & 10.228 &  4.485 \\ 
-2 &  I & load                     &  0.458 &  0.081 & 2 & *I & output                   &  0.155 &  0.597 \\ 
-3 & *I & diaSourceInput           &  0.015 &  0.017 & 3 & *\phantom{I}  & associationEvent         &  0.020 &  0.078 \\ 
-4 & *S & MatchDiaSourcesStage     &  0.005 &  0.005 &&&&&\\ 
-5 & *S & diaSourceMatchOutput     &  0.259 &  0.406 &&&&&\\ 
-6 & *I & predInput                &  0.003 &  0.004 &&&&&\\ 
-7 & *S & MatchMopsPredsStage      &  0.002 &  0.002 &&&&&\\ 
-8 & *I & predMatchAndObjectOutput &  0.112 &  0.231 &&&&&\\ 
-9 & *I & store                    &  0.379 &  0.248 &&&&&\\ 
-\hline
-\multicolumn{10}{l}{Type codes: I = input/output stage, S = Stage
-  applying a scientific algorithm, * = production stage,} \\
-\multicolumn{5}{l}{} \\
-\end{tabular}
-\end{center}
-\end{table}
 
 Comparing the LSST cluster runs with the Abe run reveals how the IPSD 
 pipeline holds up to scaling.  Note that the Abe run processed 9 times
@@ -547,7 +547,7 @@ testing.
 
 \begin{table}[htbp]
 \begin{center}
-\caption{IPSD: Average Processing Times (s) Per Stage across all
+\caption{IPSD Science Stages: Average Processing Times (s) Per Stage across all
   Slices and Visits
 \label{tbl:allscislices}}
 \vspace{\baselineskip}
@@ -582,6 +582,166 @@ rlp1233} \& {\tt rlp1234}) with the Abe run is revealing, particularly
 when we break it differentiate between file-based I/O and database
 I/O.  
 
+\begin{table}[htbp]
+\begin{center}
+\caption{IPSD File I/O Stages: Average Processing Times (s) Per Stage
+\label{tbl:fiostagetimes}}
+\small
+\vspace{\baselineskip}
+\begin{tabular}{llcrrc|crr}
+\hline\hline
+   &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
+         &&& \multicolumn{2}{c}{{\tt rlpabe041}} \\
+\# & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
+         &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+\hline
+ 3 &                   imageInput0 &&  1.804 &  0.527 &&&  1.457 &  1.177 \\
+ 7 &          visitMetadataOutput0 &&  0.001 &  0.001 &&&  0.001 &  0.002 \\
+ 8 & rawImageAndMetadataOutput0$^*$&&  1.999 &  0.374 &&&  0.629 &  0.790 \\
+10 &              calibrationInput && 11.927 &  2.810 &&&  4.453 &  3.566 \\
+14 &    calibAndBkgdExposureOutput && 10.627 &  1.536 &&&  3.145 &  2.595 \\
+16 &exposureAndWcsSourcesOutput$^*$&&  0.228 &  0.245 &&& 11.075 & 10.217 \\
+18 &                     psfOutput &&  0.120 &  0.097 &&&  0.121 &  0.081 \\
+19 &                   imageInput1 &&  1.761 &  0.494 &&&  1.693 &  1.624 \\
+23 &          visitMetadataOutput1 &&  0.002 &  0.002 &&&  0.001 &  0.001 \\
+24 & rawImageAndMetadataOutput1$^*$&&  2.126 &  0.553 &&&  0.910 &  1.317 \\
+28 &     calibratedExposuresOutput && 10.514 &  1.819 &&& 11.000 &  6.178 \\
+30 &         templateMetadataInput &&  0.062 &  0.089 &&&  0.432 &  1.181 \\
+33 &         templateSubimageInput && 27.218 &  3.925 &&& 57.291 & 34.928 \\
+34 &        templateSubimageOutput &&  5.574 &  1.043 &&&  2.209 &  1.212 \\
+37 &         differenceImageOutput && 10.172 &  1.606 &&&  3.260 &  2.316 \\
+\hline
+\multicolumn{9}{l}{$^*$includes both database and file-based I/O}
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[hbtp]
+\begin{center}
+\caption{IPSD Database I/O Stages: Average Processing Times (s) Per Stage
+\label{tbl:diostagetimes}}
+\small
+\vspace{\baselineskip}
+\begin{tabular}{llcrrc|crr}
+\hline\hline
+   &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
+         &&& \multicolumn{2}{c}{{\tt rlpabe041}} \\
+\# & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
+         &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+\hline
+ 8 &  rawImageAndMetadataOutput0$^*$&&  1.999 &  0.374 &&&  0.629 &  0.790 \\
+16 & exposureAndWcsSourcesOutput$^*$&&  0.228 &  0.245 &&& 11.075 & 10.217 \\
+24 &  rawImageAndMetadataOutput1$^*$&&  2.126 &  0.553 &&&  0.910 &  1.317 \\
+26 &                wcsSourcesInput &&  0.034 &  0.029 &&& 10.045 &  0.034 \\
+42 &               diaSourceOutput0 &&  1.947 &  4.220 &&& 10.210 &  0.232 \\
+43 &               diaSourceOutput1 &&  0.106 &  0.143 &&& 10.206 &  0.182 \\
+45 &                    sdqaOutput0 &&  0.047 &  0.015 &&& 10.056 &  0.012 \\
+46 &                    sdqaOutput1 &&  0.028 &  0.010 &&& 10.050 &  0.170 \\
+\hline
+\multicolumn{9}{l}{$^*$includes both database and file-based I/O}
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\caption{IPSD Miscellaneous Stages: Average Processing Times (s) Per Stage
+\label{tbl:miscstagetimes}}
+\small
+\vspace{\baselineskip}
+\begin{tabular}{llcrrc|crr}
+\hline\hline
+   &      && \multicolumn{2}{c}{{\tt rlp1233} \& {\tt rlp1234}} 
+         &&& \multicolumn{2}{c}{{\tt rlpabe041}} \\
+\# & Name && \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} 
+         &&& \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+\hline
+ 1 &                     sliceInfo &&  0.002 &  0.001 &&&  0.001 &  0.002 \\
+ 2 &                       symLink &&  0.001 &  0.001 &&&  0.001 &  0.002 \\
+ 4 &                visitMetadata0 &&  0.076 &  0.975 &&&  9.640 &  3.985 \\
+ 5 &            transformMetadata0 &&  0.013 &  0.007 &&&  0.024 &  0.122 \\
+ 6 &             validateMetadata0 &&  0.002 &  0.001 &&&  0.002 &  0.003 \\
+ 9 &   identifyCalibrationProducts &&  0.020 &  0.008 &&&  0.024 &  0.036 \\
+11 &  transformCalibrationMetadata &&  0.004 &  0.003 &&&  0.004 &  0.004 \\
+20 &                visitMetadata1 &&  0.038 &  0.033 &&& 10.039 &  0.004 \\
+21 &            transformMetadata1 &&  0.013 &  0.005 &&&  0.011 &  0.007 \\
+22 &             validateMetadata1 &&  0.002 &  0.002 &&&  0.001 &  0.001 \\
+29 &              CcdMetadataStage &&  0.002 &  0.001 &&&  0.003 &  0.024 \\
+31 &             templateDimension &&  0.016 &  0.005 &&&  0.033 &  0.007 \\
+32 &                  templateBBox &&  0.004 &  0.001 &&&  0.030 &  0.192 \\
+40 &             sourceToDiaSource &&  0.050 &  0.082 &&&  0.125 &  0.109 \\
+44 &              associationEvent &&  0.002 &  0.001 &&&  0.001 &  0.001 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[htbp]
+\begin{center}
+\small
+\caption{Night-MOPS and Association: Average Processing Times (s) Per
+  Stage.
+\label{tbl:otherstagetimes}}
+\vspace{\baselineskip}
+\begin{tabular}{lrlrr|lrlrr}
+\hline\hline
+\multicolumn{5}{c|}{Association} & \multicolumn{5}{c}{Night-MOPS} \\
+\# & tp & Name & \multicolumn{1}{c}{average}&\multicolumn{1}{c|}{$3\sigma$} &
+\# & tp & Name & \multicolumn{1}{c}{average}&\multicolumn{1}{c}{$3\sigma$} \\ 
+\hline
+1 &    & symLink                  &  0.001 &  0.006 & 1 & *S & NightMopsStage           & 10.228 &  4.485 \\ 
+2 &  I & load                     &  0.458 &  0.081 & 2 & *I & output                   &  0.155 &  0.597 \\ 
+3 & *I & diaSourceInput           &  0.015 &  0.017 & 3 & *\phantom{I}  & associationEvent         &  0.020 &  0.078 \\ 
+4 & *S & MatchDiaSourcesStage     &  0.005 &  0.005 &&&&&\\ 
+5 & *S & diaSourceMatchOutput     &  0.259 &  0.406 &&&&&\\ 
+6 & *I & predInput                &  0.003 &  0.004 &&&&&\\ 
+7 & *S & MatchMopsPredsStage      &  0.002 &  0.002 &&&&&\\ 
+8 & *I & predMatchAndObjectOutput &  0.112 &  0.231 &&&&&\\ 
+9 & *I & store                    &  0.379 &  0.248 &&&&&\\ 
+\hline
+\multicolumn{10}{l}{Type codes: I = input/output stage, S = Stage
+  applying a scientific algorithm, * = production stage,} \\
+\multicolumn{5}{l}{} \\
+\end{tabular}
+\end{center}
+\end{table}
 
 
+
+
+Finally, we also examined the time spent by the pipeline harness
+framework to manage and execute the stages repeatedly and in
+sequence, what we refer to as the pipeline overhead.  One way to
+calculate this on a per stage basis is to take the total time spent
+executing a stage and subtract the time spent in actual application
+code as well as the time waiting for data to become available (as
+signalled by an event).  We find that the biggest contributers to the
+overhead are the number of stages in a pipeline and the number of
+events that must be handled per visit.  Illustrating this,
+table \ref{tbl:stageoverhead} shows the per-stage overhead times for
+the three pipelines.  A relatively significant penalty is added to
+those stages that are preceeded by the reception of an event.
+Nevertheless, the overall overhead, $\lesssim $ 8 ms per stage, is still
+small compared to typically application processing time.  
+
+\begin{table}[htbp]
+\begin{center}
+\caption{IPSD: Average Processing Times (s) Per Stage. 
+\label{tbl:stageoverhead}}
+\vspace{\baselineskip}
+% \begin{tabular}{l|crcl|crcl}
+\begin{tabular}{l|crcl|crcl}
+\hline\hline
+      & \multicolumn{4}{c|}{With no event handling} 
+      & \multicolumn{4}{c}{With event handling} \\
+Name  & \multicolumn{2}{r}{average} &$\pm$& \multicolumn{1}{l|}{$3\sigma$}
+      & \multicolumn{2}{r}{average} &$\pm$& \multicolumn{1}{l}{$3\sigma$} \\
+\hline
+IPSD      && 8.0 &$\pm$& 3.5 ms&& 28.3 &$\pm$& 4.3 ms \\ 
+nightmops && 6.7 &$\pm$& 0.5 ms&& 36.5 &$\pm$& 8.9 ms \\
+ap        &\hfil& 4.0 &$\pm$& 0.2 ms&& 11.7 &$\pm$& 2.5 ms \\ 
+\hline
+\end{tabular}
+\end{center}
+\end{table}
 
