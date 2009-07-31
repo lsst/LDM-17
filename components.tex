@@ -2,45 +2,69 @@
 
 \section{Components}
 
-Harness
+As in DC2, processing flow in DC3a is guided by three production pipelines. Each of
+these pipelines, consisting of a consecutive series of independent stages
+linked together via a software harness, will be explained in greater detail below. 
 
-Pipelines
-
-Database
-
-Events Broker
-
-\subsection{Overview of Processing Flow}
-
-As in DC2, processing flow is guided by three production pipelines. Each of
-these pipelines will be explained in greater detail below.
-
-\being{itemize}
+\begin{itemize}
 
 \item The \textit{image processing and source detection} (IPSD) pipeline takes 
 as input the raw exposure images along with the related calibration data and 
-produces a catalog of the light sources found within those images.
+produces a catalog of the light sources found within those images. DC3a added
+image signature removal to this pipeline, along with the paradigm in which
+images are processed in pairs to allow for cosmic ray detection.
 
-\item The \textit{Moving Object Processing System} pipeline (MOPS) takes
+\item The \textit{Night Moving Object Processing System} pipeline (NightMOPS) takes
 time and coordinate information from the exposure and creates
 a catalog of known solar system objects expected to be within
-the exposure FOV.
+the exposure FOV. It operates in parallel with the IPSD pipeline.
 
 \item The \textit{association pipeline} (AP) then correlates the sources found
 by the IPSD with known objects --- either fixed objects or objects expected
-by MOPS to be within the FOV --- to determine whether unexpected sources
+by NightMOPS to be within the FOV --- to determine whether new sources
 have been detected.
 
 \end{itemize}
 
+The three pipelines are loosely coupled via event-based communication. 
+The whole system is configured via a set of 
+human-readable \textit{policy files} which define the different stages which make 
+up the pipeline and provide values for parameters that control the behavior of components.
+Each pipeline and each application stage within the pipeline has an associated
+policy file. 
+
+The pipeline stages are coordinated through an \textit{orchestration layer},
+a set of Python objects used to set up and launch pipelines (Section 
+\ref{sec:PipelineOrchestration}, page \pageref{sec:PipelineOrchestration}).
+An \textit{event broker} serves as a common communication
+point among the pipelines, and allows for the capture of execution
+logging information for system debugging and performance analysis. 
+
+A shared MySQL database was used to exchange information between the
+pipelines.
+
+\subsection{Overview of Processing Flow}
+
+A processing run is triggered by invoking an orchestration layer 
+command line utility named \texttt{Orca} with a run ID and a policy file.
+The run ID is a unique identifier assigned to a particular processing run,
+and all outputs of a run can be associated with their run ID for debugging
+or analysis purposes.
+
+Based on the information contained in the \texttt{Orca} policy file, a
+pipeline harness is instantiated for each of the three pipelines. For each
+exposure pair to be processed, a signal is sent to the event broker to indicate
+the availability of the corresponding raw data, whereupon the pipelines 
+begin processing.
+
 \subsubsection{Image Processing and Source Detection (IPSD)}
 
 The IPSD pipeline processes images in pairs: two exposures, designated 0 and 1, 
-are considered to have been taken consecutively of the same field of view at 
+are considered to have been taken consecutively with the same field of view at 
 essentially the same time. This pairing of exposures allows for the detection 
-of cosmic rays appearing in one exposure but not the other.
+of cosmic rays appearing in one exposure but not the other. 
 
-In order, the IPSD does the following:
+The IPSD performs the following tasks, in sequence:
 
 \begin{itemize}
 
@@ -80,7 +104,7 @@ image, and the difference images created are persisted.
 
 \item These difference images are added together. Source detection
 and measurement is then performed. The sources detected are
-persisted in the database.
+persisted in the DIASource database.
 
 \item The association pipeline is signaled through the events broker
 that the processing of the image pair is complete and that the source
@@ -90,11 +114,46 @@ data is ready for the association process.
 
 \end{itemize}
 
-\subsubsection{Moving Object Processing System (MOPS)}
+\subsubsection{Night Moving Object Processing System (MOPS)}
+
+The MOPS pipeline performs the following tasks, in sequence:
+
+\begin{itemize}
+
+\item Given the required field of view, MOPS predicts the positions 
+of known moving objects in the field.
+
+\item These positions are recorded into the database.
+
+\item MOPS then signals the association pipeline, through the events
+broker, that its predictions are available.
+
+\end{itemize}
 
 \subsubsection{Association Pipeline (AP)}
 
-\subsection{Applications}
+The association pipeline performs the following tasks, in sequence:
+
+\begin{itemize}
+
+\item The pipeline awaits signals from the event broker that
+both the IPSD and MOPS pipelines have completed their computations
+on a given pair of exposures.
+
+\item New source detections from the DIASource catalog are loaded 
+into memory.
+
+\item These detections are matched against known, fixed objects.
+Matches are recorded into the database.
+
+\item The MOPS predictions for known moving objects are loaded 
+into memory, and the new source detections are matched against
+these predictions. Again, matches are recorded in the database.
+
+\item New sources are then used to update the catalog of known
+objects.
+
+\end{itemize}
 
 \subsection{Hardware Deployment}
 
@@ -118,6 +177,7 @@ sufficiently to use it for production runs on the NCSA cluster, as planned.
 \subsubsection{NCSA Abe}
 
 For purposes of testing the scalability of the pipelines, additional runs were
+performed on a larger cluster, Abe, hosted at NCSA. Abe consists of 1200
 dual quad-core Xeon 2.33 GHz processors; for the LSST runs we used 36 of these 
 nodes, for a total of 288 cores, sufficient to process an entire focal plane 
 for the CHFT-LS images. Each core has 1 GB of memory, and shared access
