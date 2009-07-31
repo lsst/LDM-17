@@ -2,9 +2,72 @@
 
 \section{Software Development Practices}
 
+The development practices of the LSST development team were 
+described in detail in the report on Data Challenge 2. This
+section restates some central points and describes some new
+features of the software development environment.
+
+
+\subsection{Technical Control Team}
+
+A goal of DC3 was to increase the formalization of the
+development process as a way to compensate for the increasing
+size of the increasingly distributed development team.
+Accomplishing this goal called for a more central role for
+the Technical Control Team (TCT), known in DC2 as the
+Configuration Control Board (CCB), which serves as an internal
+forum on key topics for the development of LSST Data Management software, including 
+major design issues, the tools to be used, and standards and policies.
+The TCT meets monthly to set development policy 
+
+
+
+
+(settling 
+questions such as, when are developers expected to work
+on branches or 
+
+
+
+, come to agreement on 
+
+approval of the use of third-party software packages,
+
+
+
 \subsection{UML Modeling}
+
+UML modeling continues to play a central role in the code
+development process. 
+
+Software classes for LSST are designed in UML, the Unified
+Modeling Language, before coding. UML is a general set of 
+standards for diagramming abstract models for object-oriented
+development. There is a general LSST model meant for the
+final production code, and specializations of that model for
+the specific subset of that model that falls within the scope
+of the current data challenge. At the end of each data
+challenge, the general LSST model is updated with 
+
+As in previous data challenges, the UML models are created
+and maintained using a commercial software package, 
+Enterprise Architect, allowing for interactive and collaborative
+design.
+
+New components or software stages are first designed in UML,
+and before any code is written the model is reviewed 
 
 \subsection{Software Development Environment}
 
+
+
+
+
+This included the creation of an automated ``buildbot'' which
+on a daily basis builds the hardware stack from scratch.
+
+\subsection{Coding and Documentation Standards}
+
+Code standards for C++ and Python were 
 
 
