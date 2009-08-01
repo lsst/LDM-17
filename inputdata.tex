@@ -2,14 +2,45 @@
 
 \section{Input Data}
 
+For DC3, we used two sources for images to be input to the pipelines.
+As in DC2, we used real images from the CFHT Legacy 
+Survey\footnote{http://www.cfht.hawaii.edu/Science/CFHLS/} along 
+with their associated source catalogs. For DC3a we also introduced 
+simulated images generated specifically for LSST, along with the
+catalog data generated as part of the simulation process.
+
+The CFHT-LS Deep Survey images come from the Canadian-France-Hawaii
+Telescope  using the MegaCam mosaicing camera. The camera
+features a focal plane of 36 CCDs, where each CCD contains 2048
+$\times$ 4612 pixels. The total field of view for the camera is
+a full 1 degree $\times$ 1 degree square with a resolution of 0.187
+arcsecond per pixel.
+
 
 \subsection{CFHT-LS Deep Survey Data}
 
-32 CCDs.
+In DC2, calibrated images released by the CFHT-LS Deep Survey were used as 
+input. As one of the goals of DC3 was the creation of an instrument signature 
+removal (ISR) pipeline, we instead used raw images and the related 
+calibration data: flats, darks, and fringes. These raw and calibration
+images are in FITS format; metadata stored in their FITS file 
+headers allowed for matching up between exposures and the calibration
+data for that given camera run.
+
+New source detection requires that each image be subtracted from a
+template image representing the fixed objects in the field of view,
+so that the difference image can be analyzed. In DC2 a series of 
+templates were pre-calculated, one for each segment of the images to 
+be processed. In DC3, the template image is extracted as needed
+from a larger template image. For the CFHT-LS images, this larger
+template image was a stacked image created by the survey using
+the best 25\% of exposures of the field.
+
+
 
 \subsubsection{Science Data Products}
 
-The ``raw'' archival science data obtained from CFHT have  gone through
+The ``raw'' archival science data obtained from CFHT have gone through
 a modicum of pre--processing by the CFHT {\tt ELIXIR}
 pipeline\footnote{\url{http://cfht.hawaii.edu/Instruments/Imaging/MegaPrime/rawdata.html}}.
 In particular, the two amplifier readouts were spliced back together
@@ -22,10 +53,11 @@ For DC3a processing, we divided each of the 32 CCD images into 8 images
 that are approximately the anticipated size of LSST amplifier images.
 Synthesized amplifier images 0-3 come from CFHT image subsection {\tt
 [0:1056,0:4612]} of the input images, and amplifier images 4-7 from
-{\tt [1056:2112,0:4612]} (there is an additional overscan region from
-$4612 \leq y \leq 4644$ that is ignored).  Each resulting amplifier
+{\tt [1056:2112,0:4612]}; there is an additional overscan region from
+$4612 \leq y \leq 4644$ that is ignored.  Each resulting amplifier
 image is 1056 x 1153 pixels, with 32 pixels of overscan implemented as
-``prescan'' (amplifiers 0-3) or ``postscan'' (amplifiers 4-7).  When segmenting the images, we adjust the following Metadata keywords :
+``prescan'' (amplifiers 0-3) or ``postscan'' (amplifiers 4-7).  
+When segmenting the images, we adjust the following Metadata keywords :
 
 % NOTE - I coped these sections straight out of 
 % prepdc3a/python/stageCfhtForDc3a.py.  Unfortunately
@@ -71,7 +103,7 @@ exposure (exposureId = 0) of the cosmic ray split.  The second exposure of the v
 is synthesized by taking the actual
 CFHT image and adding a set of cosmic rays.  The segmented
 files are saved on disk as Images using the following formatting :
-{\tt 'raw-\%06d-e\%03d-c\%03d-a\%03d.fits' \% (visitId, exposureId,
+{\tt 'raw-\%06d-e\%03d-c\%03d-a\%03d.FITS' \% (visitId, exposureId,
 ccdId, ampId)}
 
 \subsubsection{Calibration Data Products}
@@ -146,8 +178,8 @@ processing information (i.e. DATASEC, etc..)
 
 The Image Simulation results predict non-linear distortions in the
 coordinate system, at the sub-pixel level, across a CCD. To meet the
-LSST science-goal astrometric requirements (15 milliarcsec) and to
-account for these non-linear optical distrotions, a TAN-SIP WCS
+LSST science--goal astrometric requirements (15 milliarcsec) and to
+account for these non-linear optical distortions, a TAN-SIP WCS
 solution was implemented for these images. TAN-SIP provides a
 polynomial relation between CCD positions and the position on the sky
 (where the order of the polynomial is user-specified). The TAN-SIP
@@ -163,16 +195,16 @@ of zero.
 
 \subsection{Event Generation From Input Data}
 
-The input data exist on disk as Fits files, with all requisite
+The input data exist on disk as FITS files, with all requisite
 metadata in their headers.  Conversely, the paradigm for LSST is to
 have the pixel--level science data and associated Metadata as separate
 entities, the latter ideally existing in a database but in any case
 being received separately from the camera system.  Therefore to
 generate an event for DC3a processing, we must first address the
-images on disk, translate their Fits metadata fields (e.g. 'GAIN')
+images on disk, translate their FITS metadata fields (e.g. 'GAIN')
 into LSST--format metadata fields (e.g. 'gain'), assemble selected Metadata
 representative of what the camera would know into a PropertySet, and
 send this as Event to the pipeline.
 
-This process required a metadata $\rightarrow$ Metadata mapping for
-each dataset.  This was implemented as so.
+% This process required a metadata $\rightarrow$ Metadata mapping for
+% each dataset.  This was implemented as so.
