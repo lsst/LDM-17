@@ -2,30 +2,45 @@
 
 \section{Components}
 
-As in DC2, processing flow in DC3a is guided by three production pipelines. Each of
-these pipelines, consisting of a consecutive series of independent stages
-linked together via a software harness, will be explained in greater detail below. 
+The DC3a Alert Production is accomplished through a set of
+\textit{pipelines} that work together which collectively we refer to
+as a \textit{production}.  A \textit{production run} is a particular
+instantiation and execution of those pipelines that produces a
+collection of data products, which in the case of alert production are
+the calibrated images and a catalog of detected objects.  A
+\textit{pipeline} itself is a series of processing steps (called
+\textit{stages}) which are cyclically applied to a sequence of data
+chunks.  Since alert production is meant to run in real time on data
+coming from the telescope, the chuncks of data to be processed are the
+so-called \textit{visits}, in which each visit is comprised of two
+15-second exposures of the same field in the sky.  Each visit,
+generally, is different field in the sky.    
 Figure \ref{fig:dc3apipes} diagrams major components of the processing flow in DC3a;
 figure \ref{fig:lsstpipes} shows for comparison the baseline design for processing 
 flow in the fully implemented LSST.
 
+Building on the design from DC2, the Alert Production is comprised of
+three pipelines: 
+
 \begin{itemize}
 
-\item The \textit{image processing and source detection} (IPSD) pipeline takes 
-as input the raw exposure images along with the related calibration data and 
-produces a catalog of the light sources found within those images. DC3a added
-image signature removal to this pipeline, along with the paradigm in which
-images are processed in pairs to allow for cosmic ray detection.
+\item The \textit{image processing and source detection} (IPSD)
+  pipeline takes as input the raw exposure images along with the
+  related calibration data and produces a catalog of the light sources
+  found within those images. DC3a added image signature removal to
+  this pipeline, along with the paradigm of processing both exposures
+  the make up the visit and use them to detect cosmic ray defects.
 
-\item The \textit{Night Moving Object Processing System} pipeline (NightMOPS) takes
-time and coordinate information from the exposure and creates
-a catalog of known solar system objects expected to be within
-the exposure FOV. It operates in parallel with the IPSD pipeline.
+\item The \textit{Night Moving Object Processing System} pipeline
+  (NightMOPS) takes time and coordinate information from the exposure
+  and creates a catalog of known solar system objects expected to be
+  within the exposure FOV. It operates in parallel with the IPSD
+  pipeline.
 
-\item The \textit{association pipeline} (AP) then correlates the sources found
-by the IPSD with known objects --- either fixed objects or objects expected
-by NightMOPS to be within the FOV --- to determine whether new sources
-have been detected.
+\item The \textit{association pipeline} (AP) then correlates the
+  sources found by the IPSD with known objects --- either fixed
+  objects or objects expected by NightMOPS to be within the FOV --- to
+  determine whether new sources have been detected.
 
 \begin{figure}[t]
 \begin{center}
@@ -48,43 +63,136 @@ a subset of this design.
 
 \end{itemize}
 
-The three pipelines are loosely coupled via event-based communication. 
-The whole system is configured via a set of 
-human-readable \textit{policy files} which define the different stages which make 
-up the pipeline and provide values for parameters that control the behavior of components.
-Each pipeline and each application stage within the pipeline has an associated
-policy file. 
+A pipeline can process data in highly parallelized manner; in general,
+a pipeline will use a consistent model of data parallelism, in which a
+parallel process (a \textit{slice}) will operate on the same logical
+portion of the input dataset throughout all the pipeline stages.  For
+example, each slice in the IPSD pipeline processes a different
+amplifier segment of a CCD that comprises the focal plane.  The
+NightMOPS pipeline distributes the known objects in its catalogue
+across its slices.  
 
-The pipeline stages are coordinated through an \textit{orchestration layer},
-a set of Python objects used to set up and launch pipelines (Section 
-\ref{sec:PipelineOrchestration}, page \pageref{sec:PipelineOrchestration}).
-An \textit{event broker} serves as a common communication
-point among the pipelines, and allows for the capture of execution
-logging information for system debugging and performance analysis. 
+The three pipelines run simultaneously on different machines but are
+loosely coupled via event-based communication.  In particular, the
+IPSD and NightMOPS pipelines will process the next visit when they
+receive an external event message indicating that a new visit is
+available for processing.  These pipeline both emit an event message
+when they have finished processing a visit.  These events are picked
+up by the AP pipeline as a signal that there are new detections in the
+database to be associated with known objects.  The routing of these
+event messages between pipelines is facilited by an \textit{event
+broker} (which runs as a separate process).  
 
-A shared MySQL database was used to exchange information between the
-pipelines.
+Events are also used for collecting logging messages from all of the
+processes that make up the pipelines.  A special \textit{event
+monitor} program collects these messages and loads them into the
+database.  
+
+The whole production is configured via a set of human-readable
+\textit{policy files} which provide values for parameters that
+configure the behavior of the various pipeline components.  In
+particular, a production-level policies defines the pipelines that
+make up the production along with the properties of the platforms that
+they will run on.  Pipeline-level policies define the stages that make
+up each pipeline along with details for setting up the pipeline for
+execution.  Each stage also has a policy that sets various parameters
+used by algorithms that will be applied to the data.  
+
+Data Products come in two forms: FITS images and records into a
+database.  A shared MySQL database is used for the latter.  In
+particular, insert into and retrieval from the database is the main
+mechanism for passing object and source information betweeen
+pipelines.  
 
 \subsection{Overview of Processing Flow}
 
-A processing run is triggered by invoking an orchestration layer 
-command line utility named \texttt{Orca} with a run ID and a policy file.
-The run ID is a unique identifier assigned to a particular processing run,
-and all outputs of a run can be associated with their run ID for debugging
-or analysis purposes.
+In this section, we take a closer look how the different software
+components work together to process the sequence of visits that come
+from the telescope.  
 
-Based on the information contained in the \texttt{Orca} policy file, a
-pipeline harness is instantiated for each of the three pipelines. For each
-exposure pair to be processed, a signal is sent to the event broker to indicate
-the availability of the corresponding raw data, whereupon the pipelines 
-begin processing.
+\subsubsection{Middleware for Launching and Managing Pipelines}
+
+The \textit{orchestration layer} is responsible for configuring,
+preparing, launching, and monitoring the pipelines that make up a
+production.  In general, each pipeline can be deployed on a different
+platform, so the orchestration layer must be able to adapt to
+different platforms and operate remotely.  The layer is implemented
+via the \texttt{ctrl\_orca} software package (short for
+``Control-Orchestration''; see section \ref{sec:PipelineOrchestration})
+and initiated via its \texttt{orca.py} launch script.  This basic
+inputs to this script includes a production-level policy file
+(\texttt{dc3pipe.paf}) which contains pointers to all the other policy
+files needed to configure the pipelines.  Another important input is
+the \textit{run identifier} (or ``run-ID'', for short) which is a
+short name that identifies a particular instantiation of the pipelines
+and the overall collection of data products they will produce.  When
+executed, the script will:  
+
+\begin{itemize}
+\item Create working directories on the target platforms for input and
+  output data, policy files, and log files,
+\item Initialize the database tables to be used by the pipelines, 
+\item Deploy all needed policy files and launch scripts onto the
+  target platforms,
+\item Set the necessary software environment, and 
+\item Remotely execute each platform launch script.
+\end{itemize}
+
+For DC3a, the \texttt{orca.py} script was executed through another
+script called \texttt{launchDC3a.py} from the \texttt{ctrl\_dc3pipe}
+package.  This script handles setup that is specific to DC3a.  In
+particular, after executing the \texttt{orca.py} script, it runs
+another script that creates and emits the ``data-is-available'' events
+that trigger the IPSD and NightMOPS pipelines to start processing.
+(During actual production operation of the observatory, these events
+would be generated by the observatory control software.)  These events
+are emitted at a specified cadence to simulate retrieval of data from
+the telescope.  
+
+The ``science view'' of what each pipeline does in response to these
+events is summarized in the subsequent sections below; however, these
+actions are facilitated by the \textit{pipeline harness}, the
+application container that hosts the application code which applies
+the specific scientific algorithms to the data, as illustrated in
+Fig. \ref{fig:pex}.  The harness runs a pipeline: it is responsible
+for capturing events and making the data they contain available to the
+application.  It also manages the flow of execution, executing each
+stage in sequence, passing data between them, and start the sequence
+over again when all the stages are done processing a chunk of data.  
+
+Additional details of how the harness does its work can be found in
+section \ref{sec:harness} and more so in the DC2 Report.  For the
+discussion below, it is useful to introduce some operational concepts
+that are part of the harness framework.  First, we explicitly
+segregate processing into three different types of stages:  science
+stages (that apply science processing algorithms to the data), I/O
+stages (that read in or write out data), and miscellaneous
+book-keeping stages.  This is important for our performance analysis
+as we want to be able explicitly separate the effects, say, I/O from
+the science algorithms.  All I/O operations, be they on files in a
+filesystem or operations on a database, go through an abstract
+layer referred to as \textit{persistence}.  In particular, to
+\textit{persist} some data is to use the persistence layer to save a
+copy of the data on disk, possibly in a database.  \textit{Loading} is to
+read the data from disk and into objects in memory.  I/O is handled
+through a generic stage implementation provided by the
+\texttt{pex\_harness} package which can be configured via a policy to
+read or write any data available via the persistence layer.  
+
+Data objects are passed between stages through a so-called
+\textit{clipboard} object:  any stage that wants to share data with
+subsequent stages can ``post'' it to the clipboard.  In the current
+implementation, this is an object in memory shared by all the stages;
+thus, no I/O, network communication, or other data copying is involved
+in the transfer. 
 
 \subsubsection{Image Processing and Source Detection (IPSD)}
 
-The IPSD pipeline processes images in pairs: two exposures, designated 0 and 1, 
-are considered to have been taken consecutively with the same field of view at 
-essentially the same time. This pairing of exposures allows for the detection 
-of cosmic rays appearing in one exposure but not the other. 
+The IPSD pipeline processes images in pairs: two exposures, designated
+0 and 1, are considered to have been taken consecutively with the same
+field of view at essentially the same time. This pairing of exposures
+allows for the detection of cosmic rays appearing in one exposure but
+not the other.
 
 The IPSD performs the following tasks, in sequence:
 
@@ -96,7 +204,7 @@ images.
 
 \item For image 0 of the pair, metadata in the FITS file header is read in, 
 giving the exposure time, location of the field of view, and similar information, 
-which is then persisted to the clipboard.
+which is then posted to the clipboard.
 
 \item Given this information, the calibration products associated with that
 exposure are identified by lookup. Calibration products include darks,

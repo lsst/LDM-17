@@ -1,24 +1,30 @@
 % section 1: Introduction
 
 \section{Introduction}
-Data Challenge 3 (DC3) is the third in a series of prototypes of the LSST Data Management
-System (DMS). Through these data challenges, we seek to identify the most challenging technical
-problems to building a DMS that meets the LSST science goals. We prototype specific solutions to
-these challenges with the expectation that by the start of the construction phase of the telescope,
-we will have a well-defined plan for how to build a DMS that can perform at the level needed by
-first light. Despite the prototyping nature of the data challenges, we are not producing throwaway
-code; rather, we expect that the software we produce in the data challenges will serve as the
-foundation for the DMS that will be completed during the construction phase.
-In Data Challenge 2 (DC2) \iffalse \ref{DC2report}\fi, we focused on demonstrating the use of
-astronomical algorithms for nightly processing in an LSST processing
-framework.  The scope of DC3 is significantly larger, including both a
-more capable implementation of the Alert Production and a first
-prototype implementation of the Data Release Production.
+
+Data Challenge 3 (DC3) is the third in a series of prototypes of the
+LSST Data Management System (DMS). Through these data challenges, we
+seek to identify the most challenging technical problems to building a
+DMS that meets the LSST science goals. We prototype specific solutions
+to these challenges with the expectation that by the start of the
+construction phase of the telescope, we will have a well-defined plan
+for how to build a DMS that can perform at the level needed by first
+light. Despite the prototyping nature of the data challenges, we are
+not producing throwaway code; rather, we expect that the software we
+produce in the data challenges will serve as the foundation for the
+DMS that will be completed during the construction phase.  In Data
+Challenge 2 (DC2) \iffalse \ref{DC2report}\fi, we focused on
+demonstrating the use of astronomical algorithms for nightly
+processing in an LSST processing framework.  The scope of DC3 is
+significantly larger, including both a more capable implementation of
+the Alert Production and a first prototype implementation of the Data
+Release Production.
 
 Because of the large scope of DC3, we have divided it into two phases,
 DC3a and b.  DC3a includes only the Alert Production capabilities,
-while DC3b adds the Data Release Production.  This report describes the results of 
-DC3a only. We enumerate our goals, summarize the implementation, and report on what we've learned from it.
+while DC3b adds the Data Release Production.  This report describes
+the results of DC3a only. We enumerate our goals, summarize the
+implementation, and report on what we've learned from it.
 
 \subsection{Goals of DC3a}
 
@@ -58,4 +64,4 @@ evaluate the outcome than we used for DC2.  They are as follows:
   $\leq$ XX*peak unsubtracted value)
 \end{itemize}
 
-The achieved values of these metrics are presented in Section \XXX{metrics}.
+The achieved values of these metrics are presented in Section \ref{metrics}.
