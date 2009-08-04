@@ -5,6 +5,9 @@
 As in DC2, processing flow in DC3a is guided by three production pipelines. Each of
 these pipelines, consisting of a consecutive series of independent stages
 linked together via a software harness, will be explained in greater detail below. 
+Figure \ref{fig:dc3apipes} diagrams major components of the processing flow in DC3a;
+figure \ref{fig:lsstpipes} shows for comparison the baseline design for processing 
+flow in the fully implemented LSST.
 
 \begin{itemize}
 
@@ -23,6 +26,25 @@ the exposure FOV. It operates in parallel with the IPSD pipeline.
 by the IPSD with known objects --- either fixed objects or objects expected
 by NightMOPS to be within the FOV --- to determine whether new sources
 have been detected.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=3in]{images/DC3aNightly.pdf}
+\caption{Processing flow in DC3a. Three pipelines (IPSD, Association, and
+NightMOPS) are supported by a common infrastructure.  
+\label{fig:dc3apipes}}
+\end{center}
+\end{figure}
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=4.5in]{images/LSSTpipes.pdf}
+\caption{Baseline design for nightly image processing flow for LSST; DC3a represents
+a subset of this design.  
+\label{fig:lsstpipes}}
+\end{center}
+\end{figure}
+
 
 \end{itemize}
 
