@@ -46,7 +46,8 @@ The LSST stack is itself licensed, by TCT determination, under the GPL3 Gnu
 General Public License\footnote{http://dev.lsstcorp.org/trac/wiki/SWLicense}.
 GPL3 allows others to copy, redistribute, extend, or modify the software as long
 as source code for such extensions is still distributed in source form. It does
-not allow the software to be used as part of a proprietary software package.
+not allow the software to be used as part of a proprietary software
+package in the absence of second license.   
 
 
 \subsection{UML Modeling}
@@ -82,13 +83,11 @@ automated ``buildbot'' which on a daily basis builds the software stack
 from scratch, and builds all components from the LSST software trunk against
 a standard stack of utilites, producing a report via web 
 interface\footnote{http://dev.lsstcorp.org/buildbot/} for displaying the
-results of a build. If someone checks in a package which doesn't 
-compile correctly against the LSST stack, the buildbot will send out
-a warning email. A waterfall display shows a graphical timeline of builds; if a
-package build fails, that package is displayed in red on the timeline.
-The LSST buildbot was implemented using the standard
-open source package \texttt{buildbot}\footnote{http://buildbot.net/trac}
-and some LSST-specific scripts.
+results of a build.  This display will reveal when a developer checks
+in code that ``breaks a package'' (e.g. causing it not to build).  The
+LSST buildbot was implemented using the standard open source package
+\texttt{buildbot}\footnote{http://buildbot.net/trac} and some
+LSST-specific scripts. 
 
 For DC3b, it is anticipated that the buildbot will be expanded to include
 automated checking of the package source code to verify compliance with
@@ -101,28 +100,40 @@ total automated coverage of our coding standards is unlikely.
 
 \subsection{Software Integration Schedule}
 
-There is a strong sense among the development group that the software
-integration process for DC3a had a significant flaw. For previous data
-challenges, DC1 and DC2, teams independently developed code on their own
-platforms and then brought the components together for during an ``integration
-week,'' when a large segment of the development team gathered at NCSA for a week
-and worked through the integration process in a tiger-team fashion. For DC3,
-this had an unfortunate consequence, in that there was effectively no test bed
-during the initial stages of coding, since until the integration phase
-there was no system running all of the components necessary to complete 
-even a partial pipeline run. (Substantial code refactoring and the move
-from a 32-bit to a 64-bit operating system for development meant that the 
-DC2 stack could not simply be frozen and used for this purpose.)
+For both DC2 and DC3a, the data challenge schedule was punctuated with
+a post-development integration period, highlighted by an
+``integration week'' workshop in which developers gathered in person
+at one institution pull all remaining pieces of the software for
+final execution.  While this milestone (which, in terms of travel and
+logistics, had to be planned well in advance) was useful for
+motivating developers, the software development and debugging work was
+still well underway by the time the DC3a integration week began.  This
+made it difficult to integrate and test the parts that were complete.  
 
-For the purposes of DC3a, a short-term solution was provided by
-\texttt{simpleStageTest.py}, a simple harness allowing some application stages
-to be executed independently. This allowed for some additional debugging
-capabilities.
+The seeds of these difficulties were sown early in DC3a in which the
+code tree went under significant refactoring and upgrading for 64-bit
+support.  While important and necessary, this effectively disabled use
+of our code from DC2 until the refactoring was complete.  Thus,
+developers were left without the ability to test implementations
+inside the harness framework early in the cycle.  This also caused the
+delay in the development of effective support and testing tools (which
+tend to be driven by demand and experience) later in the cycle.
 
-Following DC3a, it was felt to be essential that an installation capable
-of running the pipelines be maintained throughout the coding process,
-so that pipeline testing --- particularly, the assessment of the 
-science value of stage results, and the ability to interactively tune
-the parameters of stage algorithms --- can be performed in an on-going fashion
-rather than being deferred to the last stages of the data challenge.
+In DC3b, we plan to employ a number of strategies to avoid the late
+integration issues from DC3a in favor of an approach of continuous
+integration through out the development phase.  These include:
+
+\begin{itemize}
+\item Ensuring the DC3a code stack remains available for testing and
+  integration throughout the DC3b development phase.
+\item Limit updates to the build environment (which is critical to
+  developer progress) to the first two months of DC3b.
+\item Identify critical updates to the middleware that must be
+  delivered within the first two months of DC3b to allow 
+  creation of application early and continuously in the development
+  schedule. 
+\item Design and develop pipeline stages as semi-functioning stubs
+  early in DC3b, prior to full implementation of the underlying
+  algorithmic code.  
+\end{itemize}
 
