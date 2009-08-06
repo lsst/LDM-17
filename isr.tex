@@ -181,7 +181,7 @@ development of the ISR for DC3a.  These include :
 \item The need for a standardized set of Metadata drove the need for the 
 establishment of a {\tt datatypePolicy} for each input dataset (CFHT
 and Sim), containing a mapping to the {\tt dc3MetadataPolicy}
-established for DC3a.  In practice, this takes input Fits header
+established for DC3a.  In practice, this takes input FITS header
 keywords and maps them to the appropriate Metadata key that is
 expected to be extracted from a database query.  While this will be
 needed for {\it any} input dataset we run through our pipelines, we
@@ -219,7 +219,7 @@ utilized for DC3a (text file on disk) is not a long--term solution.
 
 \item A class representing attributes of each Detector is also needed.  
 This should contain information on e.g. its gain, readnoise, and
-defect list.  For DC3a this was solved by examining the Fits headers of
+defect list.  For DC3a this was solved by examining the FITS headers of
 each input file for the relevant Metadata.  Ideally this will instead
 happen through a database query constructing an instance of this
 Detector class.
