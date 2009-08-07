@@ -44,82 +44,41 @@ The ``raw'' archival science data obtained from CFHT have gone through
 a modicum of pre--processing by the CFHT {\tt ELIXIR}
 pipeline\footnote{\url{http://cfht.hawaii.edu/Instruments/Imaging/MegaPrime/rawdata.html}}.
 In particular, the two amplifier readouts were spliced back together
-into 2112 by 4644 pixel images corresponding to a single CCD.  To prepare the data for DC3a processing, we need
-to undo this operation to some degree, while still maintaining
-consistency between the valid data sections, overscan regions, and
-approximate Wcs information in the image headers.
+into 2112 by 4644 pixel images corresponding to a single CCD.  To
+prepare the data for DC3a processing, we undid this operation to some
+degree, while still maintaining consistency between the valid data
+sections, overscan regions, and approximate Wcs information in the
+image headers. 
 
 For DC3a processing, we divided each of the 32 CCD images into 8 images
 that are approximately the anticipated size of LSST amplifier images.
 Synthesized amplifier images 0-3 come from CFHT image subsection {\tt
-[0:1056,0:4612]} of the input images, and amplifier images 4-7 from
-{\tt [1056:2112,0:4612]}; there is an additional overscan region from
+[0:1056, 0:4612]} of the input images, and amplifier images 4-7 from
+{\tt [1056:2112, 0:4612]}; there is an additional overscan region from
 $4612 \leq y \leq 4644$ that is ignored.  Each resulting amplifier
 image is 1056 x 1153 pixels, with 32 pixels of overscan implemented as
 ``prescan'' (amplifiers 0-3) or ``postscan'' (amplifiers 4-7).  
-When segmenting the images, we adjust the following Metadata keywords :
-
-% NOTE - I coped these sections straight out of 
-% prepdc3a/python/stageCfhtForDc3a.py.  Unfortunately
-% these data sections end up being a mix of python slicing 
-% (0-indexed) and IRAF/FITS convention (1-indexed).  How did I 
-% deal with the fact that the sections are originally defined 
-% in this convention?  This is dealt with in Isr.cc, BBoxFromDatasec.
-
-\RHL{Do we need this much detail?}
-
-\begin{itemize}
-
-\item {\tt RDNOISE} : Each amplifier has a different amount of
-readnoise.  In the spliced CFHT CCD image, these are recorded as {\tt
-RDNOISEA} and {\tt RDNOISEB}.  For our segmented amplifier images we
-assign {\tt RDNOISE} as either {\tt RDNOISEA} (amplifiers 0-3) or {\tt
-RDNOISEB} (amplifiers 4-7).
-
-\item {\tt GAIN} : Derived from {\tt GAINA} and {\tt GAINB} in a
-manner similar to the {\tt RDNOISE} field.
-
-\item {\tt BIASSEC} : This is set to either columns {\tt [1:32,]} (amps
-0-3) or {\tt [1025:1056,]} (amps 4-7).
-
-\item {\tt DATASEC} and {\tt TRIMSEC} : This is set to either columns
-{\tt [33:1056,]} (amps 0-3) or {\tt [1:1024,]} (amps 4-7).
-
-\item {\tt CRPIX1} : This is left as--is for amps 0-3, and corrected
-by -1023 pixels for amps 4--7.  Additionally, for CCDs 1--16, amps
-0--3 are adjusted by another -33 pixels, and for CCDs 17--32 amps 4--7
-are adjusted by another -33 pixels.  This reflects the exclusion of a
-secondary overscan region at the ``top'' or ``bottom'' of the CCD,
-depending on the orientation of the CCD on the focal plane.
-
-\item {\tt CRPIX2} : This is adjusted by the y--axis offset of each
-amplifier image from the original CCD image.
-
-\end{itemize}
-
-The visitId associated with each Image comes from the Metadata keyword
-{\tt OBSID}, and we assume that this image represents the first
-exposure (exposureId = 0) of the cosmic ray split.  The second exposure of the visit (exposureId = 1) 
-is synthesized by taking the actual
-CFHT image and adding a set of cosmic rays.  The segmented
-files are saved on disk as Images using the following formatting :
-{\tt 'raw-\%06d-e\%03d-c\%03d-a\%03d.FITS' \% (visitId, exposureId,
-ccdId, ampId)}
+When segmenting the images, special care was taken to properly migrate
+header data describing important characteristics such as noise, gain,
+and bias for each amplifier.  Each amplifier image was saved with a
+file name that captured a visit ID (taken from the \texttt{OBSID} FITS
+keyword), CCD ID, amplifier ID, and exposure ID (indicating whether it
+is the first or second in the pair of visit exposures).  
 
 \subsubsection{Calibration Data Products}
 
 The CFHT calibration data includes FITS keywords that define the range
 of dates for which it is valid.  In order to process CFHT science frames
-we needed to associate a given filter/date with the proper calibrations.  We
-accordingly generated a \texttt{.paf} (i.e. \texttt{Policy}) file that may
-be read into a \texttt{Policy} with nested fields that enable the fast
-lookup of the correct calibration file.
+we needed to associate a given filter and date with the proper
+calibrations.  This mapping was captured in a policy file and used by
+one of the stages of the IPSD pipeline to lookup and match a given
+exposure to the appropriate calibration product.  
 
-According to Astier, ``the Elixir flats that you download from CADC
-are not fully correct on large scales. Namely, the flux of the same
-star still varies by a few percent center-to-corner'';  we have not
-attempted to correct for this effect in DC3a,  although it is clear
-that the final LSST system will need to do so.
+We note that CFHT-LS documentation explains that the flat images
+provided by the survey contain systematic errors on large scales
+resulting in variations from image center to corner of a few percent.
+We have not attempted to correct for this effect in DC3a,  although it
+is clear that the final LSST system will need to do so.
 
 \subsection{LSST Simulated Images and Catalogs}
 
@@ -195,16 +154,15 @@ of zero.
 
 \subsection{Event Generation From Input Data}
 
-The input data exist on disk as FITS files, with all requisite
-metadata in their headers.  Conversely, the paradigm for LSST is to
-have the pixel--level science data and associated Metadata as separate
-entities, the latter ideally existing in a database but in any case
-being received separately from the camera system.  Therefore to
-generate an event for DC3a processing, we must first address the
-images on disk, translate their FITS metadata fields (e.g. 'GAIN')
-into LSST--format metadata fields (e.g. 'gain'), assemble selected Metadata
-representative of what the camera would know into a PropertySet, and
-send this as Event to the pipeline.
+As described in section \ref{sec:components}, pipeline processing is
+triggered by an event indicating that new image data is
+ready.  This event contains basic metadata about the images--the
+direction of sky, the filter, etc.  In our reference design, this
+event ultimately comes from the process responsible for pulling the
+data from the camera, and the information resides new loaded in the
+database.  In DC3a where our data is in the FITS headers of images
+already cached on disk.  In lieu of a data transfer process, we have a
+simple script which that for a sequence of FITS files extracts the
+information from the headers and emits it as data events to trigger
+the pipeline processing.
 
-% This process required a metadata $\rightarrow$ Metadata mapping for
-% each dataset.  This was implemented as so.
