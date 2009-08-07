@@ -1,10 +1,23 @@
 % section 5.1.3: Pipeline Orchestration
 
-\subsubsection{Pipeline Orchestration} \label{sec:PipelineOrchestration}
+\subsection{Processing Orchestration and Control}
+
+Closely related to pipeline execution packages are the control
+packages ({\tt ctrl\_}).  The {\tt ctrl\_events} package provides the
+event framework that allows pipelines to talk to each other.  The {\tt
+ctrl\_evmon} provides the event monitor services which can listen to
+events (particularly logging events) and react intelligently.  The
+{\tt ctrl\_orca} realizes the {\it orchestration layer} responsible
+for launching pipelines.  An important part of this layer must do is
+record {\it provenance} information--all of the data describing the
+software environment and policy paramters that was used to configure
+and execute a pipeline.  
+
+\subsubsubsection{Pipeline Orchestration} \label{sec:PipelineOrchestration}
 
 The orchestration layer is a collection of Python objects used to set up and
 launch pipelines. This collection of objects is invoked via a command line
-utility named \texttt{Orca}.
+utility named \texttt{orca.py}.
 
 \texttt{Orca} takes as arguments a run ID and a policy file. The run ID is used
 to identify the pipeline run. The policy file lists configuration information
@@ -50,3 +63,76 @@ get to them.
 
 Once all the policy and data files are put into place, the Production run
 manager has each \texttt{PipelineManager} launch its pipeline.
+
+\subsubsubsection{Provenance}
+
+The Orca orchestration layer (see Section
+\ref{sec:PipelineOrchestration}) in DC3a generates enhanced provenance
+information.  In particular, the software environment and the contents
+of the policy files used to run the production are written both to log
+files and to the database.  Recording the software environment allows
+the exact configuration of LSST-packaged software used for the run to be
+reproduced later, while recording the policy files captures both
+platform configuration information such as the compute nodes and
+database used as well as all configurable science algorithm settings.
+
+This provenance information, in combination with an event sent to the
+production, is sufficient to enable accurate reconstruction of a given
+data product resulting from that event, although a demonstration of
+automated reconstruction was deferred.  When combined with the full
+sequence of events sent to the production, the provenance allows exact
+duplication of a given run.  The recorded provenance proved highly
+useful while debugging algorithmic issues since it simplified the
+construction of small reproducible test cases demonstrating problems.
+\iffalse
+\RHL{My impression was that we didn't yet have the ability to 
+down the stage configuration associated with an error, or
+is this what, ``a demonstration of 
+automated reconstruction was deferred''?}
+KTL - We can get the configuration easily.  What is not so readily
+available is the inputs to a given stage, many of which may not be
+pipeline data products (they are just internal).  This is why the text
+says "simplified" and not "automatically enabled".  The clipboard inputs
+can always be re-created by re-running the pipeline, but this may be
+inconvenient and inefficient.
+\fi
+
+The software environment is characterized by the versions of packages
+maintained by {\tt eups} that are ``setup'' at the time of production
+execution.  In addition, the actual directories declared as the
+installation locations of the packages are also persisted, allowing
+locally-setup packages and packages installed under {\tt \$LSST\_DEVEL} to
+be identified.
+
+The recorded policy file information includes the contents on a per-key
+basis as well as an MD5 hash of the file contents and the file's
+last-modified-time.  These latter two items are intended for eventual
+use to remove duplicate entries when policy files are reused across
+multiple runs.
+
+The provenance written to the database goes into two sets of tables: one
+set in the per-run database and one in a global database ({\tt
+DC3a\_DB}) that spans all DC3a runs.  The global database permits
+queries to find runs that used a given configuration.  For example, this
+query finds all runs that had the {\tt pixelScaleRangeFactor} set to a
+number other than 1.1:
+
+\begin{verbatim}
+SELECT prv_Run.runId, prv_PolicyKey.keyName, prv_cnf_PolicyKey.value
+FROM prv_Run, prv_PolicyKey, prv_cnf_PolicyKey
+WHERE prv_PolicyKey.policyKeyId = prv_cnf_PolicyKey.policyKeyId
+  AND keyName = 'pixelScaleRangeFactor'
+  AND value != '1.1'
+  AND FLOOR(prv_PolicyKey.policyFileId / 65536) = prv_Run.offset;
+\end{verbatim}
+
+Similarly, this query finds all runs that used version 3.0.9 of the {\it
+meas\_algorithms} package:
+
+\begin{verbatim}
+SELECT runId
+FROM prv_SoftwarePackage NATURAL JOIN prv_cnf_SoftwarePackage
+     JOIN prv_Run ON (FLOOR(prv_SoftwarePackage.packageId / 65536) = offset)
+WHERE packageName = 'meas_algorithms' AND version = '3.0.9';
+\end{verbatim}
+

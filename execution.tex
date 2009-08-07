@@ -1,176 +1,102 @@
 % section 5.1.2: Pipeline Execution
 
-\subsubsection{Pipeline Execution} \label{sec:harness}
+\subsubsection{Pipeline Execution} \label{sec:pex}
 
-LSST pipelines are executed within the context of a middleware layer, denoted the
-pipeline harness, that encapsulates aspects of distributed parallel
-processing, coordinates the synchronization of and communication
-between parallel worker {\tt Slice}'s,
-and provides the constructs for assembling pipelines from
-reusable scientific processing modules.
-A {\tt Pipeline} class encapsulates the main executing pipeline;
-it spawns a number of parallel workers (each denoted a {\tt Slice})
-that can be distributed across multiple processing nodes. Both {\tt Pipeline}
-and {\tt Slice} workers execute a loop of application stages
-as configured by pipeline policy.
-A primary driver for the construction of long lived parallel {\tt Slice}
-worker threads is the ability to hold image and other data in memory
-as the processing advances from one module to the next. The in-memory
-data structure that holds the collection of data on which
-applications operate is defined as a {\tt Clipboard}.
+Pipeline execution is handled by the {\tt pex\_} family of packages.
+Utility functionality is provided via {\tt pex\_exceptions,
+pex\_policy,} and {\tt pex\_logging}.  The core of pipeline execution
+is handled by {\tt pex\_harness} which provides the realization of the
+{\it pipeline harness}, summarized in section \ref{sec:components}.
 
-The software container that the harness provides for hosting an algorithm written
-by an application developer is the {\tt Stage} class.
-The {\tt Stage} class provides a standard API
-for integrating code into the LSST pipeline harness framework.
-The pipeline harness links the modular application stages to standard interfaces for
-I/O functionality and access to the persistence layer, abstracting this functionality
-away from the application code.
+\subsubsubsection{Pipeline Execution Utilities}
 
-\subsubsubsection{Pipeline Harness Modifications Since DC2}
+The pipeline execution utility packages underwent various
+improvements in DC3a.
 
-Important improvements made to the pipeline harness for DC2 included:
+\paragraph{Exceptions.}  The exception framework was overhauled in
+part to make it easier to create, throw, and handle exceptions.  In
+particular, support was improved a type of traceback that can preserve
+context-specific error messages as an error condition travels upward
+through a call stack: as an exception is caught and rethrown, handlers
+can add more information that better describes the context that
+resulted in the error.  We also changed the way exceptions travel
+across the C++--Python barrier: C++ exceptions are converted to the
+{\tt LsstCppException} class in Python, which inherits from the
+standard Python {\tt Exception} class.  This has the advantage
+allowing all exceptions to be caught via a single {\tt Exception}
+class; however, this is at the cost of easy, highly customized
+handling of exceptions based on type.  We have not figured out how
+enable both highly desirable features simultaneously.  
+
+\paragraph{Logging.}  In DC2, there existed two types of logging:  one
+primarily for debugging messages that would normally be automatically
+turned off during production runs, and one for messages that should be
+persisted.  In practice, there has not been a clear distinction
+between the two types.  For DC3a, we unified both types into a single
+unified logging framework while preserving the APIs established under
+DC2.  
+
+\paragraph{Policy.}  The {\tt Policy} class, which is used to access
+the data stored policy files used to configure pipelines, was updated
+to use the new {\tt PropertySet} internally.  The {\tt Policy} API was
+altered as well for greater consistency with the {\tt PropertySet}
+API.  
+
+\subsubsubsection{The Pipeline Harness} \label{sec:harness}
+
+At the core of {\tt pex\_harness} is the {\tt Pipeline} class which
+drives the master process of a pipeline and executes serial portion of
+each stage.  It also spawns the worker processes--the {\it slices}--on
+all of the nodes hosting the pipeline.  The {\tt Slice} class drives
+the processing in each worker process, taking its direction from the
+remote {\tt Pipeline} via MPI messages.  Both the {\tt Pipeline} and
+the {\tt Slice} workers execute a loop of application stages as
+configured by pipeline policy.  A primary driver for the construction
+of long lived parallel {\tt Slice} worker threads is the ability to
+hold image and other data in memory as the processing advances from
+one module to the next. The in-memory data structure that holds the
+collection of data on which applications operate is defined as a {\tt
+Clipboard}.
+
+The software container that the harness provides for hosting an
+algorithm written by an application developer is the {\tt Stage}
+class.  The {\tt Stage} class provides a standard API for integrating
+code into the LSST pipeline harness framework.  The pipeline harness
+links the modular application stages to standard interfaces for I/O
+functionality and access to the persistence layer, abstracting this
+functionality away from the application code.
+
+Important improvements made to the pipeline harness for DC3a included:
+
 \begin{itemize}
-\item The harness middleware package was refactored to operate with the upgraded
-software framework classes, i.e., modified to use {\tt PropertySet},
-new persistence formatters and logical location setting, new {\tt Exception} classes, etc.
-\item Infrastructure required for interSlice communication using underlying {\tt boost::mpi}
-libraries (with boost serialization) was developed within pipeline middleware.
-The interSlice communication allows complex types in the form of a {\tt PropertySet} to be
-communicated via MPI, effectively transferred from the {\tt Clipboard} of
-one {\tt Slice} to that of another.
-This functionality was not leveraged within astronomical algorithms within DC3a, but
-the groundwork laid within DC3a will allow for more rapid inclusion into suitable
-algorithms for DC3b and the future.
-\RHL{Are we happy with the performance of boost serialization?  Do we have plans
-for passing images between processes for e.g. cross-talk correction?}
-
-\item The harness logging was upgraded with the ability to write log messages to
-local log files, with a separate file for each {\tt Pipeline}
-and each {\tt Slice} worker.
-This functionality greatly facilitates debugging as middleware code and application
-stages are developed and tested.  In addition, logging in the harness
-was instrumented in coordination with the rules and constructs of the Event Monitor.
-This modification is vital for obtaining timing information on stage and visit processing,
-and for the potential detection of more complex error conditions by the Event Monitor.
-\item Pipeline policy handling was updated to use file types for the inclusion of 
-individual stage policies. This allows the stage policies to be subsumed into 
-the main pipeline policy for use 1)~by the orchestration layer for 
-simplified provenance recording, and 2)~by the pipeline harness when configuring stages 
-at runtime.  
+\item The harness middleware package was refactored to operate with
+the upgraded software framework classes, i.e., modified to use 
+{\tt PropertySet}, new persistence formatters and logical location setting,
+new {\tt Exception} classes, etc.
+\item Infrastructure required for inter-slice communication using
+underlying {\tt boost::mpi} libraries (with boost serialization) was
+developed within pipeline middleware.  Inter-slice communication
+allows complex types collected in a {\tt PropertySet} to be
+communicated via MPI, effectively transferred from the {\tt Clipboard}
+of one {\tt Slice} to that of another.  This functionality was not
+leveraged within astronomical algorithms within DC3a, but the
+groundwork laid within DC3a will allow for more rapid inclusion into
+suitable algorithms for DC3b and the future.
+\item The harness logging was upgraded with the ability to write log
+messages to local log files, with a separate file for each {\tt Pipeline}
+and each {\tt Slice} worker.  This functionality greatly facilitates
+debugging as middleware code and application stages are developed and
+tested.  In addition, a new logging pattern was employed for
+instrumenting pipeline performance that makes it easier to extract
+execution times via an event monitor script (see
+section \ref{sec:evmon}).  
+\item Pipeline policy handling was updated to the {\tt Policy} class's
+built-in facility for policy file inclusion.  Besides providing
+greater consistency with normal policy usage, this change was
+important for facilitating provenance recording.  
+\item A {\tt SimpleStageTester} class was added to provide a
+light-weight container for testing a single {\tt Stage} implementation
+in a single process (non-MPI) context.  This class proved quite
+effective for creating small scripts that replicated known bugs.  
 \end{itemize}
-
-
-\subsubsubsection{Exceptions}
-
-Exception throwing and handling was improved in DC3a. The interface was
-simplified by removing the virtually-unused inheritance from {\tt
-DataProperty}.  Instead, five features were added:
-
-\begin{itemize}
-
-\item A simple string message is used as the primary payload of the
-exception, for compatibility with standard C++ and Python exceptions.
-This also makes throwing an exception simpler for the programmer.
-
-\item A combination of macros and classes was used to automatically
-include the file, line, and function where the exception was thrown.
-This feature improves the debuggability of the code.
-
-\item Other macros allow arbitrary additional parameters to be added to
-subclasses of the generic {\tt lsst::pex::exceptions::Exception} class.
-
-\item Further macros were defined that allow additional traceback
-information, including additional messages, to be added to a caught and
-rethrown exception.
-
-\item LSST C++ exceptions are transformed via SWIG code into instances
-of the {\tt LsstCppException} class in Python, which inherits from the
-standard Python {\tt Exception} class.  The underlying SWIG-wrapped C++
-exception is available as an argument of the {\tt LsstCppException}, and
-the C++ exception's message is automatically included as part of the
-Python exception's message.  Previously, LSST C++ exceptions were
-transformed into Python exception classes that did not inherit from the
-standard Python {\tt Exception} class.
-
-\end{itemize}
-
-The result was an exception design that was simpler to throw and that
-targeted the location of the exception much more precisely.  Programmers
-are still not using the most advanced features of the exception facility
-such as adding additional parameters to exceptions; if they are found to be
-unneeded, the class can be further simplified in the future by removing
-them.
-
-\subsubsubsection{Provenance}
-
-The Orca orchestration layer (see Section
-\ref{sec:PipelineOrchestration}) in DC3a generates enhanced provenance
-information.  In particular, the software environment and the contents
-of the policy files used to run the production are written both to log
-files and to the database.  Recording the software environment allows
-the exact configuration of LSST-packaged software used for the run to be
-reproduced later, while recording the policy files captures both
-platform configuration information such as the compute nodes and
-database used as well as all configurable science algorithm settings.
-
-This provenance information, in combination with an event sent to the
-production, is sufficient to enable accurate reconstruction of a given
-data product resulting from that event, although a demonstration of
-automated reconstruction was deferred.  When combined with the full
-sequence of events sent to the production, the provenance allows exact
-duplication of a given run.  The recorded provenance proved highly
-useful while debugging algorithmic issues since it simplified the
-construction of small reproducible test cases demonstrating problems.
-\iffalse
-\RHL{My impression was that we didn't yet have the ability to 
-down the stage configuration associated with an error, or
-is this what, ``a demonstration of 
-automated reconstruction was deferred''?}
-KTL - We can get the configuration easily.  What is not so readily
-available is the inputs to a given stage, many of which may not be
-pipeline data products (they are just internal).  This is why the text
-says "simplified" and not "automatically enabled".  The clipboard inputs
-can always be re-created by re-running the pipeline, but this may be
-inconvenient and inefficient.
-\fi
-
-The software environment is characterized by the versions of packages
-maintained by {\tt eups} that are ``setup'' at the time of production
-execution.  In addition, the actual directories declared as the
-installation locations of the packages are also persisted, allowing
-locally-setup packages and packages installed under {\tt \$LSST\_DEVEL} to
-be identified.
-
-The recorded policy file information includes the contents on a per-key
-basis as well as an MD5 hash of the file contents and the file's
-last-modified-time.  These latter two items are intended for eventual
-use to remove duplicate entries when policy files are reused across
-multiple runs.
-
-The provenance written to the database goes into two sets of tables: one
-set in the per-run database and one in a global database ({\tt
-DC3a\_DB}) that spans all DC3a runs.  The global database permits
-queries to find runs that used a given configuration.  For example, this
-query finds all runs that had the {\tt pixelScaleRangeFactor} set to a
-number other than 1.1:
-
-\begin{verbatim}
-SELECT prv_Run.runId, prv_PolicyKey.keyName, prv_cnf_PolicyKey.value
-FROM prv_Run, prv_PolicyKey, prv_cnf_PolicyKey
-WHERE prv_PolicyKey.policyKeyId = prv_cnf_PolicyKey.policyKeyId
-  AND keyName = 'pixelScaleRangeFactor'
-  AND value != '1.1'
-  AND FLOOR(prv_PolicyKey.policyFileId / 65536) = prv_Run.offset;
-\end{verbatim}
-
-Similarly, this query finds all runs that used version 3.0.9 of the {\it
-meas\_algorithms} package:
-
-\begin{verbatim}
-SELECT runId
-FROM prv_SoftwarePackage NATURAL JOIN prv_cnf_SoftwarePackage
-     JOIN prv_Run ON (FLOOR(prv_SoftwarePackage.packageId / 65536) = offset)
-WHERE packageName = 'meas_algorithms' AND version = '3.0.9';
-\end{verbatim}
 
