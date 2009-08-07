@@ -8,73 +8,110 @@ event framework that allows pipelines to talk to each other.  The {\tt
 ctrl\_evmon} provides the event monitor services which can listen to
 events (particularly logging events) and react intelligently.  The
 {\tt ctrl\_orca} realizes the {\it orchestration layer} responsible
-for launching pipelines.  An important part of this layer must do is
+for launching pipelines.  An important job this layer must do is
 record {\it provenance} information--all of the data describing the
 software environment and policy paramters that was used to configure
 and execute a pipeline.  
 
-\subsubsubsection{Pipeline Orchestration} \label{sec:PipelineOrchestration}
+\subsubsubsection{Pipeline Orchestration} 
+\label{sec:PipelineOrchestration}
 
-The orchestration layer is a collection of Python objects used to set up and
-launch pipelines. This collection of objects is invoked via a command line
-utility named \texttt{orca.py}.
+In DC2, the orchestration layer was largely undeveloped; in lieu, we
+had a customized launching script that handled several of chores that
+in general would be handled by the orchestration layer.  In DC3a, we
+used this script as a starting use case to design a more generalized
+layer configuring and launching pipelines.  The design also included
+the notion of monitoring a pipeline as it runs, but we did not
+implement that part in DC3a.  
 
-\texttt{Orca} takes as arguments a run ID and a policy file. The run ID is used
-to identify the pipeline run. The policy file lists configuration information
-about the platforms where pipelines are to be launched, the type of database to
-use, and the event broker to use.
+One of the challenges we want the layer to address is adapting a
+pipeline to run on different platforms.  These platforms may differ in
+terms of, say, where data can be read in from and written out to, how
+the pipeline must be launched--e.g. right away via a remote shell
+command (as with our development cluster) versus asynchronously via a
+batch scheduler (required for NCSA Abe), and how one checks on its
+progress.  We also want it to be able to launch any kind of
+pipeline--not just one based on our pipeline harness.  To address
+these challenges, the {\tt orca} design segregates its various duties
+into separable classes, allowing for specialized versions to be
+plugged in to handle different types of pipelines and platforms.
+Similar, we had to develop a policy configuration that could mirror
+the class model and allow, for instance, the specialized classes to be
+specified in policy.  
 
-\texttt{Orca}'s object hierarchy is architected so that platform specific work
-is handled by subclasses and more generalized work is handled by super-classes.
-The objects that \texttt{Orca} instantiates and uses are specified by policy
-files. As we add support for new platforms and database configurations, we can
-expand this object hierarchy, customizing platform specific tasks to the methods
-that will be executed without having to rework the main code for \texttt{Orca}.
+The main duties of the orchestration layer are:
+\begin{itemize}
+\item Create working directories on the target platforms for input and
+  output data, policy files, and log files,
+\item Initialize the database tables to be used by the pipelines, 
+\item Deploy all needed policy files and launch scripts onto the
+  target platforms,
+\item Set the necessary software environment, 
+\item Record provenance data
+\item Remotely execute each platform launch script.
+\item Monitor the pipeline for failures (not implemented in DC3a)
+\item Shut down the pipeline (not implemented in DC3a)
+\end{itemize}
 
-The three main objects that \texttt{Orca} uses are the
-\texttt{ProductionRunManager}, the \texttt{DatabaseConfig\-urator} and the
-\texttt{PipelineManager}.  The \texttt{DatabaseConfigurator} and the
-\texttt{PipelineManager} objects are subclassed to provide database and platform
-specific functions.
+The main classes responsible for this are:
 
-The \texttt{ProductionRunManager} looks up in the policy the type of
-\texttt{DatabaseConfigurator} to use and instantiates the appropriate object.
-The \texttt{DatabaseConfigurator} is responsible for looking up the appropriate
-database authentication information for the user, connecting to the database,
-and creating the necessary database tables that will be used to record
-information about the run.
+\begin{description}
+\item[\tt ProductionRunManager:]  a class for configuring and launching the
+set of pipelines that make up a production run.  
+\item[\tt PipelineManager:]  a class for configuring and launching a
+specific pipeline.  We had two implementations of this abstract class:
+{\tt SimplePipelineManager} for launching on our development cluster,
+and {\tt AbePipelineManager} for launching on the NCSA Abe machine.  
+\item[\tt DatabaseConfigurator:]  a class use by a {\tt
+ProductionRunManager} and/or a {\tt PipelineManager} (depending on the
+policy configuration) to set up the database tables required by the
+pipelines.  
+\item[\tt Provenance:]  used by the {\tt ProductionRunManager} to
+record the provenance data--namely, the policy data--into the
+database.  
+\end{description}
 
-The \texttt{ProductionRunManager} then creates a \texttt{Provenance} object used
-to record information to the database about the provenance about the run. This
-provenance information includes all information in the command line policy file.
+It's worth noting that when launching a pipeline, our {\tt
+PipelineManager} implementations ultimately end up launching a
+pipeline launch script through a remote shell.   This launch script is
+one that could be run directly by a user (say, for debugging purposes)
+independently from the orchestration layer.  In other words, a
+pipeline has no dependencies on the orchestration layer to run; this
+is a useful feature of the orchestration layer design.  A consequence
+of this is that the policy that will configure the pipeline must be
+fully specified, and this must include parameters that would be more
+conveniently set at the production level.  An example is the {\tt
+eventBrokerHost} parameter which sets the host where the event broker
+is running; since the broker is responsible for routing event messages
+between pipelines, all pipelines need to use the same broker.  Thus,
+to ensure consistency, we want to specify it once for the whole
+production, but it is used by each pipeline, and so the pipeline
+policy needs to have this information.  
 
-The \texttt{ProductionRunManager} uses the policy to lookup and create platform
-specific \texttt{Pipeline\-Manager} objects to configure and run pipelines. The
-pipeline policy and software environment provenance is recorded for each
-pipeline to the database.
+We address this dilemma by allowing the parameter to be set at both
+the production level {\it and} the pipeline level.  The latter will be
+considered the default value that will get used when a pipeline is
+launched on its own, independently from the orchestration layer.
+However, when the pipeline is launched from orchestration, the
+production level value will override the pipeline level value.  The
+way this is accomplished is that before the orchestration layer
+deploys the pipeline policy files onto the (remote) pipeline platform,
+it collects all of the share policy data and rewrites the pipeline
+level policy, overriding the defaults.  This fact has important
+implications for provenance.  
 
-The \texttt{PipelineManager} that is invoked is specified in the platform
-section of the policy for that pipeline.  This section describes the root of the
-pipeline directories, the names of directories to create, and the pattern to use
-to create those directories.  It also describes the hardware configuration to
-use, and the nodes available for use by a pipeline. The \texttt{PipelineManager}
-places all the files required for the runs in locations where the pipelines can
-get to them.
-
-Once all the policy and data files are put into place, the Production run
-manager has each \texttt{PipelineManager} launch its pipeline.
 
 \subsubsubsection{Provenance}
 
-The Orca orchestration layer (see Section
-\ref{sec:PipelineOrchestration}) in DC3a generates enhanced provenance
-information.  In particular, the software environment and the contents
-of the policy files used to run the production are written both to log
-files and to the database.  Recording the software environment allows
-the exact configuration of LSST-packaged software used for the run to be
-reproduced later, while recording the policy files captures both
-platform configuration information such as the compute nodes and
-database used as well as all configurable science algorithm settings.
+The orchestration layer (described above) in DC3a generates enhanced
+provenance information.  In particular, the software environment and
+the contents of the policy files used to run the production are
+written both to log files and to the database.  Recording the software
+environment allows the exact configuration of LSST-packaged software
+used for the run to be reproduced later, while recording the policy
+files captures both platform configuration information such as the
+compute nodes and database used as well as all configurable science
+algorithm settings.
 
 This provenance information, in combination with an event sent to the
 production, is sufficient to enable accurate reconstruction of a given
@@ -84,25 +121,13 @@ sequence of events sent to the production, the provenance allows exact
 duplication of a given run.  The recorded provenance proved highly
 useful while debugging algorithmic issues since it simplified the
 construction of small reproducible test cases demonstrating problems.
-\iffalse
-\RHL{My impression was that we didn't yet have the ability to 
-down the stage configuration associated with an error, or
-is this what, ``a demonstration of 
-automated reconstruction was deferred''?}
-KTL - We can get the configuration easily.  What is not so readily
-available is the inputs to a given stage, many of which may not be
-pipeline data products (they are just internal).  This is why the text
-says "simplified" and not "automatically enabled".  The clipboard inputs
-can always be re-created by re-running the pipeline, but this may be
-inconvenient and inefficient.
-\fi
 
 The software environment is characterized by the versions of packages
 maintained by {\tt eups} that are ``setup'' at the time of production
-execution.  In addition, the actual directories declared as the
-installation locations of the packages are also persisted, allowing
-locally-setup packages and packages installed under {\tt \$LSST\_DEVEL} to
-be identified.
+execution (see DC2 report for more details).  In addition, the actual
+directories declared as the installation locations of the packages are
+also persisted, allowing locally-setup packages and packages installed
+under {\tt \$LSST\_DEVEL} to be identified.
 
 The recorded policy file information includes the contents on a per-key
 basis as well as an MD5 hash of the file contents and the file's
