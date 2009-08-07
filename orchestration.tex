@@ -127,7 +127,15 @@ maintained by {\tt eups} that are ``setup'' at the time of production
 execution (see DC2 report for more details).  In addition, the actual
 directories declared as the installation locations of the packages are
 also persisted, allowing locally-setup packages and packages installed
-under {\tt \$LSST\_DEVEL} to be identified.
+under {\tt \$LSST\_DEVEL} to be identified.  We not that in DC3a, the
+recording of the EUPS environment happens within the {\tt orca.py}
+script on the launch platform.  Consequently, this will only
+guaranteed to be accurate if the software stack installed on the
+launch platform is identical to the one on the pipeline platform(s);
+in general, this is not a good assumption.  The best time to record
+this information is just prior to when the pipeline process actually
+starts on the remote pipeline platform; this is what will happen in
+DC3b.  
 
 The recorded policy file information includes the contents on a per-key
 basis as well as an MD5 hash of the file contents and the file's
@@ -160,4 +168,18 @@ FROM prv_SoftwarePackage NATURAL JOIN prv_cnf_SoftwarePackage
      JOIN prv_Run ON (FLOOR(prv_SoftwarePackage.packageId / 65536) = offset)
 WHERE packageName = 'meas_algorithms' AND version = '3.0.9';
 \end{verbatim}
+
+We note that, like the recording of the EUPS environment, the
+recording of the policy data is done within the {\tt orca.py} process
+on launch platform, not on the pipeline platforms where they are
+actually used.  And like the recording of the EUPS environment, there
+is a danger that the recorded policy data will not be accurate,
+particularly considering the policy rewriting that the orchestration
+layer does described in the previous section.  In DC3a, we do
+know that the recorded policy data was, in fact, accurate; however,
+because of how functionality is encapsulated in the orca classes, the
+{\tt Provenance} class cannot make any assumptions regarding how the
+policy files were transferred to the pipeline platforms.  Thus, like
+the EUPS data, the best time to record the policy data is right before
+the pipeline executes; this is how it will be done in DC3b.  
 
