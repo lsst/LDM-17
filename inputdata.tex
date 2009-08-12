@@ -93,15 +93,15 @@ airmass of unity, 0.1 arcsec seeing and no sky background (this
 defines an idealized view of the sky for use as a truth table).
 
 The underlying stellar and galaxy catalogs are based on the
-simulations of \cite{Juric+Ivesic} and \cite{kitzbischler}
-respectively.  To reproduce the LSST sky coverage the 2x2 deg galaxy
-catalogs from Kitzbichler \& White are tiled across the sky.  The SED
-of each galaxy is estimated using the Bruzual \& Charlot (2003) stellar
-population models. Using the models of Batissta et al (2006) each
-galaxy in the Millennium Simulation is assigned a morphological
-profile. The current implementation assigns each galaxy a
-disk-to-total flux ratio, position angle in the sky, inclination along
-the line-of-sight, bulge radius, and disk radius.
+simulations of Juri\'c {\it et al.}~(2008) and Kitzbichler and White
+(2007) respectively.  To reproduce the LSST sky coverage the 2x2 deg
+galaxy catalogs from Kitzbichler and White (2007) are tiled across the
+sky.  The SED of each galaxy is estimated using the Bruzual \& Charlot
+(2003) stellar population models. Using the models of Debattista
+\textit{et al.}~(2006) each galaxy in the Millennium Simulation is
+assigned a morphological profile. The current implementation assigns
+each galaxy a disk-to-total flux ratio, position angle in the sky,
+inclination along the line-of-sight, bulge radius, and disk radius.
 
 Stars are specified by SED, and positions. The SEDs for stars are
 derived from Kurucz models (i.e.\ excluding dwarf and giant
