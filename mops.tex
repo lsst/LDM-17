@@ -2,30 +2,42 @@
 
 \subsection{MOPS}
 
-The version of NightMOPS developed for DC3a presents a number of significant 
-upgrades over DC2.
+The task of identifying moving objects in LSST images requires that
+we, for newly discovered objects, determine their orbits, and for
+known moving objects, predict their positions at time an exposure is
+made.  This task is handled by the Moving Objects Prediction System
+(MOPS).  For operational purposes, we break this into two sides.  {\it
+  DayMOPS} is responsible for updating the orbital parameters for all
+moving objects based on the latest observations; this is a 
+compute-intensive operation that can run during the day.  {\it
+  NightMOPS} will, given the latest known orbits, will predict the
+positions of the objects that intersect a particular image.  Given
+that the defining input to {\it NightMOPS} is the position of the
+image, it cannot be run ahead of time; thus, it must be run in real
+time as part of the alert production.  
 
-The basic algorithm did not change. It still involves
+The DC2 report provides a summary of MOPS with a particular focus on
+NightMOPS.  In DC3a, NightMOPS underwent a number of significant 
+upgrades.  The basic algorithm did not change, however; it still involves:
 \begin{itemize}
-    \item Identifying which known MovingObject orbits might be intersecting a 
-          given field of view at a given time.
-    \item Computing precise positions for those MovingObjects at that time.
+    \item identifying which known MovingObject orbits might be intersecting a 
+          given field of view at a given time,
+    \item computing precise positions for those MovingObjects at that
+      time, and 
     \item Passing those accurate positions, with errors, to the Association 
           pipeline.
 \end{itemize}
 
-However for DC3a
-\begin{itemize}
-    \item The identification of candidate MovingObjects uses KD-Tree searches 
-          implemented by the Auton FieldProximity code instead of simple 
-          quadratic interpolation of the orbit with a boundary check.
-    \item The computation of precise ephemeris is done using JPL Horizons 
-          software, the golden standard for this type of computations. 
-          Previously, positions were computed using quadratic interpolation 
-          between pre-computed midnight ephemeris.
-\end{itemize}
-These changes have the effect of improving the scientific quality of the results
-and the accuracy and precision of the predicted position and associated errors.
+DC3a introduced two main changes.  First, the identification of
+candidate MovingObjects now uses KD-Tree searches implemented by the
+Auton FieldProximity code instead of simple quadratic interpolation of
+the orbit with a boundary check.  Second, the computation of precise
+ephemeris is now done using the JPL Horizons software, the ``gold
+standard'' for this type of computations.  Previously, positions were
+computed using quadratic interpolation between pre-computed midnight
+ephemeris.  These changes have the effect of improving the scientific
+quality of the results and the accuracy and precision of the predicted
+position and associated errors. 
 
 A newer version of known Solar System orbits, produced by the PanSTARRS MOPS 
 team using observations provided by the Minor Planet Center, was used to

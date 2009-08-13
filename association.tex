@@ -96,7 +96,7 @@ These timings are roughly equivalent to DC2.
 
 One AP performance concern raised as a result of DC2 performance analysis was
 the speed with which difference sources were read from the database in the
-compute phase - we had observed timings of \ensuremath{\sim}0.12 seconds for
+compute phase:  we had observed timings of \ensuremath{\sim}0.12 seconds for
 every thousand difference sources read in. For DC3a, database IO speed was
 very significantly improved: it is now performed via a thin LSST wrapper for
 the native MySQL API, rather than through a debug build of the CORAL database
