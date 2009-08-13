@@ -2,16 +2,29 @@
 
 \subsection{\label{sdqasubsection}Science Data Quality Analysis (SDQA) Subsystem}
 
-Prior to DC3a, work on the high-level requirements and operations concept was performed 
-by Deborah Levine and Vince Mannings.  For DC3a, the SDQA development team welcomed new
-members Peregrine McGehee, Russ Laher, Jeoghee Rho, and Dick Shaw.  An oral paper which
-gives a succinct description of the basic design that emerged from our early efforts in 
-DC3a was presented at the 2008 ADASS conference held at Quebec City \citep{laher08}\footnote{http://spider.ipac.caltech.edu/staff/laher/lsst/O7A2.pdf}.
+Understanding the scientific quality of the data that comes out of the
+processing pipelines is acutely challenging for LSST due to its
+extremely large data production rate.  Traditional, human-driven
+assessment techniques are simply not scalable; rather, we will require
+a highly automated process for assessing quality that can be managed by
+a few people.  Science Data Quality Analysis (SDQA) subsystem aims to
+enable that process; that is, it is a comprehensive system
+(including both automated and human-intensive components) which
+collects, analyzes and records information about the quality of raw
+and derived science data and makes that information to both LSST
+system operators and end science users.  In practice, it will collect
+summary measurements from the data pipelines and compile them into
+concise reports for review by a responsible scientist.  Further, it
+collate these measurements into concise metrics that compared against
+benchmark values to identify problems that affect the scientific
+integrity of the data products and alert the appropriate technicians.  
 
-DC3a marks the beginning of creating and testing prototype software for the SDQA subsystem, and checking it into the LSST source-code base.
-
-The subsections that follow detail our objectives for DC3a and gauge our progress in
-terms of these objectives.
+Initial design for SDQA was carried out prior to DC3a, but DC3a saw
+the first implementation of the major components.  The subsections
+that follow detail our objectives for DC3a and gauge our progress in
+terms of these objectives.\footnote{Much of the design was also
+  presented at the 2008 ADASS conference held at Quebec City
+  \citep{laher08}}
 
 
 \subsubsection{Objectives}
@@ -128,13 +141,16 @@ The next subsection demonstrates how Objective \#6 was met.
 
 \subsubsection{Sample DC3a SDQA Ratings}
 
-To accomplish our DC3a objective of persisting SDQA Ratings, the image-processing pipelines
-were modified to instantiate SDQA-Rating objects for various SDQA Metrics of interest in
-DC3a.  A tutorial was written to give the application developers explicit instructions on 
-how to persist 
-SDQA Ratings\footnote{http://lsstdev.ncsa.uiuc.edu/trac/wiki/SdqaRatingTutorial}.
-The following are persisted results for SDQA Ratings that were queried from database
-rplante\_DC3a\_u\_rlp1188, which corresponds to the largest set of images tested for DC3a:
+To accomplish our DC3a objective of persisting SDQA Ratings, the
+image-processing pipelines were modified to instantiate SDQA-Rating
+objects for various SDQA Metrics of interest in DC3a.  A tutorial was
+written to give the application developers explicit instructions on
+how to persist SDQA
+Ratings\footnote{http://lsstdev.ncsa.uiuc.edu/trac/wiki/SdqaRatingTutorial}.
+The following example illustrates how SDQA Ratings can be used to
+assess the quality of the IPSD pipeline.   Below is a sampling of
+ratings that were persisted to the database during a particular
+production run (run ID {\tt rlp1188}):
 
 {\tiny
 \begin{verbatim}
@@ -155,7 +171,8 @@ rplante\_DC3a\_u\_rlp1188, which corresponds to the largest set of images tested
 }
 
 \noindent
-Here is the database query that was used to obtain the above results:
+This summary of the metrics was generated with the following SQL
+database query:
 
 {\small
 \begin{verbatim}
@@ -172,42 +189,42 @@ were persisted in the database by the pipelines.  Four SDQA ratings were compute
 the PSF pipeline, two by the ISR pipeline, and two by the difference-imaging pipeline.
 That different pipelines were able to persist SDQA Ratings demonstrates the flexibility of the design.
 
-Although demonstrating the utility of specific SDQA ratings was not an objective of DC3a (it will
-be an objective for DC3b), here are some highlights of the SDQA information presented in the 
-above table:
+Although demonstrating the utility of specific SDQA ratings was not an
+objective of DC3a (it will be an objective for DC3b), these numbers do
+reveal something of the character of the processing.  Our DC3a results
+analysis has suggested that extreme values of {\tt
+  ip.diffim.kernelSum} are correlated with bad subtractions between
+image and template, which are ultimately caused by bad astrometry.
+Despite this, we do see that kernels are being generated with the
+expected statistics; that is, {\tt ip.diffim.residuals} has a
+near-zero mean (compared to its RMS).   The results for {\tt
+  ip.isr.numCosmicRayPixels} show that no cosmic rays were detected
+which may indicate a threshold-tuning issue.  Finally, our experience
+has shown that there is a correlation between {\tt
+  phot.psf.numGoodStars} and the positional uncertainties of
+PSF-fitted source detections, and so it is expected that this will be 
+a useful diagnostic.
 
-\begin{itemize}
-\item{Tim Axelrod's analysis suggests that extreme values of ip.diffim.kernelSum are correlated
-with bad subtractions between image and template, which are ultimately caused by bad astrometry.}
-\item{Although Tim Axelrod's assessment is that ip.diffim.residuals may not be useful for identifying
-bad image subtractions, the above results at least show that kernels are being generated with the
-expected statistics (according to Andy Becker, these ratings should have zero mean and +/- 0.1 R.M.S).}
-\item{The results for ip.isr.numCosmicRayPixels show that no cosmic rays were detected, and 
-may indicate a threshold-tuning issue.}
-\item{Experience has shown that there is a correlation between phot.psf.numGoodStars and the 
-positional uncertainties of PSF-fitted source detections, and so it is expected that this will be
-a useful diagnostic.}
-\end{itemize}
+The information in the above table represents the kind of information
+that could be included in a nightly SDQA summary.  Since the SDQA
+ratings are stored in the database, it is easy to construct a variety
+of useful queries; e.g., all {\tt phot.psf.numAvailStars} values for a
+given night, CCD, and filter.
 
-The above table of results is an example of information that could be included in a 
-nightly SDQA summary.  Since the SDQA ratings are stored in the database, it is easy to
-construct a variety of useful queries; e.g., all phot.psf.numAvailStars values for a given night,
-CCD, and filter.
-
-Although SDQA Thresholds were not tuned for DC3a, we expect this to be a component of the
-work for DC3b.
+Although SDQA Thresholds were not tuned for DC3a, we expect this to be
+a component of the work for DC3b.
 
 
-\subsubsection{Additional Accomplishments}
+\subsubsection{Advanced Assessment Techniques}
 
 In our ADASS paper \citet{laher08}, we pointed out that the method of 
 artificial neural networks is particularly promising for classifying images in 
 terms of SDQA (see Figure~\ref{ANN}).  In late 2008 we undertook some work 
-involving ANNs to demonstrate that various attributes of extracted source detections 
-could be used to differentiate between variable QSOs and non-variable white dwarfs 
-\citet{borne09}.  Our completeness and reliability results showed that ANNs 
-are superior to the method of segmenting the two populations in conventional 
-color-color plots\footnote{
+involving ANNs to demonstrate that various attributes of extracted
+source detections could be used to differentiate between variable QSOs
+and non-variable white dwarfs \citet{borne09}.  Our completeness and
+reliability results showed that ANNs  are superior to the method of
+segmenting the two populations in conventional color-color plots\footnote{
 http://spider.ipac.caltech.edu/staff/laher/lsst/borne\_696\_Jan09-ver2.pdf
 }.
 

@@ -3,19 +3,27 @@
 \section{Input Data}
 
 For DC3, we used two sources for images to be input to the pipelines.
-As in DC2, we used real images from the CFHT Legacy 
-Survey\footnote{http://www.cfht.hawaii.edu/Science/CFHLS/} along 
-with their associated source catalogs. For DC3a we also introduced 
-simulated images generated specifically for LSST, along with the
-catalog data generated as part of the simulation process.
+As in DC2, we used real images from the CFHT Legacy Survey
+(CFHT-LS)\footnote{http://www.cfht.hawaii.edu/Science/CFHLS/} along
+with their associated source catalogs.  The CFHT-LS Deep Survey images
+come from the Canadian-France-Hawaii Telescope using the MegaCam
+mosaicing camera. The camera features a focal plane of 36 CCDs, where
+each CCD contains 2048 $\times$ 4612 pixels. The total field of view
+for the camera is a full 1 degree $\times$ 1 degree square with a
+resolution of 0.187 arcsecond per pixel.
 
-The CFHT-LS Deep Survey images come from the Canadian-France-Hawaii
-Telescope  using the MegaCam mosaicing camera. The camera
-features a focal plane of 36 CCDs, where each CCD contains 2048
-$\times$ 4612 pixels. The total field of view for the camera is
-a full 1 degree $\times$ 1 degree square with a resolution of 0.187
-arcsecond per pixel.
-
+The CFHT-LS dataset was chosen for its similarities to what will be
+the character of LSST data.  That is, like LSST, the CFHT-LS survey
+features repeated observations of the same fields of the sky with a
+mosaic camera.  The fact that this is ``real science data'' provides
+the benefit of being subject to real-world observational artifacts
+that we will face with LSST.  For DC3a, we introduced simulated images
+generated specifically for LSST, along with the catalog data generated
+as part of the simulation process.  This dataset has the advantage of
+not only exactly matching the observational parameters we plan for
+LSST (e.g. images size and focal plane configuration) but also being
+based on a known ``true sky'' that we can compare our processed
+results to.
 
 \subsection{CFHT-LS Deep Survey Data}
 
@@ -65,7 +73,14 @@ file name that captured a visit ID (taken from the \texttt{OBSID} FITS
 keyword), CCD ID, amplifier ID, and exposure ID (indicating whether it
 is the first or second in the pair of visit exposures).  
 
-\subsubsection{Calibration Data Products}
+The full focal plane of the CFHT data--namely, the number of amplifier
+sub-images and constituent pixels--is substantially smaller than
+the planned LSST focal plane.  In order to scale up our pipelines to
+run on a full LSST focal plane all at once using this data, we need to
+effectively replicate this data multiple times.  We note that we were
+not able to complete this level of scaling in time for this report.  
+
+\subsubsection{Calibration Data}
 
 The CFHT calibration data includes FITS keywords that define the range
 of dates for which it is valid.  In order to process CFHT science frames
