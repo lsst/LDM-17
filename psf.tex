@@ -5,14 +5,12 @@
 
 \subsubsection{Classes}
 
-The PSF virtual base class, \code{Psf}, is currently in the
-\code{lsst::meas::algorithms} package, but should be moved
-to \code{lsst::afw} for DC3b.
-
-\code{Psf} supports a PSF that is a function of position.  
-In addition to constructors and destructors, the class interface
-permits convolving an image with the PSF or evaluating a desired
-pixel (or returning an \code{Image}) of the PSF at a given position in a frame.
+The virtual base class, \code{Psf} (currently in the
+\code{meas\_algorithms} package but will likely be moved 
+to \code{afw} for DC3b) represents a point-spread function, the
+telescopes sensitivity to a point source as a function of position.  
+In addition to being able to access PSF model parameters or the PSF
+pixel data, it can be used directly to convolve an image.  
 
 There are two concrete \code{Psf} classes in DC3a: \code{dgPsf} (a circularly-symmetric double Gaussian) and
 \code{pcaPsf} (a linear combination of basis functions, modelled after SDSS's PSF representation).  Both of these

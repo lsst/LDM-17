@@ -496,12 +496,13 @@ significantly from DC2's 175 seconds; although, in DC3 we now do image
 subtraction on both exposures from a visit.  The variation in the time
 is down considerably as well.  One of the tunable parameters we found
 that can have a significant effect on the subtraction time is the 
-{\tt maxPrincipalComponents} policy parameter, which controls the number
-of principal components calculated for the ... step and which in these
-runs was set to 10.  We believe that we can probably reduce this
-parameter to 5 without loss in processing fidelity; subsequent tests
-with this value ({\tt rlp1248}) indicate that this would reduce the
-duration of the image subtraction stage by another 20 seconds.
+{\tt maxPrincipalComponents} policy parameter, which controls the
+number of kernel components in the PSF-matching kernels for the image 
+subtraction stage (see sec. \ref{sec:ImsubImprove}); in these runs,
+this parameter was set to 10.  A subsequent test ({\tt rlp1248})
+indicated that we can safely reduce this parameter to 5 without loss
+in processing fidelity; this would reduce the duration of the image
+subtraction stage by another 20 seconds.
 
 Comparing the LSST cluster runs with the Abe run reveals how the IPSD 
 pipeline holds up to scaling.  Note that the Abe run processed 9 times

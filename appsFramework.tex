@@ -4,14 +4,14 @@ As in DC2, the application framework is a library of
 scientifically-oriented C++ classes that support the development of
 astronomical processing algorithms.  A general summary of the library
 can be found in the DC2 report (section 4.3).  As part of the code
-reorganization at the start of DC3a, the namespace for the application
-framework was changed to {\tt lsst::afw}, but its contents generally
-remained the same, apart from some new classes added and an over-haul
-of the image API.  The new classes support the newest algorithms and
-are discussed later in section \ref{sec:applayer}
-(e.g. \code{Statistics}, \Sec{secBackground}; \code{Psf},
-\Sec{secPsf}).  In this section, we focus on the changes to the image
-API.  
+reorganization at the start of DC3a, the package containing this
+library was changed to {\tt afw} (with the corresponding namespace 
+changed to {\tt lsst::afw}), but its contents generally remained the
+same, apart from some new classes added and an over-haul of the image
+API.  The new classes support the newest algorithms and are discussed
+later in section \ref{sec:applayer} (e.g. \code{Statistics},
+\Sec{secBackground}; \code{Psf}, \Sec{secPsf}).  In this section, we
+focus on the changes to the image API.  
 
 \subsubsection{The Image Classes}
 \label{secImageClasses}

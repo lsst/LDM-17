@@ -5,30 +5,28 @@
 
 \subsubsection{Classes}
 
-The namespace lsst::afw::detection contains the framework classes related to 
-processing astronomical images. The namespace lsst::meas::algorithms contains
-the algorithmic implementations for processing detections.
-The fundamental objects are:\begin{itemize}
-\item Source detection (\code{lsst::afw::detection})
+The namespace {\tt lsst::afw::detection} (in the {\tt afw} package)
+contains the framework classes that enable the detection of
+astronomical sources in images.  The {\it meas\_pipeline} package uses
+these classes to provide source detection various stages of the IPSD
+pipeline, including source detection for WCS determination as well as
+final source detection from the difference images.  The fundamental
+classes for detection are: 
+
 \begin{description}
-    \item[Threshold] A threshold level.
-    \item[Footprint] A set of pixels (internally stored as Spans).
-    \item[DetectionSet] An STL collection of \code{Footprint}s associated 
+    \item[{\tt Threshold}] A threshold level.
+    \item[{\tt Footprint}] A set of pixels (internally stored as Spans).
+    \item[{\tt DetectionSet}] An STL collection of \code{Footprint}s associated 
         with a \code{MaskedImage}.
-    \item[FootprintFunctor] Utility for applying a function over the pixels of
+    \item[{\tt FootprintFunctor}] Utility for applying a function over the pixels of
         a \code{Footprint}.
 \end{description}
-\item Miscellaneous
-\begin{description}
-    \item[lsst::meas::algorithms::PSF] (virtual) baseclass for PSF representation; cf. \Sec{secPsf}
-    \end{description}
-\end{itemize}
 
-All of these classes are written to make use of image, utility and middleware
-framework classes such as \code{lsst::pex::logging::Trace}. They are 
-documented using doxygen, although the level of documentation is patchy.
+An important input to source detection is the model for the
+point-spread function (PSF).  This model is provided via the {\tt PSF}
+class (in the {\it meas\_algorithms} class; see \Sec{secPsf}). 
 
-\subsubsection{Source detection}
+\subsubsection{Algorithm Description}
 
 The fundamental class in source detection is a \code{Footprint}, a set of 
 connected pixels above (or below) some threshold. Two pixels are said to be 
@@ -47,7 +45,7 @@ the \code{MaskedImage} and a \code{Threshold}; it is templated over the
 A \code{Threshold} may be constructed to be positive or negative value in 
 units of flux, variance or standard deviation. The question of what value to 
 adopt for the threshold (although interesting) has thus been abstracted from 
-the algorithms and is answered separately by \code{Policy}. 
+the algorithms and is answered separately by \code{Policy} parameters. 
 
 In DC3a we detect on both difference images and on stacked images, which are 
 first smoothed using \code{afw::math::Kernel}. In either use case, the output
