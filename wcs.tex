@@ -26,8 +26,12 @@ The GAS takes various parameters which can be set to speed the match.
 
 We measured the time taken to solve each amplifier in the CFHT field v704893-e0 (30 images). In each case, we put no constraints on the solution other than to set the number of objects to use to find a solution to 70. Solving blindly (i.e without using an initial guess at the position) took, on average, 41\,ms $\pm$ 76\,ms. The worst case time was 300ms. When a field fails to solve, {\tt astrometry.net} takes quite some (10-20 seconds) to search every possible combination of stars before giving up. 
 
-\subsection{Success rate}
-{\tt astrometry.net} claims over 99\% success rate in solving $r$ band images from the SDSS survey {\tt etc..}
+% \subsubsection{Success rate}
+% {\tt astrometry.net} claims over 99\% success rate in solving $r$
+% band images from the SDSS survey {\tt etc..}
+%
+% Ray:  It's not clear what the intended content here should be,
+% particularly considering the problems we had with USNO-B.  
 
 \subsubsection{Improvements to the WCS class}
 Astronomical images generally contain some distortion, i.e the rectangular grid of pixels in an image does not map onto a retangular grid of right ascension and declination. The WCS standard does not supply a method of dealing with this real world problem. {\tt astrometry.net} describes distortion coefficients using the SIP convention (Shupe et al. 2005; ASPC 347 491), which was developed and used the the Spitzer Science Center. SIP defines a set of polynomials used to map the positions of the distorted pixels into an undistorted space where they can be correctly transformed using the WCS. {\tt afw} adopted the SIP convention, and the WCS class was extended to use the SIP polynomials when converting from pixel to sky coordinates.
