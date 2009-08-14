@@ -75,12 +75,10 @@ input science Image, Metadata, and Bounding Box of the Amplifier
 within the CCD.  A zero--valued Mask is created, and the variance
 Image is synthesized from the science pixels and the {\tt Gain} from
 the Metadata.  These are combined into a MaskedImage.  A WCS is
-synthesized from the input Metadata, and finally an Exposure assembled.
-% \RHL{What is this WCS used for?  Is it intended to be generated from the
-% boresight and a focal plane model, and therefore fair game for injection
-% into the WCS calculation?}
-% Ray: is this developer discussion or will the reader be asking the
-% same question?
+synthesized from the input Metadata, and finally an Exposure
+assembled.  The WCS recorded at this point represents an approximate
+position of the amplifier image on the sky which can be used as the
+initial estimate for the later WCS determination stage.
 
 \item LookupTableFromPolicy : Creates a linearization lookup table
 from an input Policy.
