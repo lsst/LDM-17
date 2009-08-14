@@ -3,7 +3,7 @@
 
 \section{Results}
 
-\subsection{Summary of Runs}
+\subsection{Summary of Runs} \label{sec:recsummary}
 
 Much as with DC2, we executed numerous but short pipeline runs over
 a sampling of the data from the CFHT-LS fields D3 and D4 and from the
@@ -133,32 +133,42 @@ database residing on the LSST cluster ({\tt lsst10}).
 
 DC3a schedule constraints limited the detailed analysis
 that could be completed for this report; nevertheless, we see that the
-pipeline scaled fairly well at this level.  One critical barrier to
-scaling, however, was in the event broker (powered by the
-third-party product, activemq), which failed while processing the
-thirteenth visit which in turn disabled the pipelines.  The reasons
-are unclear; though, it appears to be due to the total volume of
-events processed rather than the rate of at which the events were
-generated.  
+pipeline scaled fairly well at this level.  In \Sec{sec:timing} we
+present and discuss comparisons between the ``narrower'' (fewer
+slices) but longer (more visits) runs on the development cluster with
+the wider but shorter run on Abe.  The Abe run was only able to
+complete twelve visits before suffering a disabling failure.  This was
+caused by a failure in the event system when the broker run up against
+an operating system limit on the number of simultaneously open file
+descriptors (1024 by default).  Considering the large number of slices
+times a few event channels, it was clear that we were operating on the
+edge of this limit.  Raising this limit appears to correct the
+problem, and we expect to proceed with larger (both wider and longer)
+runs in the early days of DC3b.  
 
-These Abe runs provided additional qualitative accomplishments:
+These Abe runs provided important qualitative accomplishments:
 
 \begin{itemize}
-\item they revealed configurable system limits that must be increased:
+\item They revealed configurable system limits that must be increased:
 \begin{itemize}
 \item the event broker must support over 1000 simultaneous open file
-  descriptors 
+  descriptors (discussed above), and 
 \item the MySQL database must support $\gtrsim$ 300 simultaneous
   connections.  
 \end{itemize}
-\item we demonstrated the integration of grid-based job management
+\item We demonstrated the integration of grid-based job management
   (via Condor-g) into our orchestration layer
 \item we demonstrated the successful use of the parallel Lustre
   filesystem.  
 \end{itemize}
 
-\noindent Additional information about the results of these runs on
-Abe can be found in section \ref{sec:timing}.  
+In summary, Table \ref{tbl:runsummary} lists the pertinent
+production runs and the data processed which form the primary basis
+for our results analysis.  A discussion of the performance results
+for both the Abe run and the runs on the development cluster appear in
+section \ref{sec:timing}.  In the next section, we assess the
+scientific and algorithmic results of the processing, focusing
+specifically on the development cluster.  
 
 \begin{table}[htbp]
 \centering
@@ -175,9 +185,6 @@ rlpabe041 & 12      & 288 & 3456/33 GB    & 15/2 GB        & 79368/313 GB \\ \hl
 Total     & ---     & 250 & 13748/81 GB   & 191/28 GB      & 200418/793 GB \\ \hline
 \end{tabular}
 \end{table}
-
-Table \ref{tbl:runsummary} summarizes the pertinent production runs
-referenced in this section.
 
 
 \subsection{Science Data Quality}
@@ -213,6 +220,7 @@ method has proven to be difficult when run in tandem with the ISR
 method, and will require a separate set of runs with the ISR method
 turned off.  The joint analyis will lead to an optimized cosmic ray
 rejection technique for DC3b.
+
 \paragraph{WCS Accuracy}
 The WCS determination algorithm is implemented as part of the Image
 Characterization Pipeline (ICP), and is discussed in section \ref{sec:wcs}.
@@ -239,16 +247,6 @@ assess the WCS accuracy is as follows:
   used as metrics for WCS performance.
 \end{itemize}
 
-Figure \ref{fig:wcs1} shows the resulting histograms for typical
-exposures from runs rlp1233 (visit 695833-e0) and rlp1234 (visit
-696554-e0). Both histograms show very similar behavior, with the peak
-of the histogram around 30 mas, about 0.2 pixel.  In both cases there
-is a shallow tail that extends to large distances, beyond the plotting
-limit in the figure.  Figure \ref{fig:wcs2} shows that the tail is
-far more significant than is initially apparent, since it
-results from very poor wcs fits that are confined to individual
-amplifiers.
-
 \begin{figure}[p]
 \begin{center}
 \includegraphics[height=3.35in]{images/rlp1233_1234_match.png}
@@ -268,6 +266,16 @@ amplifiers from ccd1}
 \label{fig:wcs2}
 \end{center}
 \end{figure}
+
+Figure \ref{fig:wcs1} shows the resulting histograms for typical
+exposures from runs rlp1233 (visit 695833-e0) and rlp1234 (visit
+696554-e0). Both histograms show very similar behavior, with the peak
+of the histogram around 30 mas, about 0.2 pixel.  In both cases there
+is a shallow tail that extends to large distances, beyond the plotting
+limit in the figure.  Figure \ref{fig:wcs2} shows that the tail is
+far more significant than is initially apparent, since it
+results from very poor wcs fits that are confined to individual
+amplifiers.
 
 For DC3a purposes, we define WCS failure for an image to occur when
 more than 50\% of the predicted WCS\_Source positions are in error by
@@ -374,7 +382,7 @@ available.
 \end{figure}
 
   
-\paragraph{Recovery of Known Solar system Objects}
+% \paragraph{Recovery of Known Solar system Objects}
 
 \subsection{Timing Results}
 \label{sec:timing}
@@ -423,7 +431,7 @@ pipeline to complete before it could do its work.
 \begin{figure}[htbp]
 \begin{center}
 %\includegraphics[width=\textwidth,bb=0 0 800 276,viewport=25 25 775 250,clip]{images/visitdist.pdf}
-\includegraphics[width=\textwidth]{images/visitdist.pdf}
+\includegraphics[width=\textwidth,bb=0 0 800 276,viewport=25 25 775 250,clip]{images/visitdist.pdf}
 \caption{Histogram of the times to process each visit (not including
   time waiting on data events).  The $y$-axis measure the fraction of
   the 170 visits in each time bin.  

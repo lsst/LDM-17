@@ -1,6 +1,6 @@
 % Section 6.5: WCS Estimation
 
-\subsection{WCS Determination}
+\subsection{WCS Determination} \label{sec:wcs}
 
 WCS, or World Coordinate System is a convention for mapping positions on an astronomical image to coordinates in the sky. We require that our WCS map our positions with an accuracy of better than 0.1", driven by the need to subtract images from templates in the {\tt diff\_im} stage. For DC3a we implemented a method of determining a WCS solution for an image using the {\tt astrometry.net}\footnote{http://astrometry.net} package written by Dustin Lang. 
 
