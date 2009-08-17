@@ -213,7 +213,7 @@ reference runs, the two methods were used in tandem.
 \end{itemize}
 Quantitative analysis of the ISR cosmic ray rejection analysis method
 has been performed by comparing the number of pixels affected by
-synthetic cosmic rays in the e1 visit with the number identified as
+synthetic cosmic rays in each exposure 1 with the number identified as
 cosmic rays by the ISR.  The fraction successfully identified is
 nearly 100\% for rlp1233.  Analysis of the performance of the AP based
 method has proven to be difficult when run in tandem with the ISR
@@ -223,10 +223,10 @@ rejection technique for DC3b.
 
 \paragraph{WCS Accuracy}
 The WCS determination algorithm is implemented as part of the Image
-Characterization Pipeline (ICP), and is discussed in section \ref{sec:wcs}.
-The achieved WCS accuracy is crucial for subsequent processing,
-especially for production of difference images.  The procedure used to
-assess the WCS accuracy is as follows:
+Processing and Source Detection pipeline (IPSD) and is discussed in
+section \ref{sec:wcs}.  The achieved WCS accuracy is crucial for
+subsequent processing, especially for production of difference images.
+The procedure used to assess the WCS accuracy is as follows:
 \begin{itemize}
 
 \item A set of exposures from visits processed by a particular run is
@@ -754,7 +754,8 @@ pipelines in Table \ref{tbl:otherstagetimes}.
 \end{tabular}
 \end{center}
 \end{table}
-Finally, we also examined the time spent by the pipeline harness
+
+We also examined the time spent by the pipeline harness
 framework to manage and execute the stages repeatedly and in
 sequence, what we refer to as the pipeline overhead.  One way to
 calculate this on a per stage basis is to take the total time spent
@@ -789,4 +790,86 @@ ap        &\hfil& 4.0 &$\pm$& 0.2 ms&& 11.7 &$\pm$& 2.5 ms \\
 \end{tabular}
 \end{center}
 \end{table}
+
+To understand what these performance results are telling us, particularly
+about where we need to improve, it necessary to recall our performance
+goals.  Early in the design history of LSST DM datamanagement, we developed a
+timeline budget, illustrated in fig. \ref{fig:timeline}, for the major
+data handling and processing steps necessary to deliver alerts within
+the 60-second required window.  It is worthwhile discerning how our
+DC3a results stack up against this budget.  There are three durations
+that that are relevant to processing:  image processing/detection
+(times 2, for each exposure), association, and alert generation.
+Only the first two are part of the DC3a prototype.  
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=\textwidth]{images/timeline.png}
+\caption{A schematic of the alert production time budget.
+\label{fig:timeline}}
+\end{center}
+\end{figure}
+
+Table \ref{tbl:budget} compares the DC3a results with the two
+durations in our budget of interest.  We note that, in detail, the
+breakdown of our DC3a stages do not neatly map into these duration
+categories; for example, there are stages that are done for first
+exposure but not the second, and vice version.  In particular, some of
+the results from the first exposure is reused for the second.
+Nevertheless, a useful rough comparison can be illustrated if we
+combine the image processing budgets for each exposure and then take
+all production stages (as tagged in table \ref{tbl:ipsdstages},
+\Sec{sec:recsummary}) up to and including image subtraction (plus the
+time to write out the subtracted image) to constitute image
+processing.  (In addition, we will leave out reading in calibration
+data assuming this can be done once for the night.)  For association,
+we take the remaining stages in IPSD that operate on both exposures
+{\it plus} the production stages from AP.  The table breaks the costs
+in time between applying science algorithms and I/O (plus the
+miscellaneous book-keeping stages).
+
+\begin{table}[htbp]
+\centering
+\caption{A Comparison of the Alert Production time budget with average
+  DC3a costs 
+\label{tbl:budget}}
+\vspace{\baselineskip}
+\begin{tabular}{lc|ccc}
+\hline\hline
+                           &        & \multicolumn{3}{c}{DC3a Costs}   \\
+Budget Category            & Budget & Science    & I/O       & Total   \\
+\hline
+Image Processing/Detection & 18.5 s & 169.1 s    & 48.3 s    & 217.4 s \\
+Association                & 10.0 s &   8.7 s    &  2.8 s    &  11.5 s \\
+\hline
+\end{tabular}
+\end{table}
+
+Clearly, we need to improve the performance of the image processing
+part by a factor of ten.  We can understand this challenge better by
+comparing these totals with the per-stage costs presented in the
+Results section; that is, note:
+
+\begin{itemize}
+\item Of the 169 seconds spent on science part of image processing, all
+  but 6 seconds are spent on image subtraction.
+\item 56\% of the I/O time in support of image processing was spent on
+  reading in the template sub-images. 
+\item Of the 9 seconds spent on the science part of association, all
+  but 2 seconds are spent on ``add-and-detect''.  
+\end{itemize}
+
+These results, therefore, suggest that the best strategy for meeting
+our time budget must include the following:
+
+\begin{itemize}
+\item We must substantially improve the image subtraction algorithm.
+  As mentioned previously, we believe that 25\% improvement can come
+  simply from tuning configuration parameters.  
+\item We must develop better strategies for efficient I/O.  In
+  particular, significant gains would be gotten via a more
+  embarrassingly parallel I/O access to the template data.
+\item The decent gains might also be gotten in improvements to the
+  add-and-detect stage.  
+\end{itemize}
 
