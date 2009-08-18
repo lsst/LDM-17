@@ -183,3 +183,62 @@ policy files were transferred to the pipeline platforms.  Thus, like
 the EUPS data, the best time to record the policy data is right before
 the pipeline executes; this is how it will be done in DC3b.  
 
+\subsubsubsection{The Event System} \label{sec:events}
+
+The event system described in the DC2 report (section 4.6.1) is
+largely unchanged for DC3a (now in {\tt ctrl\_events}):  employing a
+publish-subscribe model, event messages sent through the event publish
+API are serialized and distributed to subscribers via a central event
+broker process (realized using the third-party package, ActiveMQ).
+The main change is that in DC3a, we did not use the third-party
+package, Mule, to record logging events into the database; this was
+instead handled by the new event monitor (next section).  We may still
+use Mule as an event router for higher-level DM operations.   
+
+\label{brokerprob} In DC3a, we did notice occasions when the
+broker would begin failing when data trigger events were published
+faster than they were consumed by the pipelines:  the more events that
+were built up in the queue, waiting to be consumed, the more likely
+the broker would fail and stop sending events.  Given that the broker
+is a completely third-party (though open source) package, the cause of
+this is not fully understood.  We were able to work around this by
+throttling down the frequency at which data trigger events were
+published to the approximate average time to processing a visit (about
+4.5 minutes).  
+
+Finally, we also discovered that the broker is subject to the
+operating system limit on the number simultaneously open file
+descriptors.  This limit can easily be exceeded when a production
+includes about 240 or more processes.  Discovered during large runs on
+the Abe cluster (discussed in section \ref{sec:recsummary}), this
+limit can be increased via an OS configuration change (requiring root
+privileges).  
+
+\subsubsubsection{Event Monitoring} \label{sec:evmon}
+
+The Event Monitor (package {\tt ctrl\_evmon}) is general purpose
+facility for listening and reacting to events and is new in DC3a.  An
+{\it event monitor} is a process that is driven by an event monitor
+script which is set up to listen for a specific series of events with
+specified attributes.  When those events have been detected (in order
+and within a prescribed amount of time), the script will do
+something--typically, issue another event.  
+
+The motivating use case for the event monitor is to asynchronously and
+remotely detect system faults--in particular, catastrophic failures of
+a pipeline.  An event monitor script can be constructed to look for
+events from a pipeline that should appear at expected intervals.  If
+monitor fails to detect those events, it can issue an event that
+announces a failure of the pipeline.
+
+In DC3a, event monitors were used in two ways.  First is as a service
+that records logging events into a logging database in real time.  The
+second is to calculate the difference in time stamps between specially
+constructed log messages that mark out the execution of specific
+blocks of code.  These calculations were loaded into the database and
+served as the basic data for the timing analysis described in
+section \ref{sec:timing}.  This latter use can be done in real-time;
+however, in the practice of DC3a, the event monitor script was run
+after the production was complete on logging events streamed from the
+database.  
+

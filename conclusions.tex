@@ -2,11 +2,11 @@
 
 \section{Conclusions}
 
-\subsection{Summary of Achieve Metrics for DC3a}
+\subsection{Summary of Achieve Metrics for DC3a} % \label{metrics}
 
 \subsection{Recommendations for DC3b and beyond}
 
-The DC3a experience and results has already informed the plans for
+The DC3a experience and results have already informed the plans for
 DC3b at a detailed level.  For the results that have been presented in
 this report, there are several high-level conclusions that are
 particularly important for our future data challenge development:
@@ -32,7 +32,7 @@ to complete the execution and analysis of these runs using DC3a to be
 completed prior to the Preliminary Design Review (PDR).  
 
 \paragraph{Scientific Performance.}  Our analysis of results have
-focused a few areas that can have important effects on the scientific
+focused on a few areas that can have important effects on the scientific
 performance of the detection of alert-able objects.  Detection and
 elimination of artificial cosmic rays was ``perfect'' in that all
 artifacts were detected; however, this occurred in only the first of
@@ -45,11 +45,11 @@ subtraction:  while most sources are subtracting well (when the WCS is
 sufficiently successful),  the bright sources feature much larger
 errors.  
 
-Limitations of our input data make it difficult to test our overall
+Limitations of our input data made it difficult to test our overall
 ability to detect variable or moving sources.  More work is needed in
 improving the simulated data; in particular, it will be important
-create simulated template data that can support image subtraction with
-simulated raw data.  
+create simulated template data with sufficient sampling and seeing to
+support image subtraction with simulated raw data.  
 
 \paragraph{Processing Performance.}  While we made important
 improvements in the performance of certain algorithms (including image
@@ -66,15 +66,18 @@ critically needed.  Goods gains could also be gotten by improving the
 
 \paragraph{I/O Performance.}  I/O performance is also a clear
 bottleneck for performance as we spent nearly three times our time
-budget for image processing on I/O.  While our runs on Abe
-supercomputer do show that the Lustre parallel filesystem is important
-for improving that performance; however, we saw that naive use of a
-parallel file system can be detrimental.  In future data challenges,
-we need put more effort into strategies for efficient I/O.  Database
-performance is also an issue, and further scaling tests are needed.  
+budget for image processing on I/O.  While our large run on the Abe
+cluster does show that the Lustre parallel filesystem is important
+for improving that performance; we saw that it works best when each
+process is accessing a completely independent file.  In future data
+challenges, we need put more effort into strategies for efficient I/O.
+Database performance is also an issue, and further scaling tests are
+needed to separate the effects of network latency and access
+contention.  
 
-It will be fortunate if advancing computing technology over the next
-few years could eliminate a bit of performance deficit we are seeing
+\paragraph{} It will be fortunate if advancing computing technology
+over the next 
+few years could eliminate a bit of the performance deficit we are seeing
 today.  Unfortunately, computing chip roadmaps are looking to
 multi-core processing for keeping up with Moore's law.  This means, we
 can only take advantage of that to the extent that we can make our
