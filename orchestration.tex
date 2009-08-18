@@ -20,18 +20,18 @@ In DC2, the orchestration layer was largely undeveloped; in lieu, we
 had a customized launching script that handled several of chores that
 in general would be handled by the orchestration layer.  In DC3a, we
 used this script as a starting use case to design a more generalized
-layer configuring and launching pipelines.  The design also included
-the notion of monitoring a pipeline as it runs, but we did not
-implement that part in DC3a.  
+layer for configuring and launching pipelines.  The design also
+included the notion of monitoring a pipeline as it runs, but we did
+not implement that part in DC3a.  
 
 One of the challenges we want the layer to address is adapting a
 pipeline to run on different platforms.  These platforms may differ in
 terms of, say, where data can be read in from and written out to, how
-the pipeline must be launched--e.g. right away via a remote shell
+the pipeline must be launched---e.g. right away via a remote shell
 command (as with our development cluster) versus asynchronously via a
 batch scheduler (required for NCSA Abe), and how one checks on its
 progress.  We also want it to be able to launch any kind of
-pipeline--not just one based on our pipeline harness.  To address
+pipeline---not just one based on our pipeline harness.  To address
 these challenges, the {\tt orca} design segregates its various duties
 into separable classes, allowing for specialized versions to be
 plugged in to handle different types of pipelines and platforms.
@@ -127,7 +127,7 @@ maintained by {\tt eups} that are ``setup'' at the time of production
 execution (see DC2 report for more details).  In addition, the actual
 directories declared as the installation locations of the packages are
 also persisted, allowing locally-setup packages and packages installed
-under {\tt \$LSST\_DEVEL} to be identified.  We note that in DC3a, the
+under {\tt \$LSST\_DEVEL} to be identified.  We note that in DC3a the
 recording of the EUPS environment happens within the {\tt orca.py}
 script on the launch platform.  Consequently, this will only
 guaranteed to be accurate if the software stack installed on the
@@ -190,7 +190,7 @@ largely unchanged for DC3a (now in {\tt ctrl\_events}):  employing a
 publish-subscribe model, event messages sent through the event publish
 API are serialized and distributed to subscribers via a central event
 broker process (realized using the third-party package, ActiveMQ).
-The main change is that in DC3a, we did not use the third-party
+The main change is that in DC3a we did not use the third-party
 package, Mule, to record logging events into the database; this was
 instead handled by the new event monitor (next section).  We may still
 use Mule as an event router for higher-level DM operations.   
