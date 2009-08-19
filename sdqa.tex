@@ -93,7 +93,7 @@ does not require a schema change; instead you simply add new records to the SDQA
 and SDQA\_Threshold database tables to define the new SDQA Metrics and associated thresholds.
 Our DC3a implementation also
 includes tables for associating SDQA Ratings with image data at the CCD and FPA levels.
-The schema's tables closely parallel the SDQA classes that we have identified in our UML (universal modeling language) design.
+The schema's tables closely parallel the SDQA classes that we have identified in our UML design.
 
 The Science\_Amp\_Exposure database table stores metadata for
 processed images associated with independently read-out 
@@ -122,10 +122,13 @@ source code for the following classes:
 \end{itemize}
 
 \noindent
-In addition, we implemented SWIG wrappers for usage of these classes by Python scripts
-directly.  We verified all SDQA-related source code by creating unit tests and assuring
-their successful execution.  The unit test for the SDQA Rating Formatter involved 
-persisting SDQA Ratings in a test database.  
+In addition, we implemented SWIG wrappers for usage of these classes
+by Python scripts directly.  We verified all SDQA-related source code
+by creating unit tests and assuring their successful execution.  The
+unit test for the SDQA Rating Formatter involved persisting SDQA
+Ratings in a test database and then querying the database to verify
+that its contents accurately match the SDQA Ratings that were
+originally persisted.
 
 All software coding was done carefully to assure that LSST coding guidelines were followed.
 
