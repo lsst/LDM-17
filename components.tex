@@ -249,9 +249,12 @@ resampled from stacked images provided by the CHFT-LS survey.
 \item Calibrated images 0 and 1 are subtracted from the template
 image, and the difference images created are persisted.
 
-\item These difference images are added together. Source detection
-and measurement is then performed. The sources detected are
-persisted in the DIASource database.
+\item These difference images are added together and sources
+in the resulting image are detected and measured.
+
+\item The detected sources are converted to DIA sources.
+
+\item The sources are classified and persisted in the DIASource database.
 
 \item The association pipeline is signaled through the events broker
 that the processing of the image pair is complete and that the source
