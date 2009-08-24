@@ -70,7 +70,9 @@ We expect to complete runs up to the 15\% level before PDR.
 
 \begin{table}[ht]
 \centering
-\caption{Summary of Production Runs analyzed in this report
+\caption{Summary of Production Runs analyzed in this report.  The
+output image size includes all intermediate products, the majority of
+which will not be persisted by the LSST.
 \label{ex:tbl:runsummary}}
 \vspace{\baselineskip}
 \begin{tabular}{rccccc}
@@ -82,6 +84,7 @@ rlp1234   & 85      & 31  & 5146/24 GB    & 88/13 GB       & 60525/240 GB \\
 rlpabe041 & 12      & 288 & 3456/33 GB    & 15/2 GB        & 79368/313 GB \\ \hline
 Total     & ---     & 250 & 13748/81 GB   & 191/28 GB      & 2000418/793 GB \\ \hline
 \end{tabular}
+
 \end{table}
 
 Finally, in DCs 1, 2, and 3a, the availability of computational and storage resources has not
@@ -148,8 +151,8 @@ judged to be the most demanding for the software system to meet,
 and are each directly related to science requirements:
 \begin{itemize}
 \item WCS accuracy was acceptable in 98\% of images processed, with median errors of 40 milli-arcsec.
-\item The noise level away from bright stars in difference images with acceptable WCS is near 1.0, as expected.
-\item The noise level near bright stars in difference images with acceptable WCS is near 20 (unacceptable), and this will be addressed in DC3b by refining the kernel basis functions chosen for image subtraction.
+\item Expressed as a ratio to the irreducible image noise, the noise level away from bright stars in difference images with acceptable WCS is near 1.0, as expected.
+\item The noise level ratio near bright stars in difference images with acceptable WCS is near 20 (unacceptable), and this will be addressed in DC3b by refining the kernel basis functions chosen for image subtraction.
 \item Difference image lightcurve quality was adversely affected by residuals around bright stars and will be re-evaluated once the basis functions are addressed.
 \end{itemize}
 

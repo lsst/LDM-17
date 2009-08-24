@@ -3,18 +3,18 @@
 \section{Components}  \label{sec:components}
 
 The DC3a Alert Production is accomplished through a set of
-\textit{pipelines} that work together which collectively we refer to
+\textit{pipelines} that work together, which collectively we refer to
 as a \textit{production}.  A \textit{production run} is a particular
 instantiation and execution of those pipelines that produces a
-collection of data products, which in the case of alert production are
-the calibrated images and a catalog of detected objects.  A
+collection of data products. In the case of alert production these include
+the calibrated images, subtracted images, and a catalog of detected objects.  A
 \textit{pipeline} itself is a series of processing steps (called
 \textit{stages}) which are cyclically applied to a sequence of data
-chunks.  Since alert production is meant to run in real time on data
-coming from the telescope, the chucks of data to be processed are the
-so-called \textit{visits}, in which each visit is comprised of two
+chunks.  Since the alert production is meant to run in real time on data
+coming from the telescope, the chunks of data to be processed are 
+ \textit{visits}, in which each visit is comprised of two
 15-second exposures of the same field in the sky.  Each visit,
-generally, is different field in the sky.    
+generally, covers a different field in the sky and/or observing filter.    
 Figure \ref{fig:dc3apipes} diagrams major components of the processing flow in DC3a;
 figure \ref{fig:lsstpipes} shows for comparison the baseline design for processing 
 flow in the fully implemented LSST.
@@ -26,10 +26,13 @@ three pipelines:
 
 \item The \textit{image processing and source detection} (IPSD)
   pipeline takes as input the raw exposure images along with the
-  related calibration data and produces a catalog of the light sources
-  found within those images. DC3a added image signature removal to
-  this pipeline, along with the paradigm of processing both exposures
-  the make up the visit and use them to detect cosmic ray defects.
+  related calibration data, produces calibrated images, and then
+  differences them from template images of the same field.  It then
+  produces a catalog of the light sources found within those
+  difference images. DC3a added image signature removal to this
+  pipeline, along with the paradigm of processing both exposures that
+  make up the visit and use them to discriminate against cosmic ray
+  defects.
 
 \item The \textit{Night Moving Object Processing System} pipeline
   (NightMOPS) takes time and coordinate information from the exposure
@@ -76,7 +79,7 @@ The three pipelines run simultaneously on different machines but are
 loosely coupled via event-based communication.  In particular, the
 IPSD and NightMOPS pipelines will process the next visit when they
 receive an external event message indicating that a new visit is
-available for processing.  These pipeline both emit an event message
+available for processing.  These pipelines each emit an event message
 when they have finished processing a visit.  These events are picked
 up by the AP pipeline as a signal that there are new detections in the
 database to be associated with known objects.  The routing of these
@@ -91,7 +94,7 @@ database.
 The whole production is configured via a set of human-readable
 \textit{policy files} which provide values for parameters that
 configure the behavior of the various pipeline components.  In
-particular, a production-level policies defines the pipelines that
+particular, a production-level policy defines the pipelines that
 make up the production along with the properties of the platforms that
 they will run on.  Pipeline-level policies define the stages that make
 up each pipeline along with details for setting up the pipeline for
@@ -249,12 +252,11 @@ resampled from stacked images provided by the CHFT-LS survey.
 \item Calibrated images 0 and 1 are subtracted from the template
 image, and the difference images created are persisted.
 
-\item These difference images are added together and sources
-in the resulting image are detected and measured.
-
-\item The detected sources are converted to DIA sources.
-
-\item The sources are classified and persisted in the DIASource database.
+\item These difference images are added together. Source detection
+and measurement is then performed. The resulting DIASources are then
+separately measured in each exposure individually.  Based on
+comparison of the two sets of measurements, classification
+flags are set and persisted with the DIASources in the science database.
 
 \item The association pipeline is signaled through the events broker
 that the processing of the image pair is complete and that the source
@@ -270,7 +272,7 @@ The MOPS pipeline performs the following tasks, in sequence:
 
 \begin{itemize}
 
-\item Given the required field of view, MOPS predicts the positions 
+\item Given the required field of view and time of exposure, MOPS predicts the positions 
 of known moving objects in the field.
 
 \item These positions are recorded into the database.

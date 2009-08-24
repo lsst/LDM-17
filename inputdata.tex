@@ -7,7 +7,7 @@ As in DC2, we used real images from the CFHT Legacy Survey
 (CFHT-LS)\footnote{http://www.cfht.hawaii.edu/Science/CFHLS/} along
 with their associated source catalogs.  The CFHT-LS Deep Survey images
 come from the Canadian-France-Hawaii Telescope using the MegaCam
-mosaicing camera. The camera features a focal plane of 36 CCDs, where
+CCD mosaic camera. The camera features a focal plane of 36 CCDs, where
 each CCD contains 2048 $\times$ 4612 pixels. The total field of view
 for the camera is a full 1 degree $\times$ 1 degree square with a
 resolution of 0.187 arcsecond per pixel.
@@ -58,7 +58,7 @@ degree, while still maintaining consistency between the valid data
 sections, overscan regions, and approximate Wcs information in the
 image headers. 
 
-For DC3a processing, we divided each of the 32 CCD images into 8 images
+For DC3a processing, we divided each of the 36 CCD images into 8 images
 that are approximately the anticipated size of LSST amplifier images.
 Synthesized amplifier images 0-3 come from CFHT image subsection {\tt
 [0:1056, 0:4612]} of the input images, and amplifier images 4-7 from
@@ -164,7 +164,7 @@ WCSTools and by Saoimage DS9.
 
 Calibration data products for the simulated images include flat field
 images, dark frames, and bias frames. The flat field images were set
-to a mean value of unity and the dark and bias frames had a mean value
+to a mean value of unity and the bias frames to a mean value
 of zero.
 
 \subsection{Event Generation From Input Data}

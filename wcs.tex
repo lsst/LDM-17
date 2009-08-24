@@ -2,12 +2,34 @@
 
 \subsection{WCS Determination} \label{sec:wcs}
 
-WCS, or World Coordinate System is a convention for mapping positions on an astronomical image to coordinates in the sky. We require that our WCS map our positions with an accuracy of better than 0.1", driven by the need to subtract images from templates in the {\tt diff\_im} stage. For DC3a we implemented a method of determining a WCS solution for an image using the {\tt astrometry.net}\footnote{http://astrometry.net} package written by Dustin Lang. 
+WCS, or World Coordinate System is a convention for mapping positions
+on an astronomical image to coordinates in the sky. We require that
+our WCS map our positions with an accuracy of better than 0.1", driven
+by the need to subtract images from templates in the {\tt diff\_im}
+stage. For DC3a we implemented a method of determining a WCS solution
+for an image using the {\tt astrometry.net}\footnote{http://astrometry.net} package.
 
-{\tt astrometry.net} takes as input a list of positions pixel positions of sources in an image, and compares pattern of stellar positions, or asterisms, with a template list of stars with known right ascension and declination. It can be used to match images of arbitary pixel scale, location on sky, and magnitude limit, provided there is a sufficient overlap between the set of sources in the image, and those in the template. 
+{\tt astrometry.net} takes as input a list of positions pixel
+positions of sources in an image, and compares pattern of stellar
+positions, or asterisms, with a template list of stars with known
+right ascension and declination. It can be used to match images of
+arbitary pixel scale, location on sky, and magnitude limit, provided
+there is a sufficient overlap between the set of sources in the image,
+and those in the template.
 
 \subsubsection{Interface}
-Because {\tt astrometry.net} is written in C, and does not have a defined public API, we created a C++ wrapper to provide an object oriented interface, which is called a {\tt meas:astrom:net:GlobalAstrometrySolution}, hereafter referrred to as a GAS. A GAS is initialised with a set of template files, the names of which are set via policy. The policy file also defines the equinox (e.g equinox=2000) and coordinate system (e.g raDecSys=FK5) of the template. These two paramaters are necessary to fully define a WCS solution, but are not included in the template files produced by {\tt astrometry.net}. The list of sources to be solved for is set using the {\tt setStarlist()} function, which takes an {\tt lsst::afw:detection::SourceSet} as its argument.
+Because {\tt astrometry.net} is written in C, and does not have a
+defined public API, we created a C++ wrapper to provide an object
+oriented interface, which is called a {\tt
+  meas:astrom:net:GlobalAstrometrySolution}, hereafter referrred to as
+a GAS. A GAS is initialised with a set of template files, the names of
+which are set via policy. The policy file also defines the equinox
+(e.g equinox=2000) and coordinate system (e.g raDecSys=FK5) of the
+template. These two parameters are necessary to fully define a WCS
+solution, but are not included in the template files produced by {\tt
+  astrometry.net}. The list of sources to be solved for is set using
+the {\tt setStarlist()} function, which takes an {\tt
+  lsst::afw:detection::SourceSet} as its argument.
 
 
 The GAS takes various parameters which can be set to speed the match. 
@@ -22,9 +44,23 @@ The GAS takes various parameters which can be set to speed the match.
 
 \subsubsection{Timing}
 
-{\tt astrometry.net} comes supplied with a large template based on the USNO-b catalogue, but we found this template unsatisfactory for two reasons. The sheer size of the cataloge ($\sim$30\,Gb) meant that disk I/O was prohibitively expensive. We also found that the centroids of individual objects differed by up to 0.3" between the CFHT images and the positions measured by USNO-b. Instead we created a smaller template (2\,Mb) from images of the CFHT field created by Swarp, and found that method worked to our satisfaction.
+{\tt astrometry.net} comes supplied with a large template based on the
+USNO-b catalogue, but we found this template unsatisfactory for two
+reasons. The sheer size of the catalog ($\sim$30\,Gb) meant that disk
+I/O was prohibitively expensive. We also found that the centroids of
+individual objects differed by up to 0.3" between the CFHT images and
+the positions measured by USNO-b. Instead we created a smaller
+template (2\,Mb) from images of the CFHT field created by Swarp, and
+found that method worked to our satisfaction.
 
-We measured the time taken to solve each amplifier in the CFHT field v704893-e0 (30 images). In each case, we put no constraints on the solution other than to set the number of objects to use to find a solution to 70. Solving blindly (i.e without using an initial guess at the position) took, on average, 41\,ms $\pm$ 76\,ms. The worst case time was 300ms. When a field fails to solve, {\tt astrometry.net} takes quite some (10-20 seconds) to search every possible combination of stars before giving up. 
+We measured the time taken to solve each ccd in the CFHT field
+v704893-e0 (30 images). In each case, we put no constraints on the
+solution other than to set the number of objects to use to find a
+solution to 70. Solving blindly (i.e without using an initial guess at
+the position) took, on average, 41\,ms $\pm$ 76\,ms. The worst case
+time was 300ms. When a field fails to solve, {\tt astrometry.net}
+takes quite some (10-20 seconds) to search every possible combination
+of stars before giving up.
 
 % \subsubsection{Success rate}
 % {\tt astrometry.net} claims over 99\% success rate in solving $r$
@@ -34,7 +70,17 @@ We measured the time taken to solve each amplifier in the CFHT field v704893-e0 
 % particularly considering the problems we had with USNO-B.  
 
 \subsubsection{Improvements to the WCS class}
-Astronomical images generally contain some distortion, i.e the rectangular grid of pixels in an image does not map onto a retangular grid of right ascension and declination. The WCS standard does not supply a method of dealing with this real world problem. {\tt astrometry.net} describes distortion coefficients using the SIP convention (Shupe et al. 2005; ASPC 347 491), which was developed and used the the Spitzer Science Center. SIP defines a set of polynomials used to map the positions of the distorted pixels into an undistorted space where they can be correctly transformed using the WCS. {\tt afw} adopted the SIP convention, and the WCS class was extended to use the SIP polynomials when converting from pixel to sky coordinates.
+Astronomical images generally contain some distortion, i.e the
+rectangular grid of pixels in an image does not map onto a retangular
+grid of right ascension and declination. The WCS standard defines
+several functional forms to describe this distortion.  {\tt
+  astrometry.net} instead describes distortion coefficients using the SIP
+convention (Shupe et al. 2005; ASPC 347 491), which was developed and
+used by the Spitzer Science Center. SIP defines a set of polynomials
+used to map the positions of the distorted pixels into an undistorted
+space where they can be correctly transformed using the WCS. {\tt afw}
+adopted the SIP convention, and the WCS class was extended to use the
+SIP polynomials when converting from pixel to sky coordinates.
 
 
 \subsubsection{Future Work}

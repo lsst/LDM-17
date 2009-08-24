@@ -1,7 +1,7 @@
 % Section 7: Results
 \newcommand{\stc}[1]{\hbox to 2.5em{{#1}\hfil}}
 
-\section{Results}
+\section{Results} \label{sec:results}
 
 \subsection{Summary of Runs} \label{sec:recsummary}
 
@@ -17,14 +17,14 @@ quality and performance.
 For our final, detailed analysis of the data quality and processing
 performance, we focused on two productions runs with identical
 versions of the software and configuration: {\tt rlp1233} and {\tt
-rlp1234}.  These two runs
-processed different subsets of the focal plane for 85 visits to the
-CFHT-LS D3 on our own LSST cluster.  These visit were selected based
-on the availability of the calibration data needed to calibrate raw
-science images.  The Image Processing and Source Detection (IPSD)
-pipeline featured 1 master pipeline and 31 slice processes running
-across four nodes of the cluster (thus each run processed 31 amplifier
-images in parallel).  The Association pipeline (ap) ran on node 10
+  rlp1234}.  These two runs processed different subsets of the focal
+plane for 85 visits to the CFHT-LS D3 on our own LSST cluster.  These
+visit were selected based on the availability of the calibration data
+needed to calibrate raw science images.  The Image Processing and
+Source Detection (IPSD) pipeline featured 1 master pipeline and 31
+slice processes running across four nodes of the cluster,which
+contained a total of 32 cores. Thus each run processed 31 amplifier
+images in parallel.  The Association pipeline (ap) ran on node 10
 within one master process and one slice process.  The ``NightMOPS''
 pipeline (part of the Moving Objects Prediction System) ran on node 9
 with 1 master process and 5 slice processes.  Taking a lesson from
@@ -115,12 +115,6 @@ resource limitations prevented our exploring the causes in any
 detail.  Consequently, the final runs were conducted using NFS-mounted
 filesystems (which are known to perform poorly under most conditions).  
 
-Ultimately, the simulated data was not used as part of the final
-analysis.  While the two simulated collections were instrumental
-in understanding and correcting processing problems, we found that the
-quality of the template images were insufficient for producing useful
-difference images and database results.  
-
 In addition to the runs on our own LSST cluster, we also conducted
 runs on the NCSA Abe cluster.  The purpose of these runs were to
 explore the scalability of the pipeline processing up to higher
@@ -172,7 +166,9 @@ specifically on the development cluster.
 
 \begin{table}[htbp]
 \centering
-\caption{Summary of Production Runs analyzed in this report
+\caption{Summary of Production Runs analyzed in this report.  The
+output image size includes all intermediate products, the majority of
+which will not be persisted by the LSST.
 \label{tbl:runsummary}}
 \vspace{\baselineskip}
 \begin{tabular}{rccccc}
@@ -232,8 +228,9 @@ The procedure used to assess the WCS accuracy is as follows:
 \item A set of exposures from visits processed by a particular run is
   picked for analysis. For each exposure:
 \begin{enumerate}
-\item The WCS\_Sources identified by the ICP for WCS determination are retrieved from the
-  science database for the run.
+\item The WCS\_Sources identified by the Image Characterization
+  Pipeline for WCS determination are retrieved from the science
+  database for the run.
 \item The pixel coordinates for each WCS\_Source are converted from
   ccd coordinates to amplifier coordinates, and are input to the
   wcstools program ``xy2sky'' along with the corresponding amplifier
@@ -450,7 +447,7 @@ managing the execution of the stages.  As the numbers show, the
 pipeline adds very little to the processing time of a visit.  A more
 precise analysis of the pipeline overhead is presented below.  
 
-The variation in the processing is in general much smaller in DC3a as
+The variation in the processing is in general much smaller in DC3a than
 it was in DC2: in the latter, the $3\sigma$ half-width was 108
 seconds in the image processing pipeline, while we now have 20
 seconds.  Furthermore as illustrated in Fig. \ref{fig:visitdist}, the
@@ -498,7 +495,7 @@ noticing trends.
 \end{center}
 \end{table}
 
-As in DC2, the costliest stages are those that do image subraction
+As in DC2, the costliest stages are those that do image subtraction
 (stages 35 and 36) at 80 seconds per image.  This is down
 significantly from DC2's 175 seconds; although, in DC3 we now do image
 subtraction on both exposures from a visit.  The variation in the time
@@ -588,7 +585,7 @@ Data input and output (I/O) takes on average 46\% of the time spent
 processing a visit in the IPSD pipeline (or 24\% if we discount
 non-essential I/O).  Comparison of the LSST cluster runs 
 ({\tt   rlp1233} \& {\tt rlp1234}) with the Abe run is revealing,
-particularly when we break it differentiate between file-based I/O and
+particularly when we differentiate between file-based I/O and
 database I/O.  Table \ref{tbl:diostagetimes} compares the times for
 database I/O stages.  We can understand these numbers by recalling
 that the database server ran on all cases on the development cluster;
@@ -678,7 +675,7 @@ data in the same or less time for all but two of the stages listed in
 Table \ref{tbl:fiostagetimes}.  
 
 One of the exceptions, stage 16, is one of the three that also
-involved in database I/O.  As discussed above, the Abe performance
+involved database I/O.  As discussed above, the Abe performance
 is suggestive of the the I/O being dominated by the database
 component.  The other exception is stage 33 in which all the parallel
 processes had to read the same template image at the same time; in
@@ -687,7 +684,7 @@ This is in contrast with all of the other file I/O stages where each
 process read in or wrote out a \textit{different} file.  
 
 For completeness, we also present the timings for the remaining
-stages in Table \ref{tbl:miscstagetimes}.  The handle neither science
+stages in Table \ref{tbl:miscstagetimes}.  They handle neither science
 processing nor I/O but rather carry out small book-keeping tasks.
 They all take a short time and half of them are not expected to have
 counterparts in the production pipelines.   We also show the timing
@@ -793,7 +790,7 @@ ap        &\hfil& 4.0 &$\pm$& 0.2 ms&& 11.7 &$\pm$& 2.5 ms \\
 
 To understand what these performance results are telling us, particularly
 about where we need to improve, it necessary to recall our performance
-goals.  Early in the design history of LSST DM datamanagement, we developed a
+goals.  Early in the design history of LSST Data Management, we developed a
 timeline budget, illustrated in fig. \ref{fig:timeline}, for the major
 data handling and processing steps necessary to deliver alerts within
 the 60-second required window.  It is worthwhile discerning how our

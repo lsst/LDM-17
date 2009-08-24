@@ -26,7 +26,7 @@ standard Python {\tt Exception} class.  This has the advantage
 allowing all exceptions to be caught via a single {\tt Exception}
 class; however, this is at the cost of easy, highly customized
 handling of exceptions based on type.  We have not figured out how
-enable both highly desirable features simultaneously.  
+to enable both highly desirable features simultaneously.  
 
 \paragraph{Logging.}  In DC2, there existed two types of logging:  one
 primarily for debugging messages that would normally be automatically
@@ -45,7 +45,7 @@ API.
 \subsubsubsection{The Pipeline Harness} \label{sec:harness}
 
 At the core of {\tt pex\_harness} is the {\tt Pipeline} class which
-drives the master process of a pipeline and executes serial portion of
+drives the master process of a pipeline and executes the serial portion of
 each stage.  It also spawns the worker processes--the {\it slices}--on
 all of the nodes hosting the pipeline.  The {\tt Slice} class drives
 the processing in each worker process, taking its direction from the
@@ -79,7 +79,7 @@ developed within pipeline middleware.  Inter-slice communication
 allows complex types collected in a {\tt PropertySet} to be
 communicated via MPI, effectively transferred from the {\tt Clipboard}
 of one {\tt Slice} to that of another.  This functionality was not
-leveraged within astronomical algorithms within DC3a, but the
+utilized within astronomical algorithms in DC3a, but the
 groundwork laid within DC3a will allow for more rapid inclusion into
 suitable algorithms for DC3b and the future.
 \item The harness logging was upgraded with the ability to write log

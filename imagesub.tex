@@ -175,15 +175,24 @@ is likely that pixels at the centers of the bright stars contribute to
 the stack with a strong dependence on seeing, making these poor
 objects for PSF matching.
 
-We note that we were unable to use the simulated images (both SimDeep
-and SimWide) for the image subtraction portion of {\tt IPSD} since the
-template images are severely undersampled (0.1'' seeing with 0.3''
-pixels).
+As part of the image simulations for DC3a, "Ideal" images were
+generated to complement the Deep and Wide image stacks. These images
+were designed to provide a high signal-to-noise representation of the
+field with no instrumental effects (essentially a "truth table" for
+comparison with Deep and Wide images). The ideal images were generated
+with appropriate atmospheric transmission but with a 0.1 arcsec PSF
+(essentially a delta function), no aberrations in the optics, and no
+sky background. While resulting in deep images useful in
+characterizing the detection thresholds for the pipeline stages,
+attempts to use these images as template images in the image
+subtraction stages proved unsuccessful as the pixel scale of 0.2
+arcseconds meant that the Ideal images were undersampled.
+
+
 
 \subsubsection{Future Work}
 
-Further investigation of the convolution vs. deconvolution issue is
-certainly warranted.  Using single--depth images from the {\tt
+Using single--depth images from the {\tt
 SimDeep} dataset, we have determined that the derived kernels are far
 noisier than expected even when the process is known to be a
 (smoothing) convolution since we have controlled all the variables in

@@ -10,7 +10,7 @@ events (particularly logging events) and react intelligently.  The
 {\tt ctrl\_orca} realizes the {\it orchestration layer} responsible
 for launching pipelines.  An important job this layer must do is
 record {\it provenance} information--all of the data describing the
-software environment and policy paramters that was used to configure
+software environment and policy parameters that was used to configure
 and execute a pipeline.  
 
 \subsubsubsection{Pipeline Orchestration} 
@@ -96,7 +96,7 @@ However, when the pipeline is launched from orchestration, the
 production level value will override the pipeline level value.  The
 way this is accomplished is that before the orchestration layer
 deploys the pipeline policy files onto the (remote) pipeline platform,
-it collects all of the share policy data and rewrites the pipeline
+it collects all of the shared policy data and rewrites the pipeline
 level policy, overriding the defaults.  This fact has important
 implications for provenance.  
 
@@ -207,7 +207,7 @@ published to the approximate average time to processing a visit (about
 4.5 minutes).  
 
 Finally, we also discovered that the broker is subject to the
-operating system limit on the number simultaneously open file
+operating system limit on the number of simultaneously open file
 descriptors.  This limit can easily be exceeded when a production
 includes about 240 or more processes.  Discovered during large runs on
 the Abe cluster (discussed in section \ref{sec:recsummary}), this
