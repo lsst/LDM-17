@@ -3,35 +3,35 @@
 \subsubsection{Processing Orchestration and Control}
 
 Closely related to pipeline execution packages are the control
-packages ({\tt ctrl\_}).  The {\tt ctrl\_events} package provides the
+packages.  The {\tt ctrl\_events} package provides the
 event framework that allows pipelines to talk to each other.  The {\tt
 ctrl\_evmon} provides the event monitor services which can listen to
 events (particularly logging events) and react intelligently.  The
 {\tt ctrl\_orca} realizes the {\it orchestration layer} responsible
 for launching pipelines.  An important job this layer must do is
-record {\it provenance} information--all of the data describing the
+record {\it provenance} information --- all of the data describing the
 software environment and policy parameters that was used to configure
 and execute a pipeline.  
 
 \subsubsubsection{Pipeline Orchestration} 
 \label{sec:PipelineOrchestration}
 
-In DC2, the orchestration layer was largely undeveloped; in lieu, we
+In DC2, the orchestration layer was largely undeveloped; in its place, we
 had a customized launching script that handled several of chores that
 in general would be handled by the orchestration layer.  In DC3a, we
 used this script as a starting use case to design a more generalized
 layer for configuring and launching pipelines.  The design also
-included the notion of monitoring a pipeline as it runs, but we did
+included the notion of monitoring a pipeline as it runs, although we did
 not implement that part in DC3a.  
 
 One of the challenges we want the layer to address is adapting a
 pipeline to run on different platforms.  These platforms may differ in
 terms of, say, where data can be read in from and written out to, how
-the pipeline must be launched---e.g. right away via a remote shell
+the pipeline must be launched --- e.g. right away via a remote shell
 command (as with our development cluster) versus asynchronously via a
-batch scheduler (required for NCSA Abe), and how one checks on its
+batch scheduler (required for NCSA Abe) --- and how one checks on its
 progress.  We also want it to be able to launch any kind of
-pipeline---not just one based on our pipeline harness.  To address
+pipeline,not just one based on our pipeline harness.  To address
 these challenges, the {\tt orca} design segregates its various duties
 into separable classes, allowing for specialized versions to be
 plugged in to handle different types of pipelines and platforms.
@@ -42,15 +42,15 @@ specified in policy.
 The main duties of the orchestration layer are:
 \begin{itemize}
 \item Create working directories on the target platforms for input and
-  output data, policy files, and log files,
-\item Initialize the database tables to be used by the pipelines, 
+  output data, policy files, and log files;
+\item Initialize the database tables to be used by the pipelines;
 \item Deploy all needed policy files and launch scripts onto the
-  target platforms,
-\item Set the necessary software environment, 
-\item Record provenance data
-\item Remotely execute each platform launch script.
-\item Monitor the pipeline for failures (not implemented in DC3a)
-\item Shut down the pipeline (not implemented in DC3a)
+  target platforms;
+\item Set the necessary software environment;
+\item Record provenance data;
+\item Remotely execute each platform launch script;
+\item Monitor the pipeline for failures (not implemented in DC3a); and
+\item Shut down the pipeline (not implemented in DC3a).
 \end{itemize}
 
 The main classes responsible for this are:
@@ -123,19 +123,11 @@ useful while debugging algorithmic issues since it simplified the
 construction of small reproducible test cases demonstrating problems.
 
 The software environment is characterized by the versions of packages
-maintained by {\tt eups} that are ``setup'' at the time of production
+maintained by {\tt eups} that are set up at the time of production
 execution (see DC2 report for more details).  In addition, the actual
 directories declared as the installation locations of the packages are
 also persisted, allowing locally-setup packages and packages installed
-under {\tt \$LSST\_DEVEL} to be identified.  We note that in DC3a the
-recording of the EUPS environment happens within the {\tt orca.py}
-script on the launch platform.  Consequently, this will only
-guaranteed to be accurate if the software stack installed on the
-launch platform is identical to the one on the pipeline platform(s);
-in general, this is not a good assumption.  The best time to record
-this information is just prior to when the pipeline process actually
-starts on the remote pipeline platform; this is what will happen in
-DC3b.  
+under {\tt \$LSST\_DEVEL} to be identified.  
 
 The recorded policy file information includes the contents on a per-key
 basis as well as an MD5 hash of the file contents and the file's
@@ -177,7 +169,7 @@ is a danger that the recorded policy data will not be accurate,
 particularly considering the policy rewriting that the orchestration
 layer does described in the previous section.  In DC3a, we do
 know that the recorded policy data was, in fact, accurate; however,
-because of how functionality is encapsulated in the orca classes, the
+because of how functionality is encapsulated in the \testtt{orca} classes, the
 {\tt Provenance} class cannot make any assumptions regarding how the
 policy files were transferred to the pipeline platforms.  Thus, like
 the EUPS data, the best time to record the policy data is right before
@@ -222,7 +214,7 @@ facility for listening and reacting to events and is new in DC3a.  An
 script which is set up to listen for a specific series of events with
 specified attributes.  When those events have been detected (in order
 and within a prescribed amount of time), the script will do
-something--typically, issue another event.  
+something --- typically, issue another event.  
 
 The motivating use case for the event monitor is to asynchronously and
 remotely detect system faults--in particular, catastrophic failures of

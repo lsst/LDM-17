@@ -15,18 +15,18 @@ improvements in DC3a.
 
 \paragraph{Exceptions.}  The exception framework was overhauled in
 part to make it easier to create, throw, and handle exceptions.  In
-particular, support was improved a type of traceback that can preserve
+particular, support was improved for a type of traceback that can preserve
 context-specific error messages as an error condition travels upward
 through a call stack: as an exception is caught and rethrown, handlers
 can add more information that better describes the context that
 resulted in the error.  We also changed the way exceptions travel
-across the C++--Python barrier: C++ exceptions are converted to the
+across the C++/Python barrier: C++ exceptions are converted to the
 {\tt LsstCppException} class in Python, which inherits from the
 standard Python {\tt Exception} class.  This has the advantage
 allowing all exceptions to be caught via a single {\tt Exception}
 class; however, this is at the cost of easy, highly customized
-handling of exceptions based on type.  We have not figured out how
-to enable both highly desirable features simultaneously.  
+handling of exceptions based on type.  We are still looking for a
+strategy enabling both highly desirable features simultaneously.  
 
 \paragraph{Logging.}  In DC2, there existed two types of logging:  one
 primarily for debugging messages that would normally be automatically
@@ -44,9 +44,9 @@ API.
 
 \subsubsubsection{The Pipeline Harness} \label{sec:harness}
 
-At the core of {\tt pex\_harness} is the {\tt Pipeline} class which
+At the core of {\tt pex\_harness} is the {\tt Pipeline} class, which
 drives the master process of a pipeline and executes the serial portion of
-each stage.  It also spawns the worker processes--the {\it slices}--on
+each stage.  It also spawns the worker processes --- the {\it slices} --- on
 all of the nodes hosting the pipeline.  The {\tt Slice} class drives
 the processing in each worker process, taking its direction from the
 remote {\tt Pipeline} via MPI messages.  Both the {\tt Pipeline} and

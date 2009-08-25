@@ -2,18 +2,18 @@
 
 \subsection{The Database}
 
-DC3a builds on the basic database schema design set down in DC2
-(consisting of 23 tables) which are realized in a MySQL database
+DC3a builds on the basic database schema design set down in DC2,
+consisting of 23 tables realized in a MySQL database
 engine running on one of the nodes of our development cluster.  The
 design is tracked in our UML model, and care has been taken that the
 information model mirrors the software class model where appropriate.
-Pipeline operation relies on two databases.  First is a global set of
-tables that were created once and reused with every production run.
+Pipeline operation relies on two databases.  The first is a global set of
+canonical tables that were created once and reused with every production run.
 The second consists of a set of tables that are created for a
-particular production run (and are given a database name that includes
-the run identifier; see section \ref{sec:components}); these contain
+particular production run and given a database name that includes
+the run identifier (see section \ref{sec:components}); these contain
 the actual results of a particular run.  When the run is done, this
-database may be deleted if the results are no longer desired.  
+database may be deleted if the results are no longer needed.  
 
 The following subsections we describe how the database use has evolved
 in DC3a.  
@@ -50,7 +50,7 @@ The following (relatively minor) changes were made to the schema for DC3a:
 In DC3a we deployed an on-line schema
 browser\footnote{http://dev.lsstcorp.org/schema/} to enable broad
 visibility (particularly for scientists) into our schema.  This
-graphical, web-based browser allows a quick, easy and convenient way
+graphical, web-based browser allows a quick, easy, and convenient way
 to look at the database-schema structure, including browsing tables,
 column names, their types, units, UCDs, and descriptions.
 Descriptions and units for most columns were added, but the UCD fields
@@ -67,11 +67,11 @@ information into a format readable by the schema browser.
 As a security measure, database authorization was reworked.  In DC3a,
 the run-specific databases are created under the ownership of the user
 running the pipelines.  To enable automatic authorization during
-pipeline operations, the user must (prior to launch) set-up a special
+pipeline operations, the user must, prior to launch, set up a special
 database configuration file in his or her home directory (under an
-{\tt .lsst} directory) which contains the username and password to
-use.  We also created a tool for granting lsst-specific privileges to
-new users as well as scripts for deleting run-specific databases that
+{\tt .lsst} directory) containing the username and password to
+use.  We also created a tool for granting LSST-specific privileges to
+new users, as well as scripts for deleting run-specific databases that
 are no longer needed.
 
 In DC3a, we also introduced metadata about runs. This allows us to
