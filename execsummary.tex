@@ -48,22 +48,22 @@ After initial short runs for purposes of debugging,
 we executed larger-scale DC3a production runs on clusters at
 NCSA.  For final analysis of data quality and processing performance,
 we have concentrated on two production runs on the NCSA LSST
-development cluster (referred to by their run
+development cluster; these are referred to by their run
 identifiers, \texttt{rlp1233} and \texttt{rlp1234}. These runs used
 identical versions of the software and were configured identically, but
-processing a different set of 31 amplifiers in the focal plane for 85
+each processed a different set of 31 amplifiers in the focal plane for 85
 visits to the CFHT-LS D3 field.  To explore the scalability of
 the pipelines, we also executed runs of the image processing pipeline
 on the NCSA cluster Abe.  These runs were performed across 36 8-core
 nodes, processing the entire 288-amplifier focal plane for CFHT-LS
-simultaneously.  (Some of the supporting software services, such as
+simultaneously.  (Some of the supporting software services for these runs, such as
 the event broker and the database, remained on the NCSA LSST cluster.)
 
 These runs showed that the pipelines scaled reasonably well to the
 level of 10\% of the actual LSST image size, although running at this scale did reveal some additional
-configuration requirements for the events broker and the MySQL
+configuration requirements for the event broker and the MySQL
 database.  To run on Abe, we integrated grid-based technologies
-(including grid-based job management using Condor-G) into our the
+--- including grid-based job management using Condor-G --- into our the
 pipeline orchestration layer.  While short of our goal of 15\% of the actual LSST image size,
 we elected to close out DC3a at this level in order to expedite completing this report.
 We expect to complete runs up to the 15\% level before PDR.
@@ -79,9 +79,9 @@ which will not be persisted by the LSST.
 \hline\hline
           &         &       & \multicolumn{3}{c}{Images Processed: Num/Size} \\
 runId     & nVisits & nAmps & Raw Images & Ancil. Images & Output Images \\ \hline
-rlp1233   & 85      & 31  & 5146/24 GB    & 88/13 GB       & 60525/240 GB \\ 
-rlp1234   & 85      & 31  & 5146/24 GB    & 88/13 GB       & 60525/240 GB \\ 
-rlpabe041 & 12      & 288 & 3456/33 GB    & 15/2 GB        & 79368/313 GB \\ \hline
+\texttt{rlp1233}   & 85      & 31  & 5146/24 GB    & 88/13 GB       & 60525/240 GB \\ 
+\texttt{rlp1234}   & 85      & 31  & 5146/24 GB    & 88/13 GB       & 60525/240 GB \\ 
+\texttt{rlpabe041} & 12      & 288 & 3456/33 GB    & 15/2 GB        & 79368/313 GB \\ \hline
 Total     & ---     & 250 & 13748/81 GB   & 191/28 GB      & 2000418/793 GB \\ \hline
 \end{tabular}
 
@@ -97,8 +97,8 @@ and performance achievable in DC3b will be limited by the available resources.
 While the total processing time per
 visit is longer than in DC2, we note that DC3a does significantly more processing,
 including additional caching of intermediate results that would not be
-necessary in production mode.  When we examined the common stages of
-processing in DC2 and DC3a, we saw large improvements across the
+necessary in production mode.  When we compared the common stages of
+processing in DC2 against their counterparts in DC3a, we saw large improvements across the
 board, along with a much lower variation in processing times over
 different data.  The most expensive stage, image subtraction, saw a
 2-fold improvement over DC2; subsequent experiments showed tuning
@@ -146,7 +146,7 @@ and efficiency.
 
 Nevertheless, we employed both algorithm developers and independent
  (non-DC) scientists from IPAC
-to evaluate the science data quality of DC3a in three areas that are
+to evaluate the science data quality of DC3a in the areas that are
 judged to be the most demanding for the software system to meet, 
 and are each directly related to science requirements:
 \begin{itemize}
@@ -166,7 +166,7 @@ A comparison between DC2 and DC3a reveals the following productivity statistics:
 
 As can be seen from the above, in DC3a there was  a significant schedule overrun (50\%).
 The team was very late in establishing the final scope 
-and developing resource leveled plans. The reasons for this include a larger team but
+and developing resource-leveled plans. The reasons for this include a larger team but
  lower per-person involvement than in DC2.
 This caused more and longer periods where parts of the team were blocked
 waiting for other parts to complete, as well as requiring more time to be spent 

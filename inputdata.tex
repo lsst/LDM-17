@@ -55,7 +55,7 @@ In particular, the two amplifier readouts were spliced back together
 into 2112 by 4644 pixel images corresponding to a single CCD.  To
 prepare the data for DC3a processing, we undid this operation to some
 degree, while still maintaining consistency between the valid data
-sections, overscan regions, and approximate Wcs information in the
+sections, overscan regions, and approximate WCS information in the
 image headers. 
 
 For DC3a processing, we divided each of the 36 CCD images into 8 images
@@ -69,12 +69,12 @@ image is 1056 x 1153 pixels, with 32 pixels of overscan implemented as
 When segmenting the images, special care was taken to properly migrate
 header data describing important characteristics such as noise, gain,
 and bias for each amplifier.  Each amplifier image was saved with a
-file name that captured a visit ID (taken from the \texttt{OBSID} FITS
+file name that designated a visit ID (taken from the \texttt{OBSID} FITS
 keyword), CCD ID, amplifier ID, and exposure ID (indicating whether it
 is the first or second in the pair of visit exposures).  
 
-The full focal plane of the CFHT data--namely, the number of amplifier
-sub-images and constituent pixels--is substantially smaller than
+The full focal plane of the CFHT data --- namely, the number of amplifier
+sub-images and constituent pixels --- is substantially smaller than
 the planned LSST focal plane.  In order to scale up our pipelines to
 run on a full LSST focal plane all at once using this data, we need to
 effectively replicate this data multiple times.  We note that we were
@@ -82,7 +82,7 @@ not able to complete this level of scaling in time for this report.
 
 \subsubsection{Calibration Data}
 
-The CFHT calibration data includes FITS keywords that define the range
+The CFHT calibration data includes FITS keywords which define the range
 of dates for which it is valid.  In order to process CFHT science frames
 we needed to associate a given filter and date with the proper
 calibrations.  This mapping was captured in a policy file and used by
@@ -98,37 +98,44 @@ is clear that the final LSST system will need to do so.
 \subsection{LSST Simulated Images and Catalogs}
 
 Three sets of simulated images were generated for the LSST data
-management pipeline: ``Deep'' images comprise 96 CCD images of the
+management pipeline: 
+
+\begin{itemize}
+\item ``Deep'' images comprise 96 CCD images of the
 same field (with varying seeing, airmass and sky backgrounds) and were
-designed for use in image stacks, ``Wide'' images comprise 163 CCDS
+designed for use in image stacks.
+\item ``Wide'' images comprise 163 CCDS
 which sample 3 rafts from the center to the edge of the focal plane
-over a range of airmasses and seeing conditions, ``Ideal'' images
+over a range of airmasses and seeing conditions.
+\item ``Ideal'' images
 comprise a simulation with no atmosphere, no optical distortions,
-airmass of unity, 0.1 arcsec seeing and no sky background (this
+airmass of unity, 0.1 arcsec seeing and no sky background; this
 defines an idealized view of the sky for use as a truth table).
+\end{itemize}
 
 The underlying stellar and galaxy catalogs are based on the
 simulations of Juri\'c {\it et al.}~(2008) and Kitzbichler and White
-(2007) respectively.  To reproduce the LSST sky coverage the 2x2 deg
+(2007) respectively.  To reproduce the LSST sky coverage the 2$\times$2 deg
 galaxy catalogs from Kitzbichler and White (2007) are tiled across the
-sky.  The SED of each galaxy is estimated using the Bruzual \& Charlot
+sky.  The SED of each galaxy is estimated using the Bruzual and Charlot
 (2003) stellar population models. Using the models of Debattista
-\textit{et al.}~(2006) each galaxy in the Millennium Simulation is
+\textit{et al.}~(2006), each galaxy in the Millennium Simulation is
 assigned a morphological profile. The current implementation assigns
 each galaxy a disk-to-total flux ratio, position angle in the sky,
 inclination along the line-of-sight, bulge radius, and disk radius.
 
-Stars are specified by SED, and positions. The SEDs for stars are
+Stars are specified by spectral energy distribution (SED)
+and positions. The SEDs for stars are
 derived from Kurucz models (i.e.\ excluding dwarf and giant
 stars). The model used to generate main sequence stars is based on
-work done by Juric et. al. This includes user-specified amounts of
+work done by Juric \textit{et al}. This includes user-specified amounts of
 thick-disk, thin-disk, and halo stars. Each version of a catalog
 contains metadata on metallicity, temperature, luminosity-type, and
 surface gravity.
 
 From these data, images with varying PSF (from 0.4 to 1.8 arcseconds),
-airmass (from 1.0 to 2.0), sky background ( with low, new moon, and
-high, full moon and 20 degrees from the Moon), and varying mirror and
+airmass (from 1.0 to 2.0), sky background (with low, new moon, and
+high, full moon, and 20 degrees from the Moon), and varying mirror and
 optics specifications (including aberrations) were generated.  The
 limiting magnitude of these catalogs was $r<26$ and the catalogs were
 made available with the resulting images.
@@ -143,16 +150,16 @@ including date, data sections, saturation level, and world coordinate
 system (WCS).  Amplifier based images were constructed by breaking up
 each CCD into 16 amplifier images (512 $\times$ 2045 pixels), addition
 of an overscan region of 5 pixels, and inclusion of read noise of 5
-elections.  A software bias of 100 counts was added to all the pixels
+electrons.  A software bias of 100 counts was added to all the pixels
 to avoid negative counts.  All amplifier-level FITS images were cast
 as 16-bit unsigned integer. The FITS keywords for these images include
 the simulation run name (i.e. Wide, Deep, or Ideal), dates processed
 at University of Washington and generated at Purdue, along with CCD
-processing information (i.e. DATASEC, etc..)
+processing information (i.e. DATASEC, etc.).
 
 The Image Simulation results predict non-linear distortions in the
 coordinate system, at the sub-pixel level, across a CCD. To meet the
-LSST science--goal astrometric requirements (15 milliarcsec) and to
+LSST science-goal astrometric requirements (15 milliarcsec) and to
 account for these non-linear optical distortions, a TAN-SIP WCS
 solution was implemented for these images. TAN-SIP provides a
 polynomial relation between CCD positions and the position on the sky
@@ -171,13 +178,13 @@ of zero.
 
 As described in section \ref{sec:components}, pipeline processing is
 triggered by an event indicating that new image data is
-ready.  This event contains basic metadata about the images--the
+ready.  This event contains basic metadata about the images --- the
 direction of sky, the filter, etc.  In our reference design, this
 event ultimately comes from the process responsible for pulling the
 data from the camera, and the information resides new loaded in the
-database.  In DC3a where our data is in the FITS headers of images
+database.  In DC3a, our data is in the FITS headers of images
 already cached on disk.  In lieu of a data transfer process, we have a
-simple script which that for a sequence of FITS files extracts the
+simple script which, for a sequence of FITS files, extracts the
 information from the headers and emits it as data events to trigger
 the pipeline processing.
 

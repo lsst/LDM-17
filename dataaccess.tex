@@ -5,23 +5,23 @@
 The data access framework is represented by several packages with
 names beginning with \texttt{daf\_} (primarily \texttt{daf\_utils}
 and \texttt{daf\_persistence}).  This framework, introduced initially
-in DC2, provides mean for reading and writing data and manipulating
-those in memory.  In DC3a, the framework was upgraded to improve
-database access, security, and performance as well as enable easier
+in DC2, provides means for reading and writing data and manipulating
+data in memory.  In DC3a, the framework was upgraded to improve
+database access, security, and performance, as well as to enable easier
 use by developers.  
 
 In DC2, the {\tt DataProperty} class was used as a generic container
-for named data--that is, metadata.  In DC3a, this was replaced with
+for named data --- that is, metadata.  In DC3a, this was replaced with
 the new {\tt PropertySet} class.  By simplifying the interface and
 unifying concepts, it helped to reduce complexity for developers,
 remove dependency issues, and bring {\tt Policy} and {\tt PropertySet}
 into closer alignment.  In particular, there is no distinction between
 a {\tt PropertySet} containing a single key/value pair and one
-containing multiple name--value pairs.  While a {\tt DataProperty}
+containing multiple name-value pairs.  While a {\tt DataProperty}
 attempted to maintain the order of the properties within it, a {\tt
 PropertySet} has no defined order except within the vector of values
 for a given key.  The new interface allows hierarchical {\tt
-PropertySet} values to be created more easily, using ``parent.child''
+PropertySet} values to be created more easily, using \textit{parent.child}
 notation in the key name instead of requiring the creation of a
 separate {\tt DataProperty} instance for the child.  
 
@@ -31,10 +31,10 @@ is appropriate for handling FITS header keywords.  FITS has a notion
 of an order {\it across different keywords} (which {\tt PropertySet} does not
 currently support) by virtue of the data being stored serially in a
 file.  Preservation of that order is not normally important for
-consuming the data (that is, with a few exceptions order has no
-semantic significance), and we don't currently require it in our
+consuming the data --- that is, with a few exceptions order has no
+semantic significance --- and we don't currently require it in our
 application.  Nevertheless, it may be useful for ensuring
-``round-tripping'' (i.e. ensuring that data that hasn't logically
+``round-tripping'' (i.e.\ ensuring that data that hasn't logically
 changed looks exactly the same when written out as when it was read
 in).  We believe that we could add support for preserving this order
 to the {\tt PropertySet} if and when it is needed.   A related issue
@@ -53,7 +53,7 @@ The formatters for {\tt Source}s and {\tt DiaSource}s (actually {\tt
 PersistableSourceVector}s and 
 \hfil\break\texttt{PersistableDiaSourceVector}s) were also updated 
 to match the new contents of those classes.  These formatters were at
-the heart of inter-slice communication in DC3a as {\tt Source}s used
+the heart of inter-slice communication in DC3a, as {\tt Source}s used
 for WCS and PSF determination were communicated via the database so
 that an entire CCD's information could be used for the calculations.
 

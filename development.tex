@@ -20,8 +20,8 @@ Technical Control Team (TCT), known in DC2 as the Configuration Control Board
 LSST Data Management software, including major design issues, the tools to be
 used, and standards and policies. The TCT meets monthly to set development
 policy on matters such as consideration and approval of LSST coding standards,
-overall LSST package boundaries (that is, at the broadest level, determining
-which component in the LSST stack is responsible for which functionality), and
+overall LSST package boundaries --- that is, at the broadest level, determining
+which component in the LSST stack is responsible for which functionality --- and
 the adoption of third-party open source software packages for use within the
 LSST stack.
 
@@ -34,7 +34,7 @@ those areas of LSST DMS for which no off-the-shelf solution exists. But these
 packages must be carefully considered, and they must be agreed upon by the TCT.
 In some rare cases, the TCT can withdraw its acceptance of a package. After DC2,
 for example, it was judged that the CORAL and SEAL third-party packages
-(developed by CERN) should be removed from the LSST stack, primarily because the
+developed by CERN should be removed from the LSST stack, primarily because the
 difficulty of building these packages from source outside the CERN-approved
 Scientific Linux environment in which it was developed forced us to distribute
 it as a pre-compiled binary, severely limiting the platforms on which the LSST
@@ -96,7 +96,7 @@ static analysis tools for C++ standards checking. Such tools can verify
 compliance with many of the LSST coding standards, although some of
 our standards (such as 3-4 of the C++ standard, which calls for function
 names to be verbs) cannot easily be checked by machine and, therefore,
-total automated coverage of our coding standards is unlikely.
+total automated coverage of our coding standards is not feasible.
 
 \subsection{Software Integration Schedule}
 
@@ -112,7 +112,7 @@ made it difficult to integrate and test the parts that were complete.
 
 The seeds of these difficulties were sown early in DC3a in which the
 code tree went under significant refactoring and upgrading for 64-bit
-support.  While important and necessary, this effectively disabled use
+support.  While important and necessary, this step effectively disabled use
 of our code from DC2 until the refactoring was complete.  Thus,
 developers were left without the ability to test implementations
 inside the harness framework early in the cycle.  This also caused the
@@ -124,15 +124,15 @@ integration issues from DC3a in favor of an approach of continuous
 integration through out the development phase.  These include:
 
 \begin{itemize}
-\item Ensuring the DC3a code stack remains available for testing and
-  integration throughout the DC3b development phase.
-\item Limit updates to the build environment (which is critical to
-  developer progress) to the first two months of DC3b.
-\item Identify critical updates to the middleware that must be
+\item ensuring the DC3a code stack remains available for testing and
+  integration throughout the DC3b development phase;
+\item limiting updates to the build environment (which is critical to
+  developer progress) to the first two months of DC3b;
+\item identifying critical updates to the middleware that must be
   delivered within the first two months of DC3b to allow 
   creation of application early and continuously in the development
-  schedule. 
-\item Design and develop pipeline stages as semi-functioning stubs
+  schedule; and 
+\item designing and developing pipeline stages as semi-functioning stubs
   early in DC3b, prior to full implementation of the underlying
   algorithmic code.  
 \end{itemize}
