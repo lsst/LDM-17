@@ -5,10 +5,11 @@
 \label{sec:isr}
 
 Because the vast majority of ISR tasks require trivial pixel
-operations (e.g. subtraction of or division by a master calibration
-image) the sub--stages were written in {\tt Python}, implemented in
+operations, such as subtraction of or division by a master calibration
+image, the sub-stages were written in Python. They were implemented in
 the file {\tt \$IP\_ISR\_DIR/python/lsst/ip/isr/IsrStages.py}, with
-access to these sub--stages available to a pipeline Stage by {\tt
+access to these sub-stages available to a pipeline Stage by the
+Python command {\tt
 import lsst.ip.isr.IsrStages as isrStages}.
 
 Each sub--stage is given a representative string (e.g. \texttt{ISR\_TRIM})
@@ -27,14 +28,14 @@ Each sub--stage is given a representative string (e.g. \texttt{ISR\_TRIM})
 %    std::string const\& ISR\_CRREJ = "ISR\_CRREJ";  ///< Cosmic ray rejection    \\
 %}
 %
-that is used when logging the results of the ISR processing (
-e.g. {\tt lsst.ip.isr.trim DEBUG: ISR\_TRIM using trimsec
-[1:512,1:2048] } )
+which is used when logging the results of the ISR processing (%
+e.g.~\texttt{lsst.ip.isr.trim DEBUG: ISR\_TRIM using trimsec
+[1:512,1:2048]})
 %
 as well as to provide provenance in the Exposure's Metadata 
 %
-(e.g. {\tt ISR\_TRIM= 'using trimsec [1:512,1:2048]; Fri Mar 27
-03:33:56 2009' } ).
+(e.g.~\texttt{ISR\_TRIM= 'using trimsec [1:512,1:2048]; Fri Mar 27
+03:33:56 2009'}).
 %
 Each sub--stage also records the type of
 processing it has done to each image.  This information would typically be
@@ -66,28 +67,28 @@ processing steps.
 
 The sub--stages that were implemented for DC3a, using their subroutine
 names and listed in the order they are called by the {\tt process()}
-method of the main ISR stage, are :
+method of the main ISR stage, are:
 
 \begin{itemize}
 
-\item ExposureFromInputData : This assembles an Exposure from the
+\item \texttt{ExposureFromInputData}: This assembles an Exposure from the
 input science Image, Metadata, and Bounding Box of the Amplifier
 within the CCD.  A zero--valued Mask is created, and the variance
 Image is synthesized from the science pixels and the {\tt Gain} from
 the Metadata.  These are combined into a MaskedImage.  A WCS is
-synthesized from the input Metadata, and finally an Exposure
+synthesized from the input Metadata, and finally an Exposure is
 assembled.  The WCS recorded at this point represents an approximate
 position of the amplifier image on the sky which can be used as the
 initial estimate for the later WCS determination stage.
 
-\item LookupTableFromPolicy : Creates a linearization lookup table
+\item \texttt{PLookupTableFromPolicy}: Creates a linearization lookup table
 from an input Policy.
 % \RHL{What's the distinction being drawn between these two?}
 For DC3a, we employed a replacement lookup table that
 merely replaces a pixel value by itself, since we don't know the true
 non--linearity of the CFHT data, and the Simulated data are linear.
 
-\item Linearization : Apply the lookup table generated above to the
+\item \texttt{Linearization}: Apply the lookup table generated above to the
 science image.  The location of this sub--stage within the overall ISR
 processing depends on the details of how the linearity curve was
 determined.  For example, it can go after bias and dark subtraction
@@ -96,7 +97,7 @@ subtracted before analysis.
 % \RHL{If there are non-linearities in different places in the signal
 % chain, we could even need two corrections in the long run}
 
-\item SaturationCorrection : The saturation keyword is retrieved from
+\item \texttt{SaturationCorrection}: The saturation keyword is retrieved from
 the Exposure's Metadata, and the Detection algorithm is called to find
 all pixel values equal or greater than this value, returning a list of
 Footprints.  If the Policy contains an option to grow these
@@ -110,25 +111,25 @@ point-spread function (PSF) with full--width--half--maximum (FWHM) of
 % \RHL{We need to revisit this 5 pixels;  I may have chosen it, but it
 % seems too large.}
 
-\item OverscanCorrection : The overscan region is retrieved from the
+\item \texttt{OverscanCorrection}: The overscan region is retrieved from the
 Exposure's Metadata, and a subExposure created using this bounding
 box.  Currently, the user can chose to subtract the mean or median of
 all pixels in this overscan region from the image.  
 
-\item TrimNew : The trim section is retrieved from the Exposure's
+\item \texttt{TrimNew}: The trim section is retrieved from the Exposure's
 Metadata, and a new subExposure is created containing the trimmed
 science Exposure.  The pixel origin is shifted accordingly, and the
 trim section removed from the Exposure's Metadata.  The new Exposure
 is returned.
 
-\item BiasCorrection : The master bias Exposure is read from the
+\item \texttt{BiasCorrection}: The master bias Exposure is read from the
 Clipboard, and subtracted from the science Exposure.
 
-\item DarkCorrection : The master dark Exposure is read from the
+\item \texttt{DarkCorrection}: The master dark Exposure is read from the
 Clipboard.  The dark Exposure is scaled to the science Exposure's
 integration time, and then subtracted from the science Exposure.
 
-\item FlatCorrection : The master flat Exposure is read from the
+\item \texttt{FlatCorrection}: The master flat Exposure is read from the
 Clipboard.  The flat Exposure is scaled by its mean or median, and
 divided out of the science Exposure.
 
@@ -138,7 +139,7 @@ FlatCorrection}.   \RHL{...but may need a different flat, depending on
 how we handle the photometric v. cosmetic flats.}
 \fi
 
-\item MaskBadPixelsDef : A list of instrumental pixel \texttt{Defects} is read 
+\item \texttt{MaskBadPixelsDef}: A list of instrumental pixel \texttt{Defects} is read 
 from the input Clipboard.  The corresponding bits are set in the
 Exposure Mask.  The Policy also determines whether or not to
 interpolate over these pixels - if interpolation is requested, this
@@ -149,7 +150,7 @@ indicating the pixels were interpolated.  A default PSF with a FWHM of
 % \RHL{Do we need to say where these come from?  We should say that they
 % are not complete for DC3a}
 
-\item CrRejection : To detect and mask out cosmic ray artifacts, a
+\item \texttt{CrRejection}: To detect and mask out cosmic ray artifacts, a
 background model is generated for the exposure and subtracted off of
 the science Image (see sec. \ref{secBackground}).  A default PSF with
 a FWHM of 5 pixels is used to compare detected sources; sources
@@ -157,7 +158,7 @@ sharper than the PSF are masked as cosmic rays and then interpolated
 over. 
 % \RHL{Again$^2$, we need to reconsider this ``5''}
 
-\item CalculateSdqaRatings : Two named values are generated by the ISR
+\item \texttt{CalculateSdqaRatings}: Two named values are generated
 and saved as {\tt SdqaRating}s for the Science Data Quality Analysis
 subsystem (see sec. \ref{sdqasubsection}):  
 {\tt ip.isr.numSaturatedPixels} and {\tt ip.isr.numCosmicRayPixels}.
@@ -187,7 +188,7 @@ second (i.e. exposure idenifier 1) images.
 \subsubsection{Issues}
 
 Several issues both minor and outstanding were raised during
-development of the ISR for DC3a.  These include :
+development of the ISR for DC3a.  These include:
 
 \begin{itemize}
 
@@ -198,13 +199,13 @@ established for DC3a.  In practice, this takes input FITS header
 keywords and maps them to the appropriate Metadata key that is
 expected to be extracted from a database query.  While this will be
 needed for {\it any} input dataset we run through our pipelines, we
-should reevaluate the implementation of this post--DC3a.
+should reevaluate the implementation of this post-DC3a.
 
 \item The CFHT data sections (e.g. {\tt TRIMSEC, BIASSEC}) are stored
-in FITS 1--indexed convention, with the final index inclusive.  For
+in FITS 1-indexed convention, with the final index inclusive.  For
 example, {\tt BSECA = '[1:32,1:4644]'} indicates that a bias section
 runs from the first to thirty-second pixel on the x-axis.  As LSST is
-using 0--indexed pixel addressing convention with the final index
+using 0-indexed pixel addressing convention with the final index
 inclusive, this should read {\tt BSECA = '[0:31,0:4643]'}.  This
 adjustment is currently made when turning the input data section into
 a {\tt lsst::afw::image::BBox} in {\tt isr::BBoxFromDatasec}; however
@@ -251,7 +252,7 @@ Detector class.
 
 \subsubsection{ISR Tasks Post-DC3a}
 
-The sub--stages (or features of the sub--stages) that remain to be
+The sub-stages (or features of the sub-stages) that remain to be
 implemented are :
 
 \begin{itemize}

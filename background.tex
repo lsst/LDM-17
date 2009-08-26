@@ -62,15 +62,19 @@ advantageous to adopt the former option.
 \subsubsection{Assessment}
 
 The background estimation code was successfully tested on images with
-known background levels: (1) all pixels set to a constant value, (2)
-pixel values increasing linearly across the frame, and (3) an image of
-noise having known statistical properties.  The tests are included
-with the source code.
+known background levels: 
+\begin{itemize}
+\item All pixels set to a constant value, 
+\item Pixel values increasing linearly across the frame, and 
+\item An image of noise having known statistical properties.  
+\end{itemize}
+
+The tests are included with the source code.
 
 % not-a-knot
 
-The {\it natural}\footnote{i.e. vanishing second derivative at the end
-knots} spline algorithm used for interpolation can suffer from
+The {\it natural}\footnote{I.e. vanishing second derivative at the end
+knots.} spline algorithm used for interpolation can suffer from
 ringing near the edges, and it is our intention to continue
 development by implementing a more robust {\it not-a-knot} spline in
 its place.

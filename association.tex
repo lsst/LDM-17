@@ -63,22 +63,22 @@ outputs of all the pipelines are then executed. These scripts:
 
 \begin{itemize}
 \item update the observation count and last observation time for matched
-      objects in the \code{Object} catalog.
+      objects in the \code{Object} catalog;
 
-\item insert new objects into the variable \code{Object} catalog
+\item insert new objects into the variable \code{Object} catalog;
 
 \item set the \code{objectId} field of difference sources to the id of the
       object generated from the source, or to the id of the closest matching
-      object.
+      object;
 
 \item append difference sources from the IPSD output tables to the global
-      \code{DIASource} table
+      \code{DIASource} table;
 
 \item \emph{(optionally)} append per-visit moving object predictions and
-      association results to global tables
+      association results to global tables; and
 
 \item \emph{(optionally)} drop per-visit pipeline output tables (from IPSD,
-      NightMOPS, and AP)
+      NightMOPS, and AP).
 \end{itemize}
 
 \subsubsection{Performance}

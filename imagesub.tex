@@ -28,8 +28,8 @@ thinner Python layer.
 
 Two major {\tt afw} improvements facilitated the implementation of
 {\tt ip\_diffim} for DC3a, both coming about due to the removal of
-``Vision Workbench'' from the software stack (\Sec{secImageClasses}).  The first was the
-replacement of the {\tt VW} pixel access operations, while the second
+Vision Workbench from the software stack (\Sec{secImageClasses}).  The first was the
+replacement of the {\tt vw} pixel access operations, while the second
 was the adoption of the {\tt Eigen} package for linear algebra
 operations.  
 
@@ -39,9 +39,9 @@ the {\tt ip\_diffim} C++ code base had to be updated to use this new
 API.
 
 The {\tt Eigen} matrix math library was adopted due to its speed and
-templated design.  Compared to the {\tt VW} matrix math operations,
+templated design.  Compared to the {\tt vw} matrix math operations,
 its considerably faster and cleaner to implement.  Using inversion of
-a {\tt 500 x 500} matrix as a benchmark, VW could solve this problem
+a {\tt 500 x 500} matrix as a benchmark, {\tt vw} could solve this problem
 in 0.26 (using {\tt vw::math::least\_squares}) to 1.82 seconds (using
 {\tt vw::math::pseudoinverse}).  In comparison, {\tt Eigen} has a
 variety of methods to invert a matrix.  The fastest of these, Cholesky
@@ -127,7 +127,7 @@ the residuals in the difference image appear to be at the noise limit.
 To be explicit, after creation of the difference image we divide the
 image pixels by the square root of the variance pixels.  This is the
 $\chi$ value, and the distribution of this across the difference image
-should have a mean of 0.0 and root--mean--square deviation of 1.0.
+should have a mean of 0.0 and root-mean-square deviation of 1.0.
 This is accomplished in practice for the vast majority of sources.
 However, for very bright stars (peak counts near 40,000 or above) the
 difference image frequently has too large of residuals.  These single
@@ -140,7 +140,7 @@ Figure~\ref{fig:diffim} illustrates an acceptable difference image
 %\includegraphics[width=6in,bb=0 0 680 494]{images/diffim.png}
 \includegraphics[width=6in]{images/diffim.png}
 \caption[Example difference images.]
-{ Each row shows a set of difference images, displayed left--to--right
+{ Each row shows a set of difference images, displayed left-to-right
 as the template image, the science image, and the resulting difference
 image.  For the top row, the difference image is clean, with only
 objects at the border left unsubtracted (these pixels are masked due
@@ -160,12 +160,12 @@ shapes of the fainter stars.  CFHT apply no linearity corrections to
 their data.  However, they have done tests using multiple exposure
 times on a given star field and find that star fluxes are not affected
 at the level of a few millimagnitudes (Astier 2009, private
-communication).  This suggests that non--linearity is not a
+communication).  This suggests that non-linearity is not a
 significant issue.  More likely is that the shapes of the bright stars
 in the template images we are differencing against are complicated.
 Of particular note are the relative shapes of the cores of the
 objects, and the relative shapes of the wings of the objects.  If
-these two regimes require a different PSF--matching kernel, the entire
+these two regimes require a different PSF-matching kernel, the entire
 process will return a solution that is not optimal for either.  We
 suspect that the shapes of the brightest stars have changed during the
 coaddition process, which uses a median combine
@@ -185,7 +185,7 @@ with appropriate atmospheric transmission but with a 0.1 arcsec PSF
 sky background. While resulting in deep images useful in
 characterizing the detection thresholds for the pipeline stages,
 attempts to use these images as template images in the image
-subtraction stages proved unsuccessful as the pixel scale of 0.2
+subtraction stages proved unsuccessful, as the pixel scale of 0.2
 arcseconds meant that the Ideal images were undersampled.
 
 

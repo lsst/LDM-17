@@ -31,7 +31,7 @@ class (in the {\it meas\_algorithms} class; see \Sec{secPsf}).
 The fundamental class in source detection is a \code{Footprint}, a set of 
 connected pixels above (or below) some threshold. Two pixels are said to be 
 connected if they touch along a side or by a corner. The internal 
-representation of a \code{Footprint} is an STL container of \code{Spans} - 
+representation of a \code{Footprint} is an STL container of \code{Spans} --- 
 a triple of a row number in the image and a starting and ending column. The 
 user does need to be aware of this and can use a \code{FootprintFunctor} to
 iterate over the pixels in the \code{Footprint}
@@ -43,8 +43,8 @@ the \code{MaskedImage} and a \code{Threshold}; it is templated over the
 \code{Image} and \code{Mask} pixel types.
 
 A \code{Threshold} may be constructed to be positive or negative value in 
-units of flux, variance or standard deviation. The question of what value to 
-adopt for the threshold (although interesting) has thus been abstracted from 
+units of flux, variance or standard deviation. The interesting question of what value to 
+adopt for this threshold has thus been abstracted from 
 the algorithms and is answered separately by \code{Policy} parameters. 
 
 In DC3a we detect on both difference images and on stacked images, which are 

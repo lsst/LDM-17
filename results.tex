@@ -151,8 +151,8 @@ These Abe runs provided important qualitative accomplishments:
   connections.  
 \end{itemize}
 \item We demonstrated the integration of grid-based job management
-  (via Condor-g) into our orchestration layer
-\item we demonstrated the successful use of the parallel Lustre
+  (via Condor-g) into our orchestration layer; and
+\item We demonstrated the successful use of the parallel Lustre
   filesystem.  
 \end{itemize}
 
@@ -186,11 +186,11 @@ Total     & ---     & 250 & 13748/81 GB   & 191/28 GB      & 200418/793 GB \\ \h
 \subsection{Science Data Quality}
 We chose several areas for which to assess the scientific data quality of the DC3a outputs:
 \begin{itemize}
-\item Cosmic ray rejection
-\item WCS accuracy
-\item Difference image quality
-\item Difference image lightcurve quality
-\item Recovery of known solar system objects
+\item Cosmic ray rejection,
+\item WCS accuracy,
+\item Difference image quality,
+\item Difference image lightcurve quality, and
+\item Recovery of known solar system objects.
 \end{itemize}
 Other areas could of course be added to this list, but the ones chosen
 are judged to be the most demanding for the software system to meet,
@@ -458,7 +458,7 @@ important impact on the overall performance because the total time
 spent on a stage is driven primarily by the duration of the slice that
 took the longest time.  
 
-Tables \ref{tbl:scistagetimes} --- \ref{tbl:otherstagetimes} list
+Tables \ref{tbl:scistagetimes} through \ref{tbl:otherstagetimes} list
 the average time spent in actual {\it application code} each stage for
 each pipeline.  (That is, these include the time spent in the {\tt
 preprocess()}, {\tt process()}, and {\tt postprocess()} functions
@@ -514,7 +514,7 @@ pipeline holds up to scaling.  Note that the Abe run processed 9 times
 more data.  Of the 11 science stages, we see that for four of them,
 the average processing time was the same within one sigma.  For five
 of them, the time went up significantly.  However, for the two most
-expensive stages--image subtraction--the time went down.  In general,
+expensive stages --- image subtraction --- the time went down.  In general,
 the variation in the average times went up.  We again note that for
 the IPSD pipeline the time spent in each stage is essentially the time
 of the longest-running slice in a visit.  
@@ -528,8 +528,8 @@ faster processors (2.33 GHz versus 2.0 GHz) or increased available
 memory (8 GB per node versus 4 GB).  This better hardware could also
 be benefitting all stages.  To discern the contribution made by the
 better hardware, we would need to compare these results with
-smaller-scale runs--i.e. 31 slices--on Abe.  Nevertheless, relative
-gain for images subtraction is modest--$\sim 5\%$--which is comparable
+smaller-scale runs --- i.e. 31 slices --- on Abe.  Nevertheless, relative
+gain for images subtraction is modest ($\sim 5\%$) which is comparable
 to the one-sigma variation for the shorter science stages and, thus,
 would not make a big difference.  The remaining science stages do show
 a degredation in the scaling.  

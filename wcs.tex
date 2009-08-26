@@ -9,19 +9,19 @@ by the need to subtract images from templates in the {\tt diff\_im}
 stage. For DC3a we implemented a method of determining a WCS solution
 for an image using the {\tt astrometry.net}\footnote{http://astrometry.net} package.
 
-{\tt astrometry.net} takes as input a list of positions pixel
-positions of sources in an image, and compares pattern of stellar
+{\tt astrometry.net} takes as input a list of pixel
+positions of sources in an image, and compares the pattern of stellar
 positions, or asterisms, with a template list of stars with known
 right ascension and declination. It can be used to match images of
 arbitary pixel scale, location on sky, and magnitude limit, provided
-there is a sufficient overlap between the set of sources in the image,
+there is a sufficient overlap between the set of sources in the image
 and those in the template.
 
 \subsubsection{Interface}
 Because {\tt astrometry.net} is written in C, and does not have a
-defined public API, we created a C++ wrapper to provide an object
-oriented interface, which is called a {\tt
-  meas::astrom::net::GlobalAstrometrySolution}, hereafter referrred to as
+defined public API, we created a C++ wrapper,
+{\tt meas::astrom::net::GlobalAstrometrySolution}, 
+to provide an object oriented-interface. This is hereafter referred to as
 a GAS. A GAS is initialised with a set of template files, the names of
 which are set via policy. The policy file also defines the equinox
 (e.g equinox=2000) and coordinate system (e.g raDecSys=FK5) of the
@@ -71,7 +71,7 @@ of stars before giving up.
 
 \subsubsection{Improvements to the WCS class}
 Astronomical images generally contain some distortion, i.e the
-rectangular grid of pixels in an image does not map onto a retangular
+rectangular grid of pixels in an image does not map onto a rectangular
 grid of right ascension and declination. The WCS standard defines
 several functional forms to describe this distortion.  {\tt
   astrometry.net} instead describes distortion coefficients using the SIP
@@ -84,4 +84,4 @@ SIP polynomials when converting from pixel to sky coordinates.
 
 
 \subsubsection{Future Work}
-Templates have been produced for the 4 CFHT deep fields. However, the proceedure for producing these templates is quite involved, and needs to be simplified so that templates can be produced on demand for new fields.
+Templates have been produced for the four CFHT deep fields. However, the proceedure for producing these templates is quite involved, and needs to be simplified so that templates can be produced on demand for new fields.
